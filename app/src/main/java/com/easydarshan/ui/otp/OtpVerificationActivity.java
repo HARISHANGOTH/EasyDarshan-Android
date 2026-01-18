@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.easydarshan.R;
 import com.easydarshan.databinding.ActivityOtpVerificationBinding;
 import com.easydarshan.data.model.User;
+import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.ui.home.HomeActivity;
 
 import java.util.ArrayList;
@@ -31,6 +32,9 @@ public class OtpVerificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityOtpVerificationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        
+        // Initialize SessionManager with context
+        SessionManager.getInstance(this);
         
         mobile = getIntent().getStringExtra("mobile");
         if (mobile == null) {

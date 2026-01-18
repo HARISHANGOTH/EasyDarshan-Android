@@ -1,7 +1,7 @@
 package com.easydarshan.data.repository;
 
 import com.easydarshan.data.api.ApiService;
-import com.easydarshan.data.api.DummyApiService;
+import com.easydarshan.data.api.RetrofitClient;
 import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.Booking;
 import com.easydarshan.data.model.Notification;
@@ -17,10 +17,10 @@ import retrofit2.Callback;
 public class AppRepository {
     
     private static AppRepository instance;
-    private DummyApiService dummyApiService;
+    private ApiService apiService;
     
     private AppRepository() {
-        dummyApiService = new DummyApiService();
+        apiService = RetrofitClient.getInstance().getApiService();
     }
     
     public static synchronized AppRepository getInstance() {
@@ -31,47 +31,51 @@ public class AppRepository {
     }
     
     public void sendOtp(OtpRequest request, Callback<ApiResponse<String>> callback) {
-        dummyApiService.sendOtp(request, callback);
+        apiService.sendOtp(request).enqueue(callback);
     }
     
-    public void verifyOtp(OtpVerifyRequest request, Callback<ApiResponse<User>> callback) {
-        dummyApiService.verifyOtp(request, callback);
+    public void verifyOtp(OtpVerifyRequest request, Callback<com.easydarshan.data.model.VerifyOtpResponse> callback) {
+        apiService.verifyOtp(request).enqueue(callback);
     }
     
     public void getTemples(String search, Callback<ApiResponse<List<Temple>>> callback) {
-        dummyApiService.getTemples(search, callback);
+        apiService.getTemples(search).enqueue(callback);
     }
     
     public void getTempleDetails(int id, Callback<ApiResponse<Temple>> callback) {
-        dummyApiService.getTempleDetails(id, callback);
+        apiService.getTempleDetails(id).enqueue(callback);
     }
     
     public void getBookings(String status, Callback<ApiResponse<List<Booking>>> callback) {
-        dummyApiService.getBookings(status, callback);
+        apiService.getBookings(status).enqueue(callback);
     }
     
     public void getBookingDetails(String id, Callback<ApiResponse<Booking>> callback) {
-        dummyApiService.getBookingDetails(id, callback);
+        apiService.getBookingDetails(id).enqueue(callback);
     }
     
     public void createBooking(Booking booking, Callback<ApiResponse<Booking>> callback) {
-        dummyApiService.createBooking(booking, callback);
+        apiService.createBooking(booking).enqueue(callback);
+    }
+    
+    public void cancelBooking(String id, Callback<ApiResponse<Void>> callback) {
+        apiService.cancelBooking(id).enqueue(callback);
     }
     
     public void getNotifications(Callback<ApiResponse<List<Notification>>> callback) {
-        dummyApiService.getNotifications(callback);
+        apiService.getNotifications().enqueue(callback);
     }
     
-    public void markNotificationsRead(Callback<ApiResponse<Void>> callback) {
-        dummyApiService.markNotificationsRead(callback);
+    public void markNotificationRead(Long id, Callback<ApiResponse<Void>> callback) {
+        apiService.markNotificationRead(id).enqueue(callback);
     }
     
     public void getUserProfile(Callback<ApiResponse<User>> callback) {
-        dummyApiService.getUserProfile(callback);
+        apiService.getUserProfile().enqueue(callback);
     }
     
     public void updateUserProfile(User user, Callback<ApiResponse<User>> callback) {
-        dummyApiService.updateUserProfile(user, callback);
+        apiService.updateUserProfile(user).enqueue(callback);
     }
 }
 

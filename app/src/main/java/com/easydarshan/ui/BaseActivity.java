@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.easydarshan.R;
+import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.ui.bookings.MyBookingsActivity;
 import com.easydarshan.ui.home.HomeActivity;
 import com.easydarshan.ui.notifications.NotificationsActivity;
@@ -18,6 +19,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Initialize SessionManager with context
+        SessionManager.getInstance(this);
     }
 
     protected void setupBottomNavigation() {

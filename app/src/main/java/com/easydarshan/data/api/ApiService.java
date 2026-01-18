@@ -12,44 +12,59 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
     
-    @POST("auth/send-otp")
+    // Authentication endpoints (no auth required)
+    @POST("api/v1/auth/send-otp")
     Call<ApiResponse<String>> sendOtp(@Body OtpRequest request);
     
-    @POST("auth/verify-otp")
-    Call<ApiResponse<User>> verifyOtp(@Body OtpVerifyRequest request);
+    @POST("api/v1/auth/verify-otp")
+    Call<com.easydarshan.data.model.VerifyOtpResponse> verifyOtp(@Body OtpVerifyRequest request);
     
-    @GET("temples")
+    // Temple endpoints (no auth required)
+    @GET("api/v1/temples")
     Call<ApiResponse<List<Temple>>> getTemples(@Query("search") String search);
     
-    @GET("temples/{id}")
+    @GET("api/v1/temples/featured")
+    Call<ApiResponse<List<Temple>>> getFeaturedTemples();
+    
+    @GET("api/v1/temples/{id}")
     Call<ApiResponse<Temple>> getTempleDetails(@Path("id") int id);
     
-    @GET("bookings")
+    // Booking endpoints (auth required)
+    @GET("api/v1/bookings")
     Call<ApiResponse<List<Booking>>> getBookings(@Query("status") String status);
     
-    @GET("bookings/{id}")
+    @GET("api/v1/bookings/{id}")
     Call<ApiResponse<Booking>> getBookingDetails(@Path("id") String id);
     
-    @POST("bookings")
+    @POST("api/v1/bookings")
     Call<ApiResponse<Booking>> createBooking(@Body Booking booking);
     
-    @GET("notifications")
+    @DELETE("api/v1/bookings/{id}")
+    Call<ApiResponse<Void>> cancelBooking(@Path("id") String id);
+    
+    // Notification endpoints (auth required)
+    @GET("api/v1/notifications")
     Call<ApiResponse<List<Notification>>> getNotifications();
     
-    @POST("notifications/mark-read")
-    Call<ApiResponse<Void>> markNotificationsRead();
+    @PATCH("api/v1/notifications/{id}/read")
+    Call<ApiResponse<Void>> markNotificationRead(@Path("id") Long id);
     
-    @GET("user/profile")
+    // User profile endpoints (auth required)
+    @GET("api/v1/users/profile")
     Call<ApiResponse<User>> getUserProfile();
     
-    @POST("user/profile")
+    @PUT("api/v1/users/profile")
     Call<ApiResponse<User>> updateUserProfile(@Body User user);
 }
 
