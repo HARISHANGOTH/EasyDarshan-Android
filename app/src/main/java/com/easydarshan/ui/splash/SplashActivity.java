@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.easydarshan.R;
+import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.ui.login.MobileLoginActivity;
 
 public class SplashActivity extends AppCompatActivity {
@@ -17,6 +18,9 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        
+        // Initialize SessionManager with context
+        SessionManager.getInstance(this);
         
         viewModel = new ViewModelProvider(this).get(SplashViewModel.class);
         

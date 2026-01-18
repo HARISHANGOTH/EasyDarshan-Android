@@ -59,19 +59,49 @@ public class NotificationsViewModel extends ViewModel {
     }
     
     public void markAllAsRead() {
-        repository.markNotificationsRead(new Callback<ApiResponse<Void>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
-                if (response.body() != null && response.body().isSuccess()) {
-                    loadNotifications();
+        List<Notification> currentNotifications = notifications.getValue();
+        if (currentNotifications == null || currentNotifications.isEmpty()) {
+            return;
+        }
+        
+        // Mark each unread notification as read
+        List<Notification> unreadNotifications = new java.util.ArrayList<>();
+        for (Notification notification : currentNotifications) {
+            if (!notification.isRead()) {
+                unreadNotifications.add(notification);
+            }
+        }
+        
+        if (unreadNotifications.isEmpty()) {
+            // All notifications already read
+            return;
+        }
+        
+        final int[] completedCount = {0};
+        final int totalCount = unreadNotifications.size();
+        
+        for (Notification notification : unreadNotifications) {
+            repository.markNotificationRead((long) notification.getId(), new Callback<ApiResponse<Void>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                    completedCount[0]++;
+                    // Reload notifications after all are marked
+                    if (completedCount[0] == totalCount) {
+                        loadNotifications();
+                    }
                 }
-            }
-            
-            @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
-                errorMessage.postValue("Failed to mark notifications as read");
-            }
-        });
+                
+                @Override
+                public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                    completedCount[0]++;
+                    if (completedCount[0] == totalCount) {
+                        loadNotifications();
+                    } else {
+                        errorMessage.postValue("Failed to mark some notifications as read");
+                    }
+                }
+            });
+        }
     }
 }
 

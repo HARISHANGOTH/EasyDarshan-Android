@@ -6,9 +6,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.OtpVerifyRequest;
 import com.easydarshan.data.model.User;
+import com.easydarshan.data.model.VerifyOtpResponse;
 import com.easydarshan.data.repository.AppRepository;
 import com.easydarshan.data.session.SessionManager;
 
@@ -79,20 +79,30 @@ public class OtpVerificationViewModel extends ViewModel {
         isLoading.setValue(true);
         OtpVerifyRequest request = new OtpVerifyRequest(mobile, otp);
         
-        repository.verifyOtp(request, new Callback<ApiResponse<User>>() {
+        repository.verifyOtp(request, new Callback<VerifyOtpResponse>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(Call<VerifyOtpResponse> call, Response<VerifyOtpResponse> response) {
                 isLoading.postValue(false);
-                if (response.body() != null && response.body().isSuccess()) {
-                    SessionManager.getInstance().setCurrentUser(response.body().getData());
-                    navigateToHome.postValue(response.body().getData());
+                if (response.body() != null && response.body().isSuccess() && response.body().isVerified()) {
+                    // Store token from OTP verification response
+                    String token = response.body().getToken();
+                    if (token != null && !token.isEmpty()) {
+                        SessionManager.getInstance().setToken(token);
+                    }
+                    
+                    // Create a User object for navigation
+                    User user = new User();
+                    user.setPhone(mobile);
+                    SessionManager.getInstance().setCurrentUser(user);
+                    navigateToHome.postValue(user);
                 } else {
-                    errorMessage.postValue("Invalid OTP. Please try again.");
+                    String errorMsg = response.body() != null ? response.body().getMessage() : "Invalid OTP. Please try again.";
+                    errorMessage.postValue(errorMsg);
                 }
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+            public void onFailure(Call<VerifyOtpResponse> call, Throwable t) {
                 isLoading.postValue(false);
                 errorMessage.postValue("Network error. Please check your connection.");
             }

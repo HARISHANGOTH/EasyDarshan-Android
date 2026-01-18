@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.easydarshan.databinding.ActivityMobileLoginBinding;
+import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.ui.otp.OtpVerificationActivity;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -25,6 +26,9 @@ public class MobileLoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMobileLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        
+        // Initialize SessionManager with context
+        SessionManager.getInstance(this);
         
         viewModel = new ViewModelProvider(this).get(MobileLoginViewModel.class);
         
