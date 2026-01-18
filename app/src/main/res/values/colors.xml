@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Primary Colors -->
+    <color name="primary">#EA580C</color>
+    <color name="primary_foreground">#FFFFFFFF</color>
+    <color name="primary_dark">#C2410C</color>
+    <color name="primary_light">#FF7A33</color>
+    
+    <!-- Background Colors -->
+    <color name="background">#FFFFFF</color>
+    <color name="background_gray">#F9FAFB</color>
+    <color name="background_orange_light">#FFF7ED</color>
+    <color name="background_orange_lighter">#FFF4E6</color>
+    
+    <!-- Foreground Colors -->
+    <color name="foreground">#030213</color>
+    <color name="foreground_secondary">#717182</color>
+    <color name="foreground_muted">#9CA3AF</color>
+    
+    <!-- Card Colors -->
+    <color name="card">#FFFFFF</color>
+    <color name="card_foreground">#030213</color>
+    
+    <!-- Secondary Colors -->
+    <color name="secondary">#F3F4F6</color>
+    <color name="secondary_foreground">#030213</color>
+    
+    <!-- Muted Colors -->
+    <color name="muted">#ECECF0</color>
+    <color name="muted_foreground">#717182</color>
+    
+    <!-- Accent Colors -->
+    <color name="accent">#E9EBEF</color>
+    <color name="accent_foreground">#030213</color>
+    
+    <!-- Status Colors -->
+    <color name="success">#10B981</color>
+    <color name="success_light">#D1FAE5</color>
+    <color name="success_foreground">#065F46</color>
+    
+    <color name="warning">#F59E0B</color>
+    <color name="warning_light">#FEF3C7</color>
+    <color name="warning_foreground">#92400E</color>
+    
+    <color name="error">#D4183D</color>
+    <color name="error_light">#FEE2E2</color>
+    <color name="error_foreground">#FFFFFF</color>
+    
+    <color name="info">#3B82F6</color>
+    <color name="info_light">#DBEAFE</color>
+    <color name="info_foreground">#1E40AF</color>
+    
+    <!-- Border Colors -->
+    <color name="border">#E5E7EB</color>
+    <color name="border_light">#F3F4F5</color>
+    <color name="border_dark">#D1D5DB</color>
+    
+    <!-- Input Colors -->
+    <color name="input_background">#F3F3F5</color>
+    <color name="input_border">#E5E7EB</color>
+    <color name="input_border_focus">#EA580C</color>
+    
+    <!-- Queue Status Colors -->
+    <color name="queue_high">#EF4444</color>
+    <color name="queue_high_bg">#FEE2E2</color>
+    <color name="queue_medium">#F59E0B</color>
+    <color name="queue_medium_bg">#FEF3C7</color>
+    <color name="queue_low">#10B981</color>
+    <color name="queue_low_bg">#D1FAE5</color>
+    
+    <!-- Gradient Colors -->
+    <color name="gradient_orange_start">#EA580C</color>
+    <color name="gradient_orange_end">#F97316</color>
+    
+    <!-- Overlay Colors -->
+    <color name="overlay_white">#E6FFFFFF</color>
+    <color name="overlay_black">#80000000</color>
+</resources>

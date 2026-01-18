@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient_orange"
+    android:padding="24dp"
+    tools:context=".SplashActivity">
+
+    <LinearLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Temple Icon -->
+        <ImageView
+            android:id="@+id/templeIcon"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:src="@drawable/ic_temple"
+            android:contentDescription="@string/temple_icon"
+            android:layout_marginBottom="24dp"
+            app:tint="@color/primary" />
+
+        <!-- App Name -->
+        <TextView
+            android:id="@+id/appName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/primary"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Tagline -->
+        <TextView
+            android:id="@+id/tagline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Peaceful Darshan Without Waiting"
+            android:textColor="@color/primary_dark"
+            android:textSize="16sp"
+            android:alpha="0.8"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:gravity="center" />
+
+        <!-- Loading Indicator -->
+        <LinearLayout
+            android:id="@+id/loadingIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="48dp"
+            android:visibility="visible">
+
+            <View
+                android:id="@+id/dot1"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:background="@drawable/bg_circle_primary"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:id="@+id/dot2"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:background="@drawable/bg_circle_primary"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:id="@+id/dot3"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:background="@drawable/bg_circle_primary" />
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

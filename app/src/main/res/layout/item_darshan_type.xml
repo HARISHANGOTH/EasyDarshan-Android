@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/darshanTypeName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Free Darshan"
+                android:textColor="@color/foreground"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"
+                tools:text="Free Darshan" />
+
+            <TextView
+                android:id="@+id/darshanDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30-45 mins"
+                android:textColor="@color/foreground_secondary"
+                android:textSize="14sp"
+                tools:text="30-45 mins" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/darshanPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Free"
+            android:textColor="@color/primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="Free" />
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
+
