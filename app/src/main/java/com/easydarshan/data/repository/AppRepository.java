@@ -8,6 +8,7 @@ import com.easydarshan.data.model.Notification;
 import com.easydarshan.data.model.OtpRequest;
 import com.easydarshan.data.model.OtpVerifyRequest;
 import com.easydarshan.data.model.Temple;
+import com.easydarshan.data.model.TempleListResponse;
 import com.easydarshan.data.model.User;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class AppRepository {
         apiService.verifyOtp(request).enqueue(callback);
     }
     
-    public void getTemples(String search, Callback<ApiResponse<List<Temple>>> callback) {
+    public void getTemples(String search, Callback<TempleListResponse> callback) {
         apiService.getTemples(search).enqueue(callback);
     }
     

@@ -6,6 +6,7 @@ import com.easydarshan.data.model.Notification;
 import com.easydarshan.data.model.OtpRequest;
 import com.easydarshan.data.model.OtpVerifyRequest;
 import com.easydarshan.data.model.Temple;
+import com.easydarshan.data.model.TempleListResponse;
 import com.easydarshan.data.model.User;
 
 import java.util.List;
@@ -32,10 +33,10 @@ public interface ApiService {
     
     // Temple endpoints (no auth required)
     @GET("api/v1/temples")
-    Call<ApiResponse<List<Temple>>> getTemples(@Query("search") String search);
+    Call<TempleListResponse> getTemples(@Query("search") String search);
     
     @GET("api/v1/temples/featured")
-    Call<ApiResponse<List<Temple>>> getFeaturedTemples();
+    Call<TempleListResponse> getFeaturedTemples();
     
     @GET("api/v1/temples/{id}")
     Call<ApiResponse<Temple>> getTempleDetails(@Path("id") int id);

@@ -7,8 +7,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.Temple;
+import com.easydarshan.data.model.TempleListResponse;
 import com.easydarshan.data.repository.AppRepository;
 
 import java.util.List;
@@ -51,19 +51,19 @@ public class HomeViewModel extends ViewModel {
         isLoading.setValue(true);
         searchHandler.removeCallbacks(searchRunnable);
         searchRunnable = () -> {
-            repository.getTemples(search, new Callback<ApiResponse<List<Temple>>>() {
+            repository.getTemples(search, new Callback<TempleListResponse>() {
                 @Override
-                public void onResponse(Call<ApiResponse<List<Temple>>> call, Response<ApiResponse<List<Temple>>> response) {
+                public void onResponse(Call<TempleListResponse> call, Response<TempleListResponse> response) {
                     isLoading.postValue(false);
-                    if (response.body() != null && response.body().isSuccess()) {
-                        temples.postValue(response.body().getData());
+                    if (response.body() != null && response.body().getTemples() != null) {
+                        temples.postValue(response.body().getTemples());
                     } else {
                         errorMessage.postValue("Failed to load temples");
                     }
                 }
                 
                 @Override
-                public void onFailure(Call<ApiResponse<List<Temple>>> call, Throwable t) {
+                public void onFailure(Call<TempleListResponse> call, Throwable t) {
                     isLoading.postValue(false);
                     errorMessage.postValue("Network error. Please check your connection.");
                 }
