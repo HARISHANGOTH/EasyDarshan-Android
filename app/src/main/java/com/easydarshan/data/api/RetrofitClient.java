@@ -1,24 +1,28 @@
 package com.easydarshan.data.api;
 
+import android.content.Context;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    
-    private static final String BASE_URL = "https://easydarsha-production.up.railway.app/";
+
+    private static final String BASE_URL = "https://easydarsha-production-3e1b.up.railway.app/";
     private static RetrofitClient instance;
     private final ApiService apiService;
+    private Context context;
     
-    private RetrofitClient() {
+    private RetrofitClient(Context context) {
+        this.context = context;
         // Create logging interceptor
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         
         // Create OkHttpClient with interceptors
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(new AuthInterceptor())
+                .addInterceptor(new AuthInterceptor(context))
                 .addInterceptor(loggingInterceptor)
                 .build();
         
@@ -32,9 +36,9 @@ public class RetrofitClient {
         apiService = retrofit.create(ApiService.class);
     }
     
-    public static synchronized RetrofitClient getInstance() {
-        if (instance == null) {
-            instance = new RetrofitClient();
+    public static synchronized RetrofitClient getInstance(Context context) {
+        if (instance == null || instance.context != context) {
+            instance = new RetrofitClient(context);
         }
         return instance;
     }
@@ -43,6 +47,7 @@ public class RetrofitClient {
         return apiService;
     }
 }
+
 
 
 

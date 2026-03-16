@@ -37,6 +37,12 @@ public class Booking {
     
     @SerializedName("paymentMethod")
     private String paymentMethod;
+    
+    @SerializedName("paymentStatus")
+    private String paymentStatus;
+    
+    @SerializedName("qrCode")
+    private String qrCode;
 
     public Booking() {
     }
@@ -128,6 +134,22 @@ public class Booking {
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
+    
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+    
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -144,11 +166,13 @@ public class Booking {
                 Objects.equals(devotees, booking.devotees) &&
                 Objects.equals(position, booking.position) &&
                 Objects.equals(amount, booking.amount) &&
-                Objects.equals(paymentMethod, booking.paymentMethod);
+                Objects.equals(paymentMethod, booking.paymentMethod) &&
+                Objects.equals(paymentStatus, booking.paymentStatus) &&
+                Objects.equals(qrCode, booking.qrCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, temple, location, date, time, status, type, devotees, position, amount, paymentMethod);
+        return Objects.hash(id, temple, location, date, time, status, type, devotees, position, amount, paymentMethod, paymentStatus, qrCode);
     }
 }

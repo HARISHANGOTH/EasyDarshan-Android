@@ -42,7 +42,9 @@ public class OtpVerificationActivity extends AppCompatActivity {
             return;
         }
         
-        viewModel = new ViewModelProvider(this).get(OtpVerificationViewModel.class);
+        viewModel = new ViewModelProvider(this, 
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
+                .get(OtpVerificationViewModel.class);
         viewModel.setMobile(mobile);
         
         binding.subtitleText.setText("Enter the 6-digit code sent to\n+91 " + mobile);

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_gray"
-    tools:context=".PreBookingFlowActivity">
+    tools:context=".ui.prebooking.PreBookingFlowActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,30 +14,30 @@
 
         <!-- Header Section -->
         <LinearLayout
+            android:id="@+id/headerLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_gradient_orange"
+            android:background="@drawable/bg_header_rounded"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="32dp">
+            android:paddingTop="20dp"
+            android:paddingBottom="24dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
+                android:gravity="center_vertical">
 
                 <ImageButton
                     android:id="@+id/backButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:src="@drawable/ic_arrow_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:tint="@color/white"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="12dp"
                     android:contentDescription="@string/back" />
 
                 <LinearLayout
@@ -47,9 +47,10 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/flowTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pre-Book Darshan"
+                        android:text="Book Darshan"
                         android:textColor="@color/white"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -58,176 +59,28 @@
                         android:id="@+id/templeName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sri Venkateswara Temple"
+                        android:text="Tirumala Venkateswara Temple"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:alpha="0.8"
-                        android:layout_marginTop="4dp"
-                        tools:text="Sri Venkateswara Temple" />
+                        android:layout_marginTop="2dp"
+                        tools:text="Tirumala Venkateswara Temple" />
                 </LinearLayout>
-            </LinearLayout>
-
-            <!-- Progress Steps -->
-            <LinearLayout
-                android:id="@+id/progressSteps"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="8dp">
-
-                <FrameLayout
-                    android:id="@+id/step1"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_circle_white"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1"
-                        android:textColor="@color/primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-
-                <View
-                    android:id="@+id/step1Line"
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:background="@color/white"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp" />
-
-                <FrameLayout
-                    android:id="@+id/step2"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_circle_primary_light"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="2"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-
-                <View
-                    android:id="@+id/step2Line"
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:background="@color/primary_light"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp" />
-
-                <FrameLayout
-                    android:id="@+id/step3"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_circle_primary_light"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="3"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-
-                <View
-                    android:id="@+id/step3Line"
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:background="@color/primary_light"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp" />
-
-                <FrameLayout
-                    android:id="@+id/step4"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_circle_primary_light"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="4"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Date"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:alpha="0.8"
-                    android:gravity="center" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Slot"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:alpha="0.8"
-                    android:gravity="center" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Details"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:alpha="0.8"
-                    android:gravity="center" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Pay"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:alpha="0.8"
-                    android:gravity="center" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Step Content -->
+        <!-- Main Content -->
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true"
-            android:padding="24dp">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
 
             <FrameLayout
                 android:id="@+id/stepContentContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="0dp">
+                android:padding="24dp">
 
                 <!-- Step 1: Date Selection -->
                 <LinearLayout
@@ -235,8 +88,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="visible">
-
+                    android:visibility="gone">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -245,7 +97,6 @@
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
-
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/datesRecyclerView"
                         android:layout_width="match_parent"
@@ -260,7 +111,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="gone">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -269,7 +119,6 @@
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
-
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/slotsRecyclerView"
                         android:layout_width="match_parent"
@@ -294,14 +143,13 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Devotee Count -->
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        app:cardCornerRadius="16dp"
+                        app:cardCornerRadius="20dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white">
+                        app:cardBackgroundColor="@color/white"
+                        app:strokeWidth="0dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -309,96 +157,154 @@
                             android:orientation="vertical"
                             android:padding="20dp">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Number of Devotees"
-                                android:textColor="@color/foreground"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginBottom="12dp" />
-
+                            <!-- Adults Counter -->
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical">
 
-                                <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/decrementButton"
-                                    android:layout_width="48dp"
-                                    android:layout_height="48dp"
-                                    android:text="-"
-                                    android:textSize="24sp"
-                                    app:cornerRadius="12dp"
-                                    app:backgroundTint="@color/muted"
-                                    android:textColor="@color/primary" />
-
-                                <TextView
-                                    android:id="@+id/devoteeCount"
+                                <LinearLayout
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android:text="1"
-                                    android:textColor="@color/foreground"
-                                    android:textSize="20sp"
-                                    android:textStyle="bold"
-                                    android:gravity="center" />
+                                    android:orientation="vertical">
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Adults"
+                                        android:textColor="@color/foreground"
+                                        android:textSize="16sp"
+                                        android:textStyle="bold" />
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Age 12+"
+                                        android:textColor="@color/foreground_secondary"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
 
-                                <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/incrementButton"
-                                    android:layout_width="48dp"
-                                    android:layout_height="48dp"
-                                    android:text="+"
-                                    android:textSize="24sp"
-                                    app:cornerRadius="12dp"
-                                    app:backgroundTint="@color/muted"
-                                    android:textColor="@color/primary" />
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:background="@drawable/bg_circle_primary_light"
+                                    android:padding="4dp">
+                                    <com.google.android.material.button.MaterialButton
+                                        android:id="@+id/decrementAdults"
+                                        style="@style/Widget.Material3.Button.IconButton.Filled"
+                                        android:layout_width="36dp"
+                                        android:layout_height="36dp"
+                                        android:text="-"
+                                        android:textSize="18sp"
+                                        app:cornerRadius="18dp"
+                                        app:backgroundTint="@color/primary"
+                                        android:textColor="@color/white"
+                                        android:padding="0dp" />
+                                    <TextView
+                                        android:id="@+id/adultCount"
+                                        android:layout_width="40dp"
+                                        android:layout_height="wrap_content"
+                                        android:text="1"
+                                        android:textColor="@color/foreground"
+                                        android:textSize="18sp"
+                                        android:textStyle="bold"
+                                        android:gravity="center" />
+                                    <com.google.android.material.button.MaterialButton
+                                        android:id="@+id/incrementAdults"
+                                        style="@style/Widget.Material3.Button.IconButton.Filled"
+                                        android:layout_width="36dp"
+                                        android:layout_height="36dp"
+                                        android:text="+"
+                                        android:textSize="18sp"
+                                        app:cornerRadius="18dp"
+                                        app:backgroundTint="@color/primary"
+                                        android:textColor="@color/white"
+                                        android:padding="0dp" />
+                                </LinearLayout>
                             </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/border"
+                                android:layout_marginTop="16dp"
+                                android:layout_marginBottom="16dp" />
+
+                            <!-- Children Counter -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Children"
+                                        android:textColor="@color/foreground"
+                                        android:textSize="16sp"
+                                        android:textStyle="bold" />
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Age 5-12"
+                                        android:textColor="@color/foreground_secondary"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:background="@drawable/bg_circle_primary_light"
+                                    android:padding="4dp">
+                                    <com.google.android.material.button.MaterialButton
+                                        android:id="@+id/decrementChildren"
+                                        style="@style/Widget.Material3.Button.IconButton.Filled"
+                                        android:layout_width="36dp"
+                                        android:layout_height="36dp"
+                                        android:text="-"
+                                        android:textSize="18sp"
+                                        app:cornerRadius="18dp"
+                                        app:backgroundTint="@color/primary"
+                                        android:textColor="@color/white"
+                                        android:padding="0dp" />
+                                    <TextView
+                                        android:id="@+id/childrenCount"
+                                        android:layout_width="40dp"
+                                        android:layout_height="wrap_content"
+                                        android:text="0"
+                                        android:textColor="@color/foreground"
+                                        android:textSize="18sp"
+                                        android:textStyle="bold"
+                                        android:gravity="center" />
+                                    <com.google.android.material.button.MaterialButton
+                                        android:id="@+id/incrementChildren"
+                                        style="@style/Widget.Material3.Button.IconButton.Filled"
+                                        android:layout_width="36dp"
+                                        android:layout_height="36dp"
+                                        android:text="+"
+                                        android:textSize="18sp"
+                                        app:cornerRadius="18dp"
+                                        app:backgroundTint="@color/primary"
+                                        android:textColor="@color/white"
+                                        android:padding="0dp" />
+                                </LinearLayout>
+                            </LinearLayout>
+
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
-
-                    <!-- Primary Devotee Name -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Primary Devotee Name"
-                        app:boxBackgroundMode="filled"
-                        app:boxBackgroundColor="@color/white"
-                        app:boxCornerRadiusTopStart="16dp"
-                        app:boxCornerRadiusTopEnd="16dp"
-                        app:boxCornerRadiusBottomStart="16dp"
-                        app:boxCornerRadiusBottomEnd="16dp"
-                        app:boxStrokeWidth="2dp"
-                        app:boxStrokeColor="@color/input_border"
-                        android:layout_marginBottom="16dp">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/devoteeNameInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPersonName"
-                            android:textSize="16sp"
-                            android:paddingTop="16dp"
-                            android:paddingBottom="16dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/continueToPaymentButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Continue to Payment"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:paddingTop="16dp"
-                        android:paddingBottom="16dp"
-                        app:cornerRadius="16dp"
-                        app:backgroundTint="@color/primary"
-                        android:textColor="@color/white"
-                        android:enabled="false" />
                 </LinearLayout>
 
-                <!-- Step 4: Payment -->
+                <!-- Step 4: Payment Summary -->
                 <LinearLayout
                     android:id="@+id/step4Content"
                     android:layout_width="match_parent"
@@ -409,20 +315,218 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Payment"
+                        android:text="Booking Summary"
                         android:textColor="@color/foreground"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Price Breakdown -->
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp"
+                        android:layout_marginBottom="24dp"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="4dp"
                         app:cardBackgroundColor="@color/white">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="20dp">
+
+                            <TextView
+                                android:id="@+id/summaryTempleName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sri Venkateswara Temple"
+                                android:textColor="@color/foreground"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="8dp">
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:src="@drawable/ic_calendar"
+                                    app:tint="@color/foreground_secondary"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_marginEnd="8dp"/>
+                                <TextView
+                                    android:id="@+id/summaryDate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Wednesday, 20 March 2024"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="14sp"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="8dp">
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:src="@drawable/ic_clock"
+                                    app:tint="@color/foreground_secondary"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_marginEnd="8dp"/>
+                                <TextView
+                                    android:id="@+id/summaryTime"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="06:00 AM - 07:00 AM"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="14sp"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="16dp">
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:src="@drawable/ic_launcher_foreground"
+                                    app:tint="@color/foreground_secondary"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_marginEnd="8dp"/>
+                                <TextView
+                                    android:id="@+id/summaryDevotees"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="2 Devotees"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="14sp"/>
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/border_light"
+                                android:layout_marginBottom="16dp"/>
+
+                            <!-- Price Breakdown -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="8dp">
+                                <TextView
+                                    android:id="@+id/darshanFeeLabel"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Darshan Fee"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="14sp"/>
+                                <TextView
+                                    android:id="@+id/darshanFee"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="₹600"
+                                    android:textColor="@color/foreground"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="12dp">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Platform Fee"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="14sp"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="₹20"
+                                    android:textColor="@color/foreground"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingTop="16dp"
+                                android:background="@drawable/bg_golden_divider"
+                                android:gravity="center_vertical">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Total Payable"
+                                    android:textColor="@color/foreground"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"/>
+                                <TextView
+                                    android:id="@+id/totalAmount"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="₹620"
+                                    android:textColor="@color/primary"
+                                    android:textSize="22sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <!-- Step 5: Payment Successful Screen -->
+                <LinearLayout
+                    android:id="@+id/successContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/success_light"
+                        android:layout_marginBottom="24dp">
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_launcher_foreground"
+                            app:tint="@color/success" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Payment Successful"
+                        android:textColor="@color/success"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Booking Summary Card -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="@color/white"
+                        android:layout_marginBottom="32dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -430,108 +534,212 @@
                             android:orientation="vertical"
                             android:padding="20dp">
 
+                            <TextView
+                                android:id="@+id/successTempleName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Tirumala Venkateswara Temple"
+                                android:textColor="@color/foreground"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:gravity="center"
+                                android:layout_marginBottom="16dp" />
+
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
-                                android:layout_marginBottom="12dp">
-
+                                android:layout_marginBottom="8dp">
                                 <TextView
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android.text="Darshan Fee (1x)"
-                                    android:textColor="@color/foreground_secondary"
-                                    android:textSize="16sp" />
-
+                                    android:text="Booking ID"
+                                    android:textColor="@color/foreground_secondary" />
                                 <TextView
-                                    android:id="@+id/darshanFee"
+                                    android:id="@+id/successBookingId"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="₹300"
+                                    android:text="BK17722956"
                                     android:textColor="@color/foreground"
-                                    android:textSize="16sp"
-                                    tools:text="₹300" />
+                                    android:textStyle="bold" />
                             </LinearLayout>
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
-                                android:layout_marginBottom="12dp">
-
+                                android:layout_marginBottom="8dp">
                                 <TextView
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android:text="Service Fee"
-                                    android:textColor="@color/foreground_secondary"
-                                    android:textSize="16sp" />
-
+                                    android:text="Persons"
+                                    android:textColor="@color/foreground_secondary" />
                                 <TextView
+                                    android:id="@+id/successPersons"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="₹20"
+                                    android:text="2"
                                     android:textColor="@color/foreground"
-                                    android:textSize="16sp" />
+                                    android:textStyle="bold" />
                             </LinearLayout>
 
-                            <View
+                            <LinearLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/border_light"
-                                android:layout_marginBottom="12dp" />
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="8dp">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Queue Token"
+                                    android:textColor="@color/foreground_secondary" />
+                                <TextView
+                                    android:id="@+id/successToken"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="#452"
+                                    android:textColor="@color/primary"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal">
-
                                 <TextView
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android:text="Total Amount"
-                                    android:textColor="@color/foreground"
-                                    android:textSize="18sp"
-                                    android:textStyle="bold" />
-
+                                    android:text="Est. Entry Time"
+                                    android:textColor="@color/foreground_secondary" />
                                 <TextView
-                                    android:id="@+id/totalAmount"
+                                    android:id="@+id/successEntryTime"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="₹320"
-                                    android:textColor="@color/primary"
-                                    android:textSize="20sp"
-                                    android:textStyle="bold"
-                                    tools:text="₹320" />
+                                    android:text="11:30 AM"
+                                    android:textColor="@color/foreground"
+                                    android:textStyle="bold" />
                             </LinearLayout>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Payment Methods -->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/paymentMethodsRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        tools:listitem="@layout/item_payment_method" />
-
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/confirmPayButton"
+                        android:id="@+id/goToLiveQueueButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Confirm &amp; Pay ₹320"
+                        android:text="Go to Live Queue"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:paddingTop="16dp"
-                        android:paddingBottom="16dp"
+                        android:paddingVertical="16dp"
                         app:cornerRadius="16dp"
                         app:backgroundTint="@color/primary"
                         android:textColor="@color/white" />
                 </LinearLayout>
+
+                <!-- Payment Failed Screen -->
+                <LinearLayout
+                    android:id="@+id/failedContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/error_light"
+                        android:layout_marginBottom="24dp">
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_launcher_foreground"
+                            app:tint="@color/error" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Payment Failed"
+                        android:textColor="@color/error"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Payment Failed – Please try again"
+                        android:textColor="@color/foreground_secondary"
+                        android:textSize="16sp"
+                        android:gravity="center"
+                        android:layout_marginBottom="48dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/retryPaymentButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Retry Payment"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:paddingVertical="16dp"
+                        android:layout_marginBottom="12dp"
+                        app:cornerRadius="16dp"
+                        app:backgroundTint="@color/primary"
+                        android:textColor="@color/white" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/cancelBookingButton"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Cancel Booking"
+                        android:textColor="@color/foreground_secondary" />
+                </LinearLayout>
+
             </FrameLayout>
         </androidx.core.widget.NestedScrollView>
+
+        <!-- Sticky Bottom Button Area -->
+        <FrameLayout
+            android:id="@+id/bottomActionArea"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp"
+            android:background="@color/background_gray">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/continueToPaymentButton"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="Continue to Payment"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:backgroundTint="@color/primary"
+                android:textColor="@color/white"
+                android:enabled="true"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/confirmPayButton"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="Confirm &amp; Pay"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:backgroundTint="@color/primary"
+                android:textColor="@color/white"
+                android:visibility="visible" />
+        </FrameLayout>
+
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

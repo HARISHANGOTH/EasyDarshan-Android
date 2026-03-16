@@ -51,11 +51,16 @@ public class TempleAdapter extends RecyclerView.Adapter<TempleAdapter.TempleView
                 .placeholder(R.drawable.ic_temple_placeholder)
                 .into(holder.templeImage);
         
-        holder.itemView.setOnClickListener(v -> {
+        View.OnClickListener clickListener = v -> {
             if (listener != null) {
                 listener.onTempleClick(temple);
             }
-        });
+        };
+
+        holder.itemView.setOnClickListener(clickListener);
+        if (holder.bookDarshanButton != null) {
+            holder.bookDarshanButton.setOnClickListener(clickListener);
+        }
     }
     
     @Override
@@ -77,6 +82,7 @@ public class TempleAdapter extends RecyclerView.Adapter<TempleAdapter.TempleView
         TextView templeLocation;
         TextView templeDistance;
         TextView queueStatusBadge;
+        View bookDarshanButton;
         
         public TempleViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -85,6 +91,7 @@ public class TempleAdapter extends RecyclerView.Adapter<TempleAdapter.TempleView
             templeLocation = itemView.findViewById(R.id.templeLocation);
             templeDistance = itemView.findViewById(R.id.templeDistance);
             queueStatusBadge = itemView.findViewById(R.id.queueStatusBadge);
+            bookDarshanButton = itemView.findViewById(R.id.bookDarshanButton);
         }
     }
 

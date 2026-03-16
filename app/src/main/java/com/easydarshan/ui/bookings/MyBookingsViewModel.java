@@ -1,20 +1,25 @@
 package com.easydarshan.ui.bookings;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.Booking;
+import com.easydarshan.data.model.BookingListResponse;
 import com.easydarshan.data.repository.AppRepository;
+import com.easydarshan.utils.ErrorHandler;
+import com.easydarshan.utils.NetworkUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MyBookingsViewModel extends ViewModel {
+public class MyBookingsViewModel extends AndroidViewModel {
     
     private AppRepository repository;
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
@@ -23,8 +28,9 @@ public class MyBookingsViewModel extends ViewModel {
     private MutableLiveData<Booking> selectedBooking = new MutableLiveData<>();
     private MutableLiveData<String> currentTab = new MutableLiveData<>("upcoming");
     
-    public MyBookingsViewModel() {
-        repository = AppRepository.getInstance();
+    public MyBookingsViewModel(Application application) {
+        super(application);
+        repository = AppRepository.getInstance(application);
     }
     
     public LiveData<Boolean> getIsLoading() {
@@ -53,22 +59,34 @@ public class MyBookingsViewModel extends ViewModel {
     }
     
     public void loadBookings(String status) {
+        if (!NetworkUtils.isNetworkAvailable(getApplication())) {
+            errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+            return;
+        }
+        
         isLoading.setValue(true);
-        repository.getBookings(status, new Callback<ApiResponse<List<Booking>>>() {
+        errorMessage.setValue(null);
+        repository.getBookings(status, new Callback<BookingListResponse>() {
             @Override
-            public void onResponse(Call<ApiResponse<List<Booking>>> call, Response<ApiResponse<List<Booking>>> response) {
+            public void onResponse(Call<BookingListResponse> call, Response<BookingListResponse> response) {
                 isLoading.postValue(false);
-                if (response.body() != null && response.body().isSuccess()) {
-                    bookings.postValue(response.body().getData());
+                
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Booking> bookingList = response.body().getBookings();
+                    bookings.postValue(bookingList != null ? bookingList : new ArrayList<>());
                 } else {
-                    errorMessage.postValue("Failed to load bookings");
+                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
+                    errorMessage.postValue(errorMsg);
+                    bookings.postValue(new ArrayList<>());
                 }
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<List<Booking>>> call, Throwable t) {
+            public void onFailure(Call<BookingListResponse> call, Throwable t) {
                 isLoading.postValue(false);
-                errorMessage.postValue("Network error. Please check your connection.");
+                String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
+                errorMessage.postValue(errorMsg);
+                bookings.postValue(new ArrayList<>());
             }
         });
     }

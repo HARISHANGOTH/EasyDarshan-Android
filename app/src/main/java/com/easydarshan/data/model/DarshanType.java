@@ -3,6 +3,9 @@ package com.easydarshan.data.model;
 import com.google.gson.annotations.SerializedName;
 
 public class DarshanType {
+    @SerializedName("id")
+    private Long id;
+    
     @SerializedName("name")
     private String name;
     
@@ -11,14 +14,26 @@ public class DarshanType {
     
     @SerializedName("duration")
     private String duration;
+    
+    @SerializedName("isActive")
+    private Boolean isActive;
 
     public DarshanType() {
     }
 
-    public DarshanType(String name, String price, String duration) {
+    public DarshanType(Long id, String name, String price, String duration) {
+        this.id = id;
         this.name = name;
         this.price = price;
         this.duration = duration;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -43,6 +58,14 @@ public class DarshanType {
 
     public void setDuration(String duration) {
         this.duration = duration;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 }
 

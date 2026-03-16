@@ -22,6 +22,12 @@ public class User {
     
     @SerializedName("gender")
     private String gender;
+    
+    @SerializedName("id")
+    private String id;
+    
+    @SerializedName("avatar")
+    private String avatar;
 
     public User() {
     }
@@ -72,6 +78,22 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+    
+    public String getId() {
+        return id;
+    }
+    
+    public void setId(String id) {
+        this.id = id;
+    }
+    
+    public String getAvatar() {
+        return avatar;
+    }
+    
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     @Override

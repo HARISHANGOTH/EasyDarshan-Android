@@ -14,6 +14,9 @@ public class TimeSlot {
     
     @SerializedName("available")
     private boolean available;
+    
+    @SerializedName("slotId")
+    private String slotId;
 
     public TimeSlot() {
     }
@@ -48,6 +51,14 @@ public class TimeSlot {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+    
+    public String getSlotId() {
+        return slotId;
+    }
+    
+    public void setSlotId(String slotId) {
+        this.slotId = slotId;
     }
 }
 

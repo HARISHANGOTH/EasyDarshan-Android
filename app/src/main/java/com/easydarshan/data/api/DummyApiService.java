@@ -81,10 +81,10 @@ public class DummyApiService {
             }
             
             List<Temple> temples = new ArrayList<>();
-            temples.add(new Temple(1, "Sri Venkateswara Temple", "Tirupati, Andhra Pradesh", "2.3 km", "high", "High Queue", ""));
-            temples.add(new Temple(2, "Golden Temple", "Amritsar, Punjab", "5.1 km", "medium", "Medium Queue", ""));
-            temples.add(new Temple(3, "Meenakshi Temple", "Madurai, Tamil Nadu", "8.7 km", "low", "Low Queue", ""));
-            temples.add(new Temple(4, "Kashi Vishwanath Temple", "Varanasi, Uttar Pradesh", "1.2 km", "medium", "Medium Queue", ""));
+            temples.add(new Temple(1L, "Sri Venkateswara Temple", "Tirupati, Andhra Pradesh", "2.3 km", "high", "High Queue", ""));
+            temples.add(new Temple(2L, "Golden Temple", "Amritsar, Punjab", "5.1 km", "medium", "Medium Queue", ""));
+            temples.add(new Temple(3L, "Meenakshi Temple", "Madurai, Tamil Nadu", "8.7 km", "low", "Low Queue", ""));
+            temples.add(new Temple(4L, "Kashi Vishwanath Temple", "Varanasi, Uttar Pradesh", "1.2 km", "medium", "Medium Queue", ""));
             
             ApiResponse<List<Temple>> response = new ApiResponse<>();
             response.setSuccess(true);
@@ -105,7 +105,7 @@ public class DummyApiService {
             }
             
             Temple temple = new Temple();
-            temple.setId(id);
+            temple.setId((long) id);
             temple.setName("Sri Venkateswara Temple");
             temple.setLocation("Tirupati, Andhra Pradesh");
             temple.setDistance("2.3 km");

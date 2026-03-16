@@ -24,7 +24,9 @@ public class NotificationsActivity extends BaseActivity {
         binding = ActivityNotificationsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        viewModel = new ViewModelProvider(this).get(NotificationsViewModel.class);
+        viewModel = new ViewModelProvider(this, 
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
+                .get(NotificationsViewModel.class);
         
         setupRecyclerView();
         setupObservers();
@@ -40,7 +42,8 @@ public class NotificationsActivity extends BaseActivity {
 
     @Override
     protected int getNavigationMenuItemId() {
-        return R.id.nav_notifications;
+        // Notifications removed from bottom nav, return home as fallback
+        return R.id.nav_home;
     }
     
     private void setupRecyclerView() {

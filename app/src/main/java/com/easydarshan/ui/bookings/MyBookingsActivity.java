@@ -1,5 +1,6 @@
 package com.easydarshan.ui.bookings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -11,6 +12,8 @@ import com.easydarshan.R;
 import com.easydarshan.databinding.ActivityMyBookingsBinding;
 import com.easydarshan.ui.BaseActivity;
 import com.easydarshan.ui.adapter.BookingAdapter;
+import com.easydarshan.ui.paymenthistory.PaymentHistoryActivity;
+import com.google.android.material.tabs.TabLayout;
 
 public class MyBookingsActivity extends BaseActivity {
     
@@ -24,18 +27,33 @@ public class MyBookingsActivity extends BaseActivity {
         binding = ActivityMyBookingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        viewModel = new ViewModelProvider(this).get(MyBookingsViewModel.class);
+        viewModel = new ViewModelProvider(this, 
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
+                .get(MyBookingsViewModel.class);
         
         setupRecyclerView();
+        setupTabs();
         setupObservers();
         setupListeners();
         setupBottomNavigation();
+        
+        // Initial load with original "active" status for compatibility
+        viewModel.loadBookings("active");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.loadBookings("upcoming");
+        refreshCurrentTab();
+    }
+
+    private void refreshCurrentTab() {
+        int selectedTab = binding.tabLayout.getSelectedTabPosition();
+        if (selectedTab == 0) {
+            viewModel.loadBookings("active");
+        } else {
+            viewModel.loadBookings("completed");
+        }
     }
 
     @Override
@@ -45,11 +63,36 @@ public class MyBookingsActivity extends BaseActivity {
     
     private void setupRecyclerView() {
         adapter = new BookingAdapter(null, booking -> {
-            // Navigate to booking details
+            Intent intent = new Intent(this, BookingDetailsActivity.class);
+            intent.putExtra("booking_id", booking.getId());
+            startActivity(intent);
         });
         
         binding.bookingsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.bookingsRecyclerView.setAdapter(adapter);
+    }
+
+    private void setupTabs() {
+        binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) {
+                    binding.emptyStateTitle.setText("No Active Bookings");
+                    viewModel.loadBookings("active");
+                } else {
+                    binding.emptyStateTitle.setText("No Past Bookings");
+                    viewModel.loadBookings("completed");
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                refreshCurrentTab();
+            }
+        });
     }
     
     private void setupObservers() {
@@ -59,12 +102,15 @@ public class MyBookingsActivity extends BaseActivity {
                 binding.emptyState.setVisibility(View.GONE);
                 binding.bookingsRecyclerView.setVisibility(View.VISIBLE);
             } else {
+                adapter.updateList(null);
                 binding.emptyState.setVisibility(View.VISIBLE);
                 binding.bookingsRecyclerView.setVisibility(View.GONE);
             }
         });
-        
-        viewModel.getCurrentTab().observe(this, this::updateTabSelection);
+
+        viewModel.getIsLoading().observe(this, isLoading -> {
+            binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
         
         viewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
@@ -73,17 +119,11 @@ public class MyBookingsActivity extends BaseActivity {
         });
     }
     
-    private void updateTabSelection(String currentTab) {
-        binding.tabUpcoming.setSelected("upcoming".equals(currentTab));
-        binding.tabActive.setSelected("active".equals(currentTab));
-        binding.tabCompleted.setSelected("completed".equals(currentTab));
-        binding.tabCancelled.setSelected("cancelled".equals(currentTab));
-    }
-    
     private void setupListeners() {
-        binding.tabUpcoming.setOnClickListener(v -> viewModel.setCurrentTab("upcoming"));
-        binding.tabActive.setOnClickListener(v -> viewModel.setCurrentTab("active"));
-        binding.tabCompleted.setOnClickListener(v -> viewModel.setCurrentTab("completed"));
-        binding.tabCancelled.setOnClickListener(v -> viewModel.setCurrentTab("cancelled"));
+        if (binding.viewPreviousVisitsLink != null) {
+            binding.viewPreviousVisitsLink.setOnClickListener(v -> {
+                binding.tabLayout.getTabAt(1).select();
+            });
+        }
     }
 }

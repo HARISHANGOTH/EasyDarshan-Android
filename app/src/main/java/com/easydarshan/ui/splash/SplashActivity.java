@@ -22,11 +22,20 @@ public class SplashActivity extends AppCompatActivity {
         // Initialize SessionManager with context
         SessionManager.getInstance(this);
         
-        viewModel = new ViewModelProvider(this).get(SplashViewModel.class);
+        viewModel = new ViewModelProvider(this, 
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
+                .get(SplashViewModel.class);
         
         viewModel.getNavigateToLogin().observe(this, shouldNavigate -> {
             if (shouldNavigate) {
                 startActivity(new Intent(this, MobileLoginActivity.class));
+                finish();
+            }
+        });
+        
+        viewModel.getNavigateToHome().observe(this, shouldNavigate -> {
+            if (shouldNavigate) {
+                startActivity(new Intent(this, com.easydarshan.ui.home.HomeActivity.class));
                 finish();
             }
         });

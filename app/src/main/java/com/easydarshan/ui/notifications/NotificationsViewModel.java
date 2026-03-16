@@ -1,28 +1,34 @@
 package com.easydarshan.ui.notifications;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.Notification;
 import com.easydarshan.data.repository.AppRepository;
+import com.easydarshan.utils.ErrorHandler;
+import com.easydarshan.utils.NetworkUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NotificationsViewModel extends ViewModel {
+public class NotificationsViewModel extends AndroidViewModel {
     
     private AppRepository repository;
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private MutableLiveData<List<Notification>> notifications = new MutableLiveData<>();
     
-    public NotificationsViewModel() {
-        repository = AppRepository.getInstance();
+    public NotificationsViewModel(Application application) {
+        super(application);
+        repository = AppRepository.getInstance(application);
     }
     
     public LiveData<Boolean> getIsLoading() {
@@ -38,22 +44,40 @@ public class NotificationsViewModel extends ViewModel {
     }
     
     public void loadNotifications() {
+        if (!NetworkUtils.isNetworkAvailable(getApplication())) {
+            errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+            return;
+        }
+        
         isLoading.setValue(true);
+        errorMessage.setValue(null);
         repository.getNotifications(new Callback<ApiResponse<List<Notification>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Notification>>> call, Response<ApiResponse<List<Notification>>> response) {
                 isLoading.postValue(false);
-                if (response.body() != null && response.body().isSuccess()) {
-                    notifications.postValue(response.body().getData());
+                
+                if (response.isSuccessful() && response.body() != null) {
+                    if (response.body().isSuccess()) {
+                        List<Notification> notificationList = response.body().getData();
+                        notifications.postValue(notificationList != null ? notificationList : new ArrayList<>());
+                    } else {
+                        String errorMsg = response.body().getMessage();
+                        errorMessage.postValue(errorMsg != null ? errorMsg : "Failed to load notifications");
+                        notifications.postValue(new ArrayList<>());
+                    }
                 } else {
-                    errorMessage.postValue("Failed to load notifications");
+                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
+                    errorMessage.postValue(errorMsg);
+                    notifications.postValue(new ArrayList<>());
                 }
             }
             
             @Override
             public void onFailure(Call<ApiResponse<List<Notification>>> call, Throwable t) {
                 isLoading.postValue(false);
-                errorMessage.postValue("Network error. Please check your connection.");
+                String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
+                errorMessage.postValue(errorMsg);
+                notifications.postValue(new ArrayList<>());
             }
         });
     }

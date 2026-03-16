@@ -1,13 +1,17 @@
 package com.easydarshan.ui.temple;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.DarshanType;
 import com.easydarshan.data.model.Temple;
 import com.easydarshan.data.repository.AppRepository;
+import com.easydarshan.utils.ErrorHandler;
+import com.easydarshan.utils.NetworkUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +20,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TempleDetailsViewModel extends ViewModel {
+public class TempleDetailsViewModel extends AndroidViewModel {
     
     private AppRepository repository;
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
@@ -26,9 +30,9 @@ public class TempleDetailsViewModel extends ViewModel {
     private MutableLiveData<String> navigateToPreBooking = new MutableLiveData<>();
     private MutableLiveData<String> navigateToLiveQueue = new MutableLiveData<>();
     
-    public TempleDetailsViewModel() {
-        repository = AppRepository.getInstance();
-        loadDarshanTypes();
+    public TempleDetailsViewModel(Application application) {
+        super(application);
+        repository = AppRepository.getInstance(application);
     }
     
     public LiveData<Boolean> getIsLoading() {
@@ -55,33 +59,58 @@ public class TempleDetailsViewModel extends ViewModel {
         return navigateToLiveQueue;
     }
     
-    public void loadTempleDetails(int templeId) {
+    public void loadTempleDetails(Long templeId) {
+        if (templeId == null) {
+            errorMessage.setValue("Invalid temple ID");
+            return;
+        }
+        
+        if (!NetworkUtils.isNetworkAvailable(getApplication())) {
+            errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+            return;
+        }
+        
         isLoading.setValue(true);
-        repository.getTempleDetails(templeId, new Callback<ApiResponse<Temple>>() {
+        errorMessage.setValue(null);
+        repository.getTempleDetails(templeId, new Callback<Temple>() {
             @Override
-            public void onResponse(Call<ApiResponse<Temple>> call, Response<ApiResponse<Temple>> response) {
+            public void onResponse(Call<Temple> call, Response<Temple> response) {
                 isLoading.postValue(false);
-                if (response.body() != null && response.body().isSuccess()) {
-                    temple.postValue(response.body().getData());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    // Backend returns a plain Temple object (not wrapped in ApiResponse)
+                    temple.postValue(response.body());
+                    // Load darshan types for this temple
+                    loadDarshanTypes(templeId);
                 } else {
-                    errorMessage.postValue("Failed to load temple details");
+                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
+                    errorMessage.postValue(errorMsg);
                 }
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<Temple>> call, Throwable t) {
+            public void onFailure(Call<Temple> call, Throwable t) {
                 isLoading.postValue(false);
-                errorMessage.postValue("Network error. Please check your connection.");
+                String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
+                errorMessage.postValue(errorMsg);
             }
         });
     }
     
-    private void loadDarshanTypes() {
-        List<DarshanType> types = new ArrayList<>();
-        types.add(new DarshanType("Free Darshan", "Free", "30-45 mins"));
-        types.add(new DarshanType("Special Darshan", "₹300", "15-20 mins"));
-        types.add(new DarshanType("Senior Citizen", "Free", "20-30 mins"));
-        darshanTypes.setValue(types);
+    private void loadDarshanTypes(Long templeId) {
+        repository.getTempleDarshans(templeId, new Callback<ApiResponse<List<DarshanType>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<DarshanType>>> call, Response<ApiResponse<List<DarshanType>>> response) {
+                if (response.body() != null && response.body().isSuccess()) {
+                    darshanTypes.postValue(response.body().getData());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<ApiResponse<List<DarshanType>>> call, Throwable t) {
+                // Silently fail - darshan types are optional
+            }
+        });
     }
     
     public void onPreBookClick() {

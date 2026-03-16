@@ -30,7 +30,9 @@ public class MobileLoginActivity extends AppCompatActivity {
         // Initialize SessionManager with context
         SessionManager.getInstance(this);
         
-        viewModel = new ViewModelProvider(this).get(MobileLoginViewModel.class);
+        viewModel = new ViewModelProvider(this, 
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
+                .get(MobileLoginViewModel.class);
         
         setupObservers();
         setupListeners();

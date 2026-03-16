@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class Temple {
     @SerializedName("id")
-    private int id;
+    private Long id;
     
     @SerializedName("name")
     private String name;
@@ -38,7 +38,7 @@ public class Temple {
     public Temple() {
     }
 
-    public Temple(int id, String name, String location, String distance, String queueStatus, String queueText, String image) {
+    public Temple(Long id, String name, String location, String distance, String queueStatus, String queueText, String image) {
         this.id = id;
         this.name = name;
         this.location = location;
@@ -48,11 +48,11 @@ public class Temple {
         this.image = image;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

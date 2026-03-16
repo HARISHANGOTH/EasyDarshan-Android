@@ -1,27 +1,36 @@
 package com.easydarshan.ui.login;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.OtpRequest;
 import com.easydarshan.data.repository.AppRepository;
+import com.easydarshan.utils.ErrorHandler;
+import com.easydarshan.utils.NetworkUtils;
+import com.easydarshan.utils.ValidationUtils;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MobileLoginViewModel extends ViewModel {
+public class MobileLoginViewModel extends AndroidViewModel {
     
     private AppRepository repository;
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private MutableLiveData<String> successMessage = new MutableLiveData<>();
     private MutableLiveData<String> navigateToOtp = new MutableLiveData<>();
+    private AtomicInteger retryCount = new AtomicInteger(0);
     
-    public MobileLoginViewModel() {
-        repository = AppRepository.getInstance();
+    public MobileLoginViewModel(Application application) {
+        super(application);
+        repository = AppRepository.getInstance(application);
     }
     
     public LiveData<Boolean> getIsLoading() {
@@ -41,30 +50,53 @@ public class MobileLoginViewModel extends ViewModel {
     }
     
     public void sendOtp(String mobile) {
-        if (mobile == null || mobile.length() != 10) {
-            errorMessage.setValue("Please enter a valid 10-digit mobile number");
+        // Validate phone number
+        String validationError = ValidationUtils.getPhoneValidationError(mobile);
+        if (validationError != null) {
+            errorMessage.setValue(validationError);
             return;
         }
         
+        // Check network connectivity
+        if (!NetworkUtils.isNetworkAvailable(getApplication())) {
+            errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+            return;
+        }
+        
+        // Clean phone number
+        String cleanedPhone = ValidationUtils.cleanPhoneNumber(mobile);
+        retryCount.set(0);
+        
         isLoading.setValue(true);
-        OtpRequest request = new OtpRequest(mobile);
+        errorMessage.setValue(null);
+        OtpRequest request = new OtpRequest(cleanedPhone);
         
         repository.sendOtp(request, new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 isLoading.postValue(false);
-                if (response.body() != null && response.body().isSuccess()) {
-                    successMessage.postValue(response.body().getMessage());
-                    navigateToOtp.postValue(mobile);
+                
+                if (response.isSuccessful() && response.body() != null) {
+                    if (response.body().isSuccess()) {
+                        successMessage.postValue(response.body().getMessage() != null ? 
+                            response.body().getMessage() : "OTP sent successfully");
+                        navigateToOtp.postValue(cleanedPhone);
+                        retryCount.set(0);
+                    } else {
+                        String errorMsg = response.body().getMessage();
+                        errorMessage.postValue(errorMsg != null ? errorMsg : "Failed to send OTP");
+                    }
                 } else {
-                    errorMessage.postValue("Failed to send OTP. Please try again.");
+                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
+                    errorMessage.postValue(errorMsg);
                 }
             }
             
             @Override
             public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
                 isLoading.postValue(false);
-                errorMessage.postValue("Network error. Please check your connection.");
+                String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
+                errorMessage.postValue(errorMsg);
             }
         });
     }

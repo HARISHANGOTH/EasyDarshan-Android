@@ -4,9 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
+    android:layout_marginBottom="24dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/border_light"
     app:cardBackgroundColor="@color/white"
     android:clickable="true"
     android:focusable="true"
@@ -20,7 +22,7 @@
         <!-- Temple Image -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="200dp"
             android:background="@color/muted">
 
             <ImageView
@@ -38,13 +40,16 @@
                 android:text="High Queue"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:background="@drawable/bg_queue_status_high"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:background="@drawable/bg_floating_nav"
+                android:backgroundTint="@color/overlay_white"
+                android:textColor="@color/error"
                 android:layout_gravity="top|end"
-                android:layout_margin="12dp" />
+                android:layout_margin="16dp"
+                android:elevation="4dp" />
         </FrameLayout>
 
         <!-- Temple Info -->
@@ -52,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
             <TextView
                 android:id="@+id/templeName"
@@ -60,9 +65,9 @@
                 android:layout_height="wrap_content"
                 android:text="Sri Venkateswara Temple"
                 android:textColor="@color/foreground"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="4dp"
                 tools:text="Sri Venkateswara Temple" />
 
             <LinearLayout
@@ -70,11 +75,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="20dp">
 
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
                     android:src="@drawable/ic_location"
                     app:tint="@color/foreground_secondary"
                     android:layout_marginEnd="4dp" />
@@ -102,26 +107,29 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="2.3 km"
-                    android:textColor="@color/foreground_secondary"
+                    android:textColor="@color/primary"
                     android:textSize="14sp"
+                    android:textStyle="bold"
                     tools:text="2.3 km" />
             </LinearLayout>
 
-            <!-- Book Darshan Button -->
+            <!-- Book Now Button - Improved UI -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/bookDarshanButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:text="Book Darshan"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                app:cornerRadius="12dp"
+                app:cornerRadius="16dp"
                 app:backgroundTint="@color/primary"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_calendar"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconTint="@color/white" />
         </LinearLayout>
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
-

@@ -5,6 +5,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="upi" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -63,6 +70,21 @@
         
         <activity
             android:name=".ui.prebooking.PreBookingFlowActivity"
+            android:exported="false"
+            android:theme="@style/Theme.EasyDarshan" />
+        
+        <activity
+            android:name=".ui.bookings.BookingDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.EasyDarshan" />
+        
+        <activity
+            android:name=".ui.paymenthistory.PaymentHistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.EasyDarshan" />
+        
+        <activity
+            android:name=".ui.profileupdate.ProfileUpdateActivity"
             android:exported="false"
             android:theme="@style/Theme.EasyDarshan" />
         

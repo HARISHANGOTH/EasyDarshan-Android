@@ -10,7 +10,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:background="@android:color/transparent"
         app:elevation="0dp">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -28,11 +28,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_gradient_orange"
+                    android:background="@drawable/bg_header_rounded"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
-                    android:paddingTop="24dp"
-                    android:paddingBottom="32dp">
+                    android:paddingTop="32dp"
+                    android:paddingBottom="48dp">
 
                     <!-- Top Bar -->
                     <LinearLayout
@@ -53,7 +53,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Namaste 🙏"
                                 android:textColor="@color/white"
-                                android:textSize="20sp"
+                                android:textSize="22sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -65,116 +65,38 @@
                                 android:alpha="0.8"
                                 android:layout_marginTop="4dp" />
                         </LinearLayout>
-
-                        <FrameLayout
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:background="@drawable/bg_circle_white_alpha"
-                            android:gravity="center"
-                            android:clickable="true"
-                            android:focusable="true">
-
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/ic_notification"
-                                app:tint="@color/white" />
-
-                            <View
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:background="@drawable/bg_circle_red"
-                                android:layout_gravity="top|end"
-                                android:layout_marginTop="4dp"
-                                android:layout_marginEnd="4dp" />
-                        </FrameLayout>
                     </LinearLayout>
 
                     <!-- Search Bar -->
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:boxBackgroundMode="filled"
-                        app:boxBackgroundColor="@color/white"
-                        app:boxCornerRadiusTopStart="16dp"
-                        app:boxCornerRadiusTopEnd="16dp"
-                        app:boxCornerRadiusBottomStart="16dp"
-                        app:boxCornerRadiusBottomEnd="16dp"
-                        app:boxStrokeWidth="0dp"
-                        app:startIconDrawable="@drawable/ic_search"
-                        app:startIconTint="@color/foreground_secondary">
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="8dp"
+                        app:cardBackgroundColor="@color/white">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/searchInput"
+                        <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Search temple by name or city"
-                            android:textSize="16sp"
-                            android:paddingTop="16dp"
-                            android:paddingBottom="16dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            app:boxBackgroundMode="none"
+                            app:hintEnabled="false"
+                            app:startIconDrawable="@drawable/ic_search"
+                            app:startIconTint="@color/foreground_secondary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/searchInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Search temple by name or city"
+                                android:textSize="16sp"
+                                android:paddingTop="16dp"
+                                android:paddingBottom="16dp"
+                                android:background="@android:color/transparent" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Festival Banner -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/bg_gradient_orange"
-                    android:padding="20dp"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginEnd="24dp"
-                    android:layout_marginTop="24dp"
-                    android:gravity="center_vertical">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Special Occasion"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:alpha="0.8"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Maha Shivaratri"
-                            android:textColor="@color/white"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Book your darshan early"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:alpha="0.8" />
-                    </LinearLayout>
-
-                    <FrameLayout
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:background="@drawable/bg_circle_white_alpha"
-                        android:gravity="center">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/ic_shield"
-                            app:tint="@color/white" />
-                    </FrameLayout>
-                </LinearLayout>
-
-                <!-- Nearby Temples Section Header -->
+                <!-- Temples Section Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -189,41 +111,43 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Nearby Temples"
+                        android:text="Temples"
                         android:textColor="@color/foreground"
                         android:textSize="20sp"
                         android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="View All"
-                        android:textColor="@color/primary"
-                        android:textSize="16sp"
-                        android:clickable="true"
-                        android:focusable="true" />
                 </LinearLayout>
 
             </LinearLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/templesRecyclerView"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_temple_card" />
-        
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <include layout="@layout/bottom_navigation" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/templesRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="100dp"
+            android:clipToPadding="false"
+            tools:listitem="@layout/item_temple_card" />
+            
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <include 
+        layout="@layout/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

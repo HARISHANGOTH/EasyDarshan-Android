@@ -10,7 +10,6 @@ import com.easydarshan.R;
 import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.ui.bookings.MyBookingsActivity;
 import com.easydarshan.ui.home.HomeActivity;
-import com.easydarshan.ui.notifications.NotificationsActivity;
 import com.easydarshan.ui.profile.ProfileActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -26,11 +25,15 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void setupBottomNavigation() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
         if (bottomNav != null) {
-            bottomNav.setSelectedItemId(getNavigationMenuItemId());
-            bottomNav.setOnNavigationItemSelectedListener(item -> {
+            // Set the correct item as selected based on the current activity
+            bottomNav.getMenu().findItem(getNavigationMenuItemId()).setChecked(true);
+            
+            bottomNav.setOnItemSelectedListener(item -> {
                 int itemId = item.getItemId();
+                
+                // If the user clicks the already selected item, do nothing
                 if (itemId == getNavigationMenuItemId()) {
-                    return false;
+                    return true;
                 }
                 
                 Intent intent = null;
@@ -38,19 +41,30 @@ public abstract class BaseActivity extends AppCompatActivity {
                     intent = new Intent(this, HomeActivity.class);
                 } else if (itemId == R.id.nav_bookings) {
                     intent = new Intent(this, MyBookingsActivity.class);
-                } else if (itemId == R.id.nav_notifications) {
-                    intent = new Intent(this, NotificationsActivity.class);
                 } else if (itemId == R.id.nav_profile) {
                     intent = new Intent(this, ProfileActivity.class);
                 }
                 
                 if (intent != null) {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     startActivity(intent);
+                    // Smooth transition without blinking
+                    overridePendingTransition(0, 0);
+                    return true;
                 }
                 
-                return true;
+                return false;
             });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Ensure the correct item is highlighted when returning to the activity
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
+        if (bottomNav != null) {
+            bottomNav.getMenu().findItem(getNavigationMenuItemId()).setChecked(true);
         }
     }
 
