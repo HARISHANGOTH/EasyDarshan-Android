@@ -36,6 +36,8 @@ public class PreBookingViewModel extends AndroidViewModel {
     private MutableLiveData<TimeSlot> selectedSlot = new MutableLiveData<>();
     private MutableLiveData<Integer> adultCount = new MutableLiveData<>(1);
     private MutableLiveData<Integer> childrenCount = new MutableLiveData<>(0);
+    private MutableLiveData<List<String>> devoteeNames = new MutableLiveData<>(new ArrayList<>());
+    private MutableLiveData<String> tempReferenceId = new MutableLiveData<>();
     private MutableLiveData<List<String>> availableDates = new MutableLiveData<>();
     private MutableLiveData<List<TimeSlot>> timeSlots = new MutableLiveData<>();
     private MutableLiveData<CreateBookingResponse> bookingCreated = new MutableLiveData<>();
@@ -78,10 +80,16 @@ public class PreBookingViewModel extends AndroidViewModel {
     public LiveData<TimeSlot> getSelectedSlot() { return selectedSlot; }
     public LiveData<Integer> getAdultCount() { return adultCount; }
     public LiveData<Integer> getChildrenCount() { return childrenCount; }
+    public LiveData<List<String>> getDevoteeNames() { return devoteeNames; }
+    public LiveData<String> getTempReferenceId() { return tempReferenceId; }
     public LiveData<List<String>> getAvailableDates() { return availableDates; }
     public LiveData<List<TimeSlot>> getTimeSlots() { return timeSlots; }
     public LiveData<CreateBookingResponse> getBookingCreated() { return bookingCreated; }
     public LiveData<PaymentOrderResponse> getPaymentOrderCreated() { return paymentOrderCreated; }
+    
+    public String getBookingId() {
+        return bookingId;
+    }
     
     public void incrementAdults() {
         int current = adultCount.getValue() != null ? adultCount.getValue() : 1;
@@ -169,7 +177,18 @@ public class PreBookingViewModel extends AndroidViewModel {
     }
     
     public void continueToPayment() {
+        generateTempReferenceId();
         currentStep.setValue(4);
+    }
+
+    private void generateTempReferenceId() {
+        String datePart = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(new Date());
+        String randomPart = String.format("%04d", (int) (Math.random() * 10000));
+        tempReferenceId.setValue("ED" + datePart + randomPart);
+    }
+    
+    public void setDevoteeNames(List<String> names) {
+        devoteeNames.setValue(names);
     }
     
     public void createBookingAndPayment(String paymentMethod) {
@@ -181,15 +200,26 @@ public class PreBookingViewModel extends AndroidViewModel {
         
         // Platform fee is always 20
         double totalAmount = (unitPrice * totalDevotees) + 20;
+
+        // Convert names to comma separated string
+        StringBuilder namesBuilder = new StringBuilder();
+        List<String> names = devoteeNames.getValue();
+        if (names != null) {
+            for (int i = 0; i < names.size(); i++) {
+                namesBuilder.append(names.get(i));
+                if (i < names.size() - 1) namesBuilder.append(", ");
+            }
+        }
         
         CreateBookingRequest request = new CreateBookingRequest(
                 templeId,
                 selectedDate.getValue(),
-                isLiveQueue ? "LIVE_QUEUE" : selectedSlot.getValue().getSlotId(),
+                isLiveQueue ? "LIVE_QUEUE" : (selectedSlot.getValue() != null ? selectedSlot.getValue().getSlotId() : null),
                 selectedDarshanType,
                 totalDevotees,
                 paymentMethod,
-                totalAmount
+                totalAmount,
+                namesBuilder.toString()
         );
         
         repository.createBooking(request, new Callback<CreateBookingResponse>() {
@@ -228,12 +258,11 @@ public class PreBookingViewModel extends AndroidViewModel {
     }
     
     public void confirmBooking() {
-        if (bookingId != null) {
-            CreateBookingResponse response = new CreateBookingResponse();
-            response.setBookingId(bookingId);
-            response.setStatus("CONFIRMED");
-            bookingCreated.postValue(response);
-        }
+        String idToUse = (bookingId != null) ? bookingId : tempReferenceId.getValue();
+        CreateBookingResponse response = new CreateBookingResponse();
+        response.setBookingId(idToUse);
+        response.setStatus("CONFIRMED");
+        bookingCreated.postValue(response);
     }
 
     public boolean isLiveQueue() { return isLiveQueue; }

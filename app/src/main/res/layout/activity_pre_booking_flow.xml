@@ -300,6 +300,30 @@
                                 </LinearLayout>
                             </LinearLayout>
 
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/border"
+                                android:layout_marginTop="16dp"
+                                android:layout_marginBottom="16dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Devotee Names"
+                                android:textColor="@color/foreground"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="8dp"/>
+
+                            <!-- Names Container -->
+                            <LinearLayout
+                                android:id="@+id/namesContainer"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:layout_marginBottom="8dp" />
+
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
@@ -407,6 +431,47 @@
                                     android:textSize="14sp"/>
                             </LinearLayout>
 
+                            <!-- Devotee Names Summary -->
+                            <TextView
+                                android:id="@+id/summaryDevoteeNames"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/foreground_secondary"
+                                android:textSize="14sp"
+                                android:layout_marginBottom="8dp"
+                                android:visibility="gone"
+                                tools:text="Names: Mahesh, Suresh"
+                                tools:visibility="visible"/>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="8dp">
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:src="@drawable/ic_shield"
+                                    app:tint="@color/foreground_secondary"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_marginEnd="8dp"/>
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Booking Reference"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="14sp"/>
+                                <TextView
+                                    android:id="@+id/summaryReferenceId"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="ED20240320XXXX"
+                                    android:textColor="@color/foreground"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+
                             <View
                                 android:layout_width="match_parent"
                                 android:layout_height="1dp"
@@ -481,6 +546,30 @@
                                     android:textColor="@color/primary"
                                     android:textSize="22sp"
                                     android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Cancellation Policy: Non-refundable after confirmation."
+                                android:textColor="@color/error"
+                                android:textSize="12sp"
+                                android:layout_marginTop="16dp"
+                                android:gravity="center_horizontal"/>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center"
+                                android:layout_marginTop="12dp"
+                                android:alpha="0.7">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="🔒 Secure payment powered by Razorpay"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="12sp"/>
                             </LinearLayout>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>

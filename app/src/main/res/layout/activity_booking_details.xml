@@ -291,18 +291,20 @@
                     android:layout_marginBottom="12dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/refreshQueueButton"
+                    android:id="@+id/liveQueueButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Refresh Queue Status"
+                    android:text="Check Live Queue"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:paddingVertical="16dp"
                     app:cornerRadius="16dp"
-                    app:backgroundTint="@color/primary_light"
+                    app:backgroundTint="@color/primary"
                     android:textColor="@color/white"
                     app:elevation="4dp"
-                    android:visibility="gone" />
+                    android:layout_marginBottom="12dp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
             </LinearLayout>
 
         </LinearLayout>

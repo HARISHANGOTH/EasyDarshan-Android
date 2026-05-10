@@ -1,6 +1,8 @@
 package com.easydarshan.ui.bookings;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,6 +14,7 @@ import com.easydarshan.databinding.ActivityBookingDetailsBinding;
 import com.easydarshan.data.model.Booking;
 import com.easydarshan.data.model.SingleBookingResponse;
 import com.easydarshan.data.repository.AppRepository;
+import com.easydarshan.ui.livequeue.LiveQueueActivity;
 import com.easydarshan.utils.ErrorHandler;
 import com.easydarshan.utils.NetworkUtils;
 import android.graphics.Bitmap;
@@ -36,6 +39,7 @@ public class BookingDetailsActivity extends AppCompatActivity {
     private ActivityBookingDetailsBinding binding;
     private String bookingId;
     private AppRepository repository;
+    private Booking currentBooking;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,21 @@ public class BookingDetailsActivity extends AppCompatActivity {
     
     private void setupListeners() {
         binding.backButton.setOnClickListener(v -> finish());
+        
+        binding.liveQueueButton.setOnClickListener(v -> {
+            if (bookingId != null) {
+                Intent intent = new Intent(this, LiveQueueActivity.class);
+                intent.putExtra("booking_id", bookingId);
+                intent.putExtra("temple_name", binding.templeName.getText().toString());
+                intent.putExtra("booking_date", binding.bookingDate.getText().toString());
+                
+                if (currentBooking != null && currentBooking.getDevotees() != null) {
+                    intent.putExtra("devotees", currentBooking.getDevotees());
+                }
+                
+                startActivity(intent);
+            }
+        });
     }
     
     private void loadBookingDetails() {
@@ -92,6 +111,7 @@ public class BookingDetailsActivity extends AppCompatActivity {
     
     private void displayBookingDetails(Booking booking) {
         if (booking == null) return;
+        this.currentBooking = booking;
         
         try {
             if (binding.templeName != null && booking.getTemple() != null) {
@@ -121,6 +141,12 @@ public class BookingDetailsActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "QR code data not available", Toast.LENGTH_SHORT).show();
             }
+
+            // Show Live Queue button if applicable
+            boolean isLiveQueue = (booking.getTime() != null && booking.getTime().toLowerCase().contains("live")) 
+                                || "LIVE_QUEUE".equals(booking.getTime());
+            binding.liveQueueButton.setVisibility(isLiveQueue ? View.VISIBLE : View.GONE);
+
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Error displaying booking details: " + e.getMessage(), Toast.LENGTH_SHORT).show();

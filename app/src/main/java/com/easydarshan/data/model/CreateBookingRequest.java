@@ -24,11 +24,14 @@ public class CreateBookingRequest {
     @SerializedName("amount")
     private Double amount;
 
+    @SerializedName("devoteeNames")
+    private String devoteeNames;
+
     public CreateBookingRequest() {
     }
 
     public CreateBookingRequest(Long templeId, String date, String timeSlot, String darshanType, 
-                                Integer devotees, String paymentMethod, Double amount) {
+                                Integer devotees, String paymentMethod, Double amount, String devoteeNames) {
         this.templeId = templeId;
         this.date = date;
         this.timeSlot = timeSlot;
@@ -36,6 +39,7 @@ public class CreateBookingRequest {
         this.devotees = devotees;
         this.paymentMethod = paymentMethod;
         this.amount = amount;
+        this.devoteeNames = devoteeNames;
     }
 
     public Long getTempleId() {
@@ -92,6 +96,14 @@ public class CreateBookingRequest {
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public String getDevoteeNames() {
+        return devoteeNames;
+    }
+
+    public void setDevoteeNames(String devoteeNames) {
+        this.devoteeNames = devoteeNames;
     }
 }
 

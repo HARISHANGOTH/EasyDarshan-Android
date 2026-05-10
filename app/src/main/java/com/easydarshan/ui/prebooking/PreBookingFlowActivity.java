@@ -30,6 +30,8 @@ import com.easydarshan.ui.payment.PaymentBottomSheet;
 import com.razorpay.PaymentResultListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -120,12 +122,14 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         viewModel.getAdultCount().observe(this, count -> {
             if (count != null) {
                 binding.adultCount.setText(String.valueOf(count));
+                updateDevoteeNameInputs();
             }
         });
 
         viewModel.getChildrenCount().observe(this, count -> {
             if (count != null) {
                 binding.childrenCount.setText(String.valueOf(count));
+                updateDevoteeNameInputs();
             }
         });
         
@@ -158,6 +162,32 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
                 viewModel.setCurrentStep(5);
             }
         });
+    }
+
+    private void updateDevoteeNameInputs() {
+        int adultCount = viewModel.getAdultCount().getValue() != null ? viewModel.getAdultCount().getValue() : 1;
+        int childrenCount = viewModel.getChildrenCount().getValue() != null ? viewModel.getChildrenCount().getValue() : 0;
+        int total = adultCount + childrenCount;
+
+        binding.namesContainer.removeAllViews();
+        for (int i = 0; i < total; i++) {
+            com.google.android.material.textfield.TextInputLayout textInputLayout = new com.google.android.material.textfield.TextInputLayout(this, null, com.google.android.material.R.attr.textInputOutlinedStyle);
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(0, 8, 0, 16);
+            textInputLayout.setLayoutParams(lp);
+            textInputLayout.setHint((i < adultCount ? "Adult " + (i + 1) : "Child " + (i - adultCount + 1)) + " Name");
+            float radius = (float) dpToPx(12);
+            textInputLayout.setBoxCornerRadii(radius, radius, radius, radius);
+
+            com.google.android.material.textfield.TextInputEditText editText = new com.google.android.material.textfield.TextInputEditText(textInputLayout.getContext());
+            textInputLayout.addView(editText);
+            binding.namesContainer.addView(textInputLayout);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round((float) dp * density);
     }
 
     private void populatePaymentSummary() {
@@ -207,18 +237,45 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         if (total == 0) {
             binding.confirmPayButton.setText("Confirm Booking");
         }
+        
+        // Show names in summary
+        List<String> names = viewModel.getDevoteeNames().getValue();
+        if (names != null && !names.isEmpty()) {
+            StringBuilder sb = new StringBuilder("Names: ");
+            for (int i = 0; i < names.size(); i++) {
+                sb.append(names.get(i));
+                if (i < names.size() - 1) sb.append(", ");
+            }
+            binding.summaryDevoteeNames.setText(sb.toString());
+            binding.summaryDevoteeNames.setVisibility(View.VISIBLE);
+        } else {
+            binding.summaryDevoteeNames.setVisibility(View.GONE);
+        }
+        
+        // Show temporary reference ID
+        binding.summaryReferenceId.setText(viewModel.getTempReferenceId().getValue());
     }
 
     private void populateSuccessSummary() {
         binding.successTempleName.setText(binding.templeName.getText());
         binding.successPersons.setText(String.valueOf(viewModel.getTotalDevotees()));
-        binding.successBookingId.setText("BK" + System.currentTimeMillis() / 100000);
+        
+        String refId = viewModel.getTempReferenceId().getValue();
+        if (refId != null) {
+            binding.successBookingId.setText(refId);
+        } else {
+            binding.successBookingId.setText("BK" + System.currentTimeMillis() / 100000);
+        }
+
         binding.successToken.setText("#" + (100 + (int)(Math.random() * 900)));
         binding.successEntryTime.setText("11:30 AM"); 
     }
 
     private void startAutoRedirect() {
-        redirectRunnable = () -> navigateToLiveQueue();
+        if (redirectRunnable != null) {
+            redirectHandler.removeCallbacks(redirectRunnable);
+        }
+        redirectRunnable = this::navigateToLiveQueue;
         redirectHandler.postDelayed(redirectRunnable, 3000);
     }
 
@@ -227,9 +284,23 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
             redirectHandler.removeCallbacks(redirectRunnable);
             redirectRunnable = null;
         }
+        
         Intent intent = new Intent(this, LiveQueueActivity.class);
-        intent.putExtra("booking_id", binding.successBookingId.getText().toString());
-        intent.putExtra("temple_name", binding.successTempleName.getText().toString());
+        String bId = viewModel.getBookingId();
+        if (bId == null || bId.isEmpty()) {
+            bId = binding.successBookingId.getText().toString();
+        }
+        
+        intent.putExtra("booking_id", bId);
+        intent.putExtra("temple_name", binding.templeName.getText().toString());
+        
+        String dateStr = viewModel.getSelectedDate().getValue();
+        if (dateStr == null) {
+            dateStr = binding.summaryDate.getText().toString();
+        }
+        intent.putExtra("booking_date", dateStr);
+        intent.putExtra("devotees", viewModel.getTotalDevotees());
+
         startActivity(intent);
         finish();
     }
@@ -270,7 +341,35 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         binding.incrementChildren.setOnClickListener(v -> viewModel.incrementChildren());
         binding.decrementChildren.setOnClickListener(v -> viewModel.decrementChildren());
         
-        binding.continueToPaymentButton.setOnClickListener(v -> viewModel.continueToPayment());
+        binding.continueToPaymentButton.setOnClickListener(v -> {
+            List<String> names = new ArrayList<>();
+            boolean allFilled = true;
+            for (int i = 0; i < binding.namesContainer.getChildCount(); i++) {
+                View view = binding.namesContainer.getChildAt(i);
+                if (view instanceof com.google.android.material.textfield.TextInputLayout) {
+                    com.google.android.material.textfield.TextInputLayout layout = (com.google.android.material.textfield.TextInputLayout) view;
+                    String name = "";
+                    if (layout.getEditText() != null && layout.getEditText().getText() != null) {
+                        name = layout.getEditText().getText().toString().trim();
+                    }
+
+                    if (name.isEmpty()) {
+                        layout.setError("Name required");
+                        allFilled = false;
+                    } else {
+                        layout.setError(null);
+                        names.add(name);
+                    }
+                }
+            }
+            
+            if (allFilled) {
+                viewModel.setDevoteeNames(names);
+                viewModel.continueToPayment();
+            } else {
+                Toast.makeText(this, "Please enter all devotee names", Toast.LENGTH_SHORT).show();
+            }
+        });
         
         binding.confirmPayButton.setOnClickListener(v -> {
             int total = calculateTotalAmount();

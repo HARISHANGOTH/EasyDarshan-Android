@@ -87,6 +87,11 @@
             android:name=".ui.profileupdate.ProfileUpdateActivity"
             android:exported="false"
             android:theme="@style/Theme.EasyDarshan" />
+
+        <activity
+            android:name=".ui.livequeue.LiveQueueActivity"
+            android:exported="false"
+            android:theme="@style/Theme.EasyDarshan" />
         
         <activity
             android:name=".MainActivity"
