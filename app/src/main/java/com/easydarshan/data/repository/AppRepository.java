@@ -16,6 +16,7 @@ import com.easydarshan.data.model.LiveQueueActivateResponse;
 import com.easydarshan.data.model.LiveQueueDraftRequest;
 import com.easydarshan.data.model.LiveQueuePositionResponse;
 import com.easydarshan.data.model.Notification;
+import com.easydarshan.data.model.OtpReponse;
 import com.easydarshan.data.model.OtpRequest;
 import com.easydarshan.data.model.OtpVerifyRequest;
 import com.easydarshan.data.model.PaymentOrderRequest;
@@ -55,7 +56,7 @@ public class AppRepository {
     }
     
     // Authentication
-    public void sendOtp(OtpRequest request, Callback<ApiResponse<String>> callback) {
+    public void sendOtp(OtpRequest request, Callback<OtpReponse> callback) {
         apiService.sendOtp(request).enqueue(callback);
     }
     

@@ -2,41 +2,19 @@ package com.easydarshan.data.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class OtpRequest {
-    @SerializedName("phone")
-    private String phone;
-    
-    @SerializedName("purpose")
-    private String purpose;
-
-    public OtpRequest(String phone) {
-        this.phone = phone;
-        this.purpose = "LOGIN"; // Default to LOGIN, can be changed to REGISTRATION or PASSWORD_RESET
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getPurpose() {
-        return purpose;
-    }
-
-    public void setPurpose(String purpose) {
-        this.purpose = purpose;
-    }
-    
-    // For backward compatibility
-    public String getMobile() {
-        return phone;
-    }
-    
-    public void setMobile(String mobile) {
-        this.phone = mobile;
-    }
+    public String phoneNumber;
+    public String countryCode;
+    public DeviceInfo deviceInfo;
+    public AppInfo appInfo;
+    public UserContext userContext;
+    public String referralCode;
 }
 

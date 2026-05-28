@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.easydarshan.data.model.OtpReponse;
 import com.easydarshan.data.model.OtpRequest;
 import com.easydarshan.data.model.OtpVerifyRequest;
 import com.easydarshan.data.model.User;
@@ -99,7 +100,10 @@ public class OtpVerificationViewModel extends AndroidViewModel {
         
         isLoading.setValue(true);
         errorMessage.setValue(null);
-        OtpVerifyRequest request = new OtpVerifyRequest(mobile, otp);
+        OtpVerifyRequest request = new OtpVerifyRequest();
+        request.setPhoneNumber(mobile);
+        request.setOtp(otp);
+        request.setCountryCode("+91");
         
         repository.verifyOtp(request, new Callback<VerifyOtpResponse>() {
             @Override
@@ -162,14 +166,15 @@ public class OtpVerificationViewModel extends AndroidViewModel {
         
         // Resend OTP
         isLoading.setValue(true);
-        OtpRequest request = new OtpRequest(mobile);
+        OtpRequest request = new OtpRequest();
+        request.setPhoneNumber(mobile);
         
-        repository.sendOtp(request, new Callback<com.easydarshan.data.model.ApiResponse<String>>() {
+        repository.sendOtp(request, new Callback<OtpReponse>() {
             @Override
-            public void onResponse(Call<com.easydarshan.data.model.ApiResponse<String>> call, 
-                                 Response<com.easydarshan.data.model.ApiResponse<String>> response) {
+            public void onResponse(Call<OtpReponse> call,
+                                 Response<OtpReponse> response) {
                 isLoading.postValue(false);
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                if (response.isSuccessful() && response.body() != null && response.code() == 200) {
                     startTimer();
                 } else {
                     String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
@@ -178,7 +183,7 @@ public class OtpVerificationViewModel extends AndroidViewModel {
             }
             
             @Override
-            public void onFailure(Call<com.easydarshan.data.model.ApiResponse<String>> call, Throwable t) {
+            public void onFailure(Call<OtpReponse> call, Throwable t) {
                 isLoading.postValue(false);
                 String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
                 errorMessage.postValue(errorMsg);

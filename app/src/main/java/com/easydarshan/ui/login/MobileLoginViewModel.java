@@ -7,7 +7,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.easydarshan.data.model.ApiResponse;
+import com.easydarshan.data.model.AppInfo;
+import com.easydarshan.data.model.DeviceInfo;
+import com.easydarshan.data.model.OtpReponse;
 import com.easydarshan.data.model.OtpRequest;
+import com.easydarshan.data.model.UserContext;
 import com.easydarshan.data.repository.AppRepository;
 import com.easydarshan.utils.ErrorHandler;
 import com.easydarshan.utils.NetworkUtils;
@@ -69,15 +73,36 @@ public class MobileLoginViewModel extends AndroidViewModel {
         
         isLoading.setValue(true);
         errorMessage.setValue(null);
-        OtpRequest request = new OtpRequest(cleanedPhone);
-        
-        repository.sendOtp(request, new Callback<ApiResponse<String>>() {
+        OtpRequest otpRequest = new OtpRequest();
+        otpRequest.setPhoneNumber(cleanedPhone);
+        otpRequest.setCountryCode("+91");
+
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setDeviceModel("Vivo");
+        deviceInfo.setDeviceId("a1b2c3d4e5");
+        deviceInfo.setManufacturer("Vivo");
+        deviceInfo.setOsVersion("14");
+        deviceInfo.setPushToken("pushToken");
+        deviceInfo.setDeviceType("ANDROID");
+
+        otpRequest.setDeviceInfo(deviceInfo);
+
+        AppInfo appInfo = new AppInfo();
+        appInfo.setAppVersion("1.0.0");
+        appInfo.setBuildNumber("100");
+
+       otpRequest.setAppInfo(appInfo);
+        UserContext userContext = new UserContext();
+        userContext.setLanguage("Asia/kolkata");
+        userContext.setTimezone("en");
+        otpRequest.setUserContext(userContext);
+        repository.sendOtp(otpRequest, new Callback<OtpReponse>() {
             @Override
-            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+            public void onResponse(Call<OtpReponse> call, Response<OtpReponse> response) {
                 isLoading.postValue(false);
                 
                 if (response.isSuccessful() && response.body() != null) {
-                    if (response.body().isSuccess()) {
+                    if (response.code() == 200 && response.body() != null) {
                         successMessage.postValue(response.body().getMessage() != null ? 
                             response.body().getMessage() : "OTP sent successfully");
                         navigateToOtp.postValue(cleanedPhone);
@@ -93,7 +118,7 @@ public class MobileLoginViewModel extends AndroidViewModel {
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+            public void onFailure(Call<OtpReponse> call, Throwable t) {
                 isLoading.postValue(false);
                 String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
                 errorMessage.postValue(errorMsg);

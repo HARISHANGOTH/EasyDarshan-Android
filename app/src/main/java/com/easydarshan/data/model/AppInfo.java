@@ -1,7 +1,5 @@
 package com.easydarshan.data.model;
 
-import com.google.gson.annotations.SerializedName;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OtpVerifyRequest {
-    public String phoneNumber;
-    public String countryCode;
-    public String otp;
+public class AppInfo {
+    public String appVersion;
+    public String buildNumber;
 }
-

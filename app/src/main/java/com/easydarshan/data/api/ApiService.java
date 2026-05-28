@@ -10,6 +10,7 @@ import com.easydarshan.data.model.LiveQueueActivateRequest;
 import com.easydarshan.data.model.LiveQueueActivateResponse;
 import com.easydarshan.data.model.LiveQueuePositionResponse;
 import com.easydarshan.data.model.Notification;
+import com.easydarshan.data.model.OtpReponse;
 import com.easydarshan.data.model.OtpRequest;
 import com.easydarshan.data.model.OtpVerifyRequest;
 import com.easydarshan.data.model.PaymentOrderRequest;
@@ -38,8 +39,8 @@ import retrofit2.http.Query;
 public interface ApiService {
     
     // Authentication endpoints (no auth required)
-    @POST("api/v1/auth/send-otp")
-    Call<ApiResponse<String>> sendOtp(@Body OtpRequest request);
+    @POST("/api/v1/auth/register")
+    Call<OtpReponse> sendOtp(@Body OtpRequest request);
     
     @POST("api/v1/auth/verify-otp")
     Call<VerifyOtpResponse> verifyOtp(@Body OtpVerifyRequest request);

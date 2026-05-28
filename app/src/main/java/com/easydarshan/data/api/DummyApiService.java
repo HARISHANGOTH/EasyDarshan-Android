@@ -58,7 +58,7 @@ public class DummyApiService {
             
             User user = new User();
             user.setName("User Name");
-            user.setPhone(request.getMobile());
+            user.setPhone(request.getPhoneNumber());
             user.setCity("City");
             user.setTotalVisits(12);
             
