@@ -26,7 +26,6 @@ import com.easydarshan.ui.adapter.DateAdapter;
 import com.easydarshan.ui.adapter.TimeSlotAdapter;
 import com.easydarshan.ui.bookings.MyBookingsActivity;
 import com.easydarshan.ui.livequeue.LiveQueueActivity;
-import com.easydarshan.ui.payment.PaymentBottomSheet;
 import com.razorpay.PaymentResultListener;
 
 import java.text.SimpleDateFormat;
@@ -38,7 +37,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PreBookingFlowActivity extends AppCompatActivity implements PaymentResultListener, PaymentBottomSheet.PaymentCallback {
+public class PreBookingFlowActivity extends AppCompatActivity implements PaymentResultListener {
     
     private ActivityPreBookingFlowBinding binding;
     private PreBookingViewModel viewModel;
@@ -50,6 +49,9 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
     private TimeSlotAdapter timeSlotAdapter;
     private Handler redirectHandler = new Handler(Looper.getMainLooper());
     private Runnable redirectRunnable;
+    private String pendingOrderId = null;
+    private boolean paymentInProgress = false;
+
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,12 +80,13 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         paymentHelper = new RazorpayPaymentHelper(this, new RazorpayPaymentHelper.PaymentCallback() {
             @Override
             public void onPaymentSuccess(String paymentId, String orderId) {
-                verifyPayment(paymentId, orderId);
+                // Handled by PaymentResultListener.onPaymentSuccess — this is a secondary hook
             }
-            
+
             @Override
             public void onPaymentError(int code, String response) {
-                viewModel.setCurrentStep(6); // Step 6: Failed
+                // Handled by PaymentResultListener.onPaymentError — this fires on checkout.open() exception only
+                handlePaymentFailure(code, response);
             }
         });
         
@@ -113,7 +116,7 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
             updateStepVisibility(step);
             if (step == 4) {
                 populatePaymentSummary();
-            } else if (step == 5) {
+            } else if (step == 6) {
                 populateSuccessSummary();
                 startAutoRedirect();
             }
@@ -150,16 +153,20 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
             }
         });
+
+        viewModel.getIsLoading().observe(this, isLoading -> {
+            binding.loadingOverlay.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
         
         viewModel.getPaymentOrderCreated().observe(this, paymentOrder -> {
-            if (paymentOrder != null && paymentOrder.isSuccess()) {
+            if (paymentOrder != null && paymentOrder.isSuccess() && !paymentInProgress) {
                 startRazorpayPayment(paymentOrder);
             }
         });
         
         viewModel.getBookingCreated().observe(this, booking -> {
             if (booking != null) {
-                viewModel.setCurrentStep(5);
+                viewModel.setCurrentStep(6);
             }
         });
     }
@@ -311,8 +318,9 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         binding.step2Content.setVisibility(step == 2 ? View.VISIBLE : View.GONE);
         binding.step3Content.setVisibility(step == 3 ? View.VISIBLE : View.GONE);
         binding.step4Content.setVisibility(step == 4 ? View.VISIBLE : View.GONE);
-        binding.successContent.setVisibility(step == 5 ? View.VISIBLE : View.GONE);
-        binding.failedContent.setVisibility(step == 6 ? View.VISIBLE : View.GONE);
+        binding.verifyingContent.setVisibility(step == 5 ? View.VISIBLE : View.GONE);
+        binding.successContent.setVisibility(step == 6 ? View.VISIBLE : View.GONE);
+        binding.failedContent.setVisibility(step == 7 ? View.VISIBLE : View.GONE);
         
         binding.continueToPaymentButton.setVisibility(step == 3 ? View.VISIBLE : View.GONE);
         binding.confirmPayButton.setVisibility(step == 4 ? View.VISIBLE : View.GONE);
@@ -372,10 +380,10 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         });
         
         binding.confirmPayButton.setOnClickListener(v -> {
+            if (paymentInProgress) return; // Prevent double-tap
             int total = calculateTotalAmount();
-            // Free Queue also needs to pay Platform Fee (20)
             if (total > 0) {
-                showPaymentBottomSheet(String.valueOf(total));
+                viewModel.createBookingAndPayment("RAZORPAY");
             } else {
                 viewModel.createBookingAndPayment("FREE");
             }
@@ -383,7 +391,12 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
 
         binding.goToLiveQueueButton.setOnClickListener(v -> navigateToLiveQueue());
         
-        binding.retryPaymentButton.setOnClickListener(v -> viewModel.setCurrentStep(4));
+        binding.retryPaymentButton.setOnClickListener(v -> {
+            paymentInProgress = false;
+            // Clear the payment order so a fresh one is created on next attempt
+            viewModel.clearPaymentOrder();
+            viewModel.setCurrentStep(4);
+        });
         binding.cancelBookingButton.setOnClickListener(v -> finish());
     }
 
@@ -400,46 +413,46 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         return (unitPrice * count) + 20;
     }
 
-    private void showPaymentBottomSheet(String amount) {
-        PaymentBottomSheet paymentBottomSheet = PaymentBottomSheet.newInstance(amount);
-        paymentBottomSheet.show(getSupportFragmentManager(), "PaymentBottomSheet");
-    }
-
-    @Override
-    public void onPaymentSuccess() {
-        viewModel.createBookingAndPayment("UPI");
-    }
-
     private void startRazorpayPayment(PaymentOrderResponse paymentOrder) {
+        if (paymentInProgress) return;
+        paymentInProgress = true;
+
+        pendingOrderId = paymentOrder.getPaymentOrderId();
         String amountInPaise = String.valueOf(paymentOrder.getAmount().multiply(new java.math.BigDecimal(100)).intValue());
-        paymentHelper.startPayment(
-                paymentOrder.getPaymentOrderId(),
-                amountInPaise,
-                "Harish",
-                "Temple Darshan Booking Payment"
-        );
+
+        com.easydarshan.data.session.SessionManager session = com.easydarshan.data.session.SessionManager.getInstance(this);
+        com.easydarshan.data.model.User user = session.getCurrentUser();
+        String phone = (user != null && user.getPhone() != null) ? user.getPhone() : "";
+
+        paymentHelper.startStandardCheckout(pendingOrderId, amountInPaise, phone, "user@easydarshan.com");
     }
     
-    private void verifyPayment(String paymentId, String orderId) {
+    private void verifyPayment(String paymentId, String orderId, String signature) {
+        viewModel.setCurrentStep(5);
         PaymentOrderResponse paymentOrder = viewModel.getPaymentOrderCreated().getValue();
+        String resolvedOrderId = (paymentOrder != null) ? paymentOrder.getPaymentOrderId() : orderId;
+
         PaymentVerificationRequest request = new PaymentVerificationRequest(
-                paymentOrder != null ? paymentOrder.getPaymentOrderId() : orderId,
+                resolvedOrderId,
                 paymentId,
-                ""
+                signature != null ? signature : "",
+                null
         );
-        
+
         repository.verifyPayment(request, new Callback<PaymentVerificationResponse>() {
             @Override
             public void onResponse(Call<PaymentVerificationResponse> call, Response<PaymentVerificationResponse> response) {
+                paymentInProgress = false;
                 if (response.body() != null && response.body().isSuccess()) {
                     viewModel.confirmBooking();
                 } else {
-                    viewModel.setCurrentStep(6);
+                    viewModel.setCurrentStep(7);
                 }
             }
             @Override
             public void onFailure(Call<PaymentVerificationResponse> call, Throwable t) {
-                viewModel.setCurrentStep(6);
+                paymentInProgress = false;
+                viewModel.setCurrentStep(7);
             }
         });
     }
@@ -447,12 +460,21 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
     @Override
     public void onPaymentSuccess(String razorpayPaymentId) {
         PaymentOrderResponse paymentOrder = viewModel.getPaymentOrderCreated().getValue();
-        verifyPayment(razorpayPaymentId, paymentOrder != null ? paymentOrder.getPaymentOrderId() : "");
+        verifyPayment(razorpayPaymentId,
+                paymentOrder != null ? paymentOrder.getPaymentOrderId() : "",
+                "");
     }
 
     @Override
     public void onPaymentError(int code, String response) {
-        viewModel.setCurrentStep(6);
+        handlePaymentFailure(code, response);
+    }
+
+    private void handlePaymentFailure(int code, String response) {
+        paymentInProgress = false;
+        // Do NOT silently fallback to Razorpay UI — that creates the duplicate screen problem.
+        // Instead show the failure screen so user can consciously choose to retry or use other method.
+        viewModel.setCurrentStep(7);
     }
 
     @Override

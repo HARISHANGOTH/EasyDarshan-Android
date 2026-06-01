@@ -48,6 +48,8 @@ public interface ApiService {
     // Temple endpoints (no auth required)
     @GET("api/v1/temples")
     Call<TempleListResponse> getTemples(@Query("search") String search);
+
+//    curl --location 'https://deflected-emotion-deviant.ngrok-free.dev/api/v1/temples/search?temple=tirupati'
     
     @GET("api/v1/temples/featured")
     Call<TempleListResponse> getFeaturedTemples();

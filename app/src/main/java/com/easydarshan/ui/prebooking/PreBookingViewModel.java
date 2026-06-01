@@ -265,5 +265,9 @@ public class PreBookingViewModel extends AndroidViewModel {
         bookingCreated.postValue(response);
     }
 
+    public void clearPaymentOrder() {
+        paymentOrderCreated.setValue(null);
+    }
+
     public boolean isLiveQueue() { return isLiveQueue; }
 }

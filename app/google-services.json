@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "322056318308",
+    "project_id": "easy-darshan",
+    "storage_bucket": "easy-darshan.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:322056318308:android:3114f1d31cffcef55a1e71",
+        "android_client_info": {
+          "package_name": "com.easydarshan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhhLgWPcV1n0N7sNryI9P4Algc4l55CQ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

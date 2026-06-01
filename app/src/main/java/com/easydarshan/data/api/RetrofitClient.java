@@ -11,13 +11,11 @@ public class RetrofitClient {
 
 //    private static final String BASE_URL = "https://easydarsha-production-3e1b.up.railway.app/";
 
-    private static final String BASE_URL = "http://10.198.186.172:8080/";
+    private static final String BASE_URL = "https://deflected-emotion-deviant.ngrok-free.dev/";
     private static RetrofitClient instance;
     private final ApiService apiService;
-    private Context context;
-    
+
     private RetrofitClient(Context context) {
-        this.context = context;
         // Create logging interceptor
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -39,8 +37,8 @@ public class RetrofitClient {
     }
     
     public static synchronized RetrofitClient getInstance(Context context) {
-        if (instance == null || instance.context != context) {
-            instance = new RetrofitClient(context);
+        if (instance == null) {
+            instance = new RetrofitClient(context.getApplicationContext());
         }
         return instance;
     }

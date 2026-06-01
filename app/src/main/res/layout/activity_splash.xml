@@ -24,10 +24,9 @@
             android:id="@+id/templeIcon"
             android:layout_width="128dp"
             android:layout_height="128dp"
-            android:src="@drawable/ic_temple"
+            android:src="@drawable/app_logo"
             android:contentDescription="@string/temple_icon"
-            android:layout_marginBottom="24dp"
-            app:tint="@color/primary" />
+            android:layout_marginBottom="24dp" />
 
         <!-- App Name -->
         <TextView

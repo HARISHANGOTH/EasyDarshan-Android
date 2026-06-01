@@ -41,16 +41,14 @@ public class AppRepository {
     
     private static AppRepository instance;
     private ApiService apiService;
-    private Context context;
-    
+
     private AppRepository(Context context) {
-        this.context = context;
         apiService = RetrofitClient.getInstance(context).getApiService();
     }
     
     public static synchronized AppRepository getInstance(Context context) {
-        if (instance == null || instance.context != context) {
-            instance = new AppRepository(context);
+        if (instance == null) {
+            instance = new AppRepository(context.getApplicationContext());
         }
         return instance;
     }
