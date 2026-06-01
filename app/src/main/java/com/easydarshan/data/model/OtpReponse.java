@@ -1,15 +1,49 @@
 package com.easydarshan.data.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class OtpReponse {
-    public String message;
-    public String userId;
-    public boolean requiresOtpVerification;
-    public String flow;
+    private String message;
+    private String userId;
+    private boolean requiresOtpVerification;
+    private String flow;
+
+    public OtpReponse() {}
+
+    public OtpReponse(String message, String userId, boolean requiresOtpVerification, String flow) {
+        this.message = message;
+        this.userId = userId;
+        this.requiresOtpVerification = requiresOtpVerification;
+        this.flow = flow;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public boolean isRequiresOtpVerification() {
+        return requiresOtpVerification;
+    }
+
+    public void setRequiresOtpVerification(boolean requiresOtpVerification) {
+        this.requiresOtpVerification = requiresOtpVerification;
+    }
+
+    public String getFlow() {
+        return flow;
+    }
+
+    public void setFlow(String flow) {
+        this.flow = flow;
+    }
 }
