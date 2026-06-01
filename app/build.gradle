@@ -86,6 +86,10 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
 
+    // Room Database
+    implementation "androidx.room:room-runtime:2.6.1"
+    annotationProcessor "androidx.room:room-compiler:2.6.1"
+
     // Testing
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

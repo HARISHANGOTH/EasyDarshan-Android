@@ -44,9 +44,15 @@ public class TempleDetailsViewModel extends AndroidViewModel {
             errorMessage.setValue("Invalid temple ID");
             return;
         }
+
+        // Load from cache first
+        repository.getCachedTemple(templeId, cached -> {
+            if (cached != null) {
+                temple.postValue(cached);
+            }
+        });
         
         if (!NetworkUtils.isNetworkAvailable(getApplication())) {
-            errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
             return;
         }
         
@@ -59,7 +65,7 @@ public class TempleDetailsViewModel extends AndroidViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     temple.postValue(response.body());
                     loadDarshanTypes(templeId);
-                } else {
+                } else if (temple.getValue() == null) {
                     errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                 }
             }
@@ -67,7 +73,9 @@ public class TempleDetailsViewModel extends AndroidViewModel {
             @Override
             public void onFailure(@NonNull Call<Temple> call, @NonNull Throwable t) {
                 isLoading.postValue(false);
-                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+                if (temple.getValue() == null) {
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+                }
             }
         });
     }

@@ -37,8 +37,17 @@ public class MyBookingsViewModel extends AndroidViewModel {
     public LiveData<List<Booking>> getBookings() { return bookings; }
     
     public void loadBookings(String status) {
+        // Load from cache first
+        repository.getCachedBookings(status, cached -> {
+            if (cached != null && !cached.isEmpty()) {
+                bookings.postValue(cached);
+            }
+        });
+
         if (!NetworkUtils.isNetworkAvailable(getApplication())) {
-            errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+            if (bookings.getValue().isEmpty()) {
+                errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+            }
             return;
         }
         
@@ -51,17 +60,17 @@ public class MyBookingsViewModel extends AndroidViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Booking> list = response.body().getBookings();
                     bookings.postValue(list != null ? list : new ArrayList<>());
-                } else {
+                } else if (bookings.getValue().isEmpty()) {
                     errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
-                    bookings.postValue(new ArrayList<>());
                 }
             }
             
             @Override
             public void onFailure(@NonNull Call<BookingListResponse> call, @NonNull Throwable t) {
                 isLoading.postValue(false);
-                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
-                bookings.postValue(new ArrayList<>());
+                if (bookings.getValue().isEmpty()) {
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+                }
             }
         });
     }

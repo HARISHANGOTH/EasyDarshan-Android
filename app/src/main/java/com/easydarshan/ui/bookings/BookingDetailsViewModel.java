@@ -38,9 +38,15 @@ public class BookingDetailsViewModel extends AndroidViewModel {
             errorMessage.setValue("Invalid booking ID");
             return;
         }
+
+        // Load from cache first
+        repository.getCachedBooking(bookingId, cached -> {
+            if (cached != null) {
+                booking.postValue(cached);
+            }
+        });
         
         if (!NetworkUtils.isNetworkAvailable(getApplication())) {
-            errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
             return;
         }
         
@@ -52,7 +58,7 @@ public class BookingDetailsViewModel extends AndroidViewModel {
                 isLoading.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
                     booking.postValue(response.body().getBooking());
-                } else {
+                } else if (booking.getValue() == null) {
                     errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                 }
             }
@@ -60,7 +66,9 @@ public class BookingDetailsViewModel extends AndroidViewModel {
             @Override
             public void onFailure(@NonNull Call<SingleBookingResponse> call, @NonNull Throwable t) {
                 isLoading.postValue(false);
-                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+                if (booking.getValue() == null) {
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+                }
             }
         });
     }

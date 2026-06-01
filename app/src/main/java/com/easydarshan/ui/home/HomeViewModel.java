@@ -33,22 +33,34 @@ public class HomeViewModel extends AndroidViewModel {
     public HomeViewModel(@NonNull Application application) {
         super(application);
         repository = AppRepository.getInstance(application);
+        loadCachedTemples();
     }
     
     public LiveData<Boolean> getIsLoading() { return isLoading; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
     public LiveData<List<Temple>> getTemples() { return temples; }
     
+    private void loadCachedTemples() {
+        repository.getCachedTemples(cached -> {
+            if (cached != null && !cached.isEmpty()) {
+                temples.postValue(cached);
+            }
+        });
+    }
+
     public void loadTemples(String search) {
         String query = search != null ? search.trim() : "";
         if (query.equals(lastSearch) && !temples.getValue().isEmpty()) {
-            return;
+            // Already loading or showing this search
+            // But we might want to refresh if it's the initial load
         }
         lastSearch = query;
 
         searchDebouncer.debounce(() -> {
             if (!NetworkUtils.isNetworkAvailable(getApplication())) {
-                errorMessage.postValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+                if (temples.getValue().isEmpty()) {
+                    errorMessage.postValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+                }
                 return;
             }
 
@@ -60,7 +72,7 @@ public class HomeViewModel extends AndroidViewModel {
                     if (response.isSuccessful() && response.body() != null) {
                         List<Temple> list = response.body().getTemples();
                         temples.postValue(list != null ? list : new ArrayList<>());
-                    } else {
+                    } else if (temples.getValue().isEmpty()) {
                         errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                     }
                 }
@@ -68,7 +80,9 @@ public class HomeViewModel extends AndroidViewModel {
                 @Override
                 public void onFailure(@NonNull Call<TempleListResponse> call, @NonNull Throwable t) {
                     isLoading.postValue(false);
-                    errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+                    if (temples.getValue().isEmpty()) {
+                        errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+                    }
                 }
             });
         });

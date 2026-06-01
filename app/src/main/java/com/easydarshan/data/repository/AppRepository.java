@@ -1,9 +1,11 @@
 package com.easydarshan.data.repository;
 
 import android.content.Context;
+import androidx.annotation.NonNull;
 
 import com.easydarshan.data.api.ApiService;
 import com.easydarshan.data.api.RetrofitClient;
+import com.easydarshan.data.local.database.AppDatabase;
 import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.AvailableDatesResponse;
 import com.easydarshan.data.model.Booking;
@@ -35,15 +37,19 @@ import com.easydarshan.data.model.VerifyOtpResponse;
 
 import java.util.List;
 
+import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AppRepository {
     
     private static AppRepository instance;
-    private ApiService apiService;
+    private final ApiService apiService;
+    private final AppDatabase database;
 
     private AppRepository(Context context) {
         apiService = RetrofitClient.getInstance(context).getApiService();
+        database = AppDatabase.getDatabase(context);
     }
     
     public static synchronized AppRepository getInstance(Context context) {
@@ -64,15 +70,54 @@ public class AppRepository {
     
     // Temples
     public void getTemples(String search, Callback<TempleListResponse> callback) {
-        apiService.getTemples(search).enqueue(callback);
+        apiService.getTemples(search).enqueue(new Callback<TempleListResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<TempleListResponse> call, @NonNull Response<TempleListResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getTemples() != null) {
+                    final List<Temple> temples = response.body().getTemples();
+                    AppDatabase.databaseWriteExecutor.execute(() -> database.templeDao().insertTemples(temples));
+                }
+                callback.onResponse(call, response);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TempleListResponse> call, @NonNull Throwable t) {
+                callback.onFailure(call, t);
+            }
+        });
     }
-    
-    public void getFeaturedTemples(Callback<TempleListResponse> callback) {
-        apiService.getFeaturedTemples().enqueue(callback);
+
+    public void getCachedTemples(LocalDataCallback<List<Temple>> callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<Temple> temples = database.templeDao().getAllTemples();
+            callback.onLoaded(temples);
+        });
     }
     
     public void getTempleDetails(Long id, Callback<Temple> callback) {
-        apiService.getTempleDetails(id).enqueue(callback);
+        apiService.getTempleDetails(id).enqueue(new Callback<Temple>() {
+            @Override
+            public void onResponse(@NonNull Call<Temple> call, @NonNull Response<Temple> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    final Temple temple = response.body();
+                    // Update cache in background
+                    // AppDatabase.databaseWriteExecutor.execute(() -> database.templeDao().insertTemple(temple));
+                }
+                callback.onResponse(call, response);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Temple> call, @NonNull Throwable t) {
+                callback.onFailure(call, t);
+            }
+        });
+    }
+
+    public void getCachedTemple(Long id, LocalDataCallback<Temple> callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            Temple temple = database.templeDao().getTempleById(id);
+            callback.onLoaded(temple);
+        });
     }
     
     public void getTempleDarshans(Long id, Callback<ApiResponse<List<com.easydarshan.data.model.DarshanType>>> callback) {
@@ -98,11 +143,55 @@ public class AppRepository {
     
     // Bookings
     public void getBookings(String status, Callback<BookingListResponse> callback) {
-        apiService.getBookings(status).enqueue(callback);
+        apiService.getBookings(status).enqueue(new Callback<BookingListResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<BookingListResponse> call, @NonNull Response<BookingListResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getBookings() != null) {
+                    final List<Booking> bookings = response.body().getBookings();
+                    AppDatabase.databaseWriteExecutor.execute(() -> database.bookingDao().insertBookings(bookings));
+                }
+                callback.onResponse(call, response);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<BookingListResponse> call, @NonNull Throwable t) {
+                callback.onFailure(call, t);
+            }
+        });
+    }
+
+    public void getCachedBookings(String status, LocalDataCallback<List<Booking>> callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<Booking> list = (status == null || status.equals("all")) ? 
+                    database.bookingDao().getAllBookings() : 
+                    database.bookingDao().getBookingsByStatus(status);
+            callback.onLoaded(list);
+        });
     }
     
     public void getBookingDetails(String id, Callback<SingleBookingResponse> callback) {
-        apiService.getBookingDetails(id).enqueue(callback);
+        apiService.getBookingDetails(id).enqueue(new Callback<SingleBookingResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<SingleBookingResponse> call, @NonNull Response<SingleBookingResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getBooking() != null) {
+                    final Booking booking = response.body().getBooking();
+                    AppDatabase.databaseWriteExecutor.execute(() -> database.bookingDao().insertBooking(booking));
+                }
+                callback.onResponse(call, response);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<SingleBookingResponse> call, @NonNull Throwable t) {
+                callback.onFailure(call, t);
+            }
+        });
+    }
+
+    public void getCachedBooking(String id, LocalDataCallback<Booking> callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            Booking booking = database.bookingDao().getBookingById(id);
+            callback.onLoaded(booking);
+        });
     }
     
     public void createBooking(CreateBookingRequest request, Callback<CreateBookingResponse> callback) {
@@ -171,5 +260,9 @@ public class AppRepository {
     
     public void uploadAvatar(UpdatePasswordRequest request, Callback<ApiResponse<String>> callback) {
         apiService.uploadAvatar(new UploadAvatarRequest(request.getNewPassword())).enqueue(callback);
+    }
+
+    public interface LocalDataCallback<T> {
+        void onLoaded(T data);
     }
 }

@@ -1,10 +1,16 @@
 package com.easydarshan.data.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
+@Entity(tableName = "temples")
 public class Temple {
+    @PrimaryKey
+    @NonNull
     @SerializedName("id")
     private Long id;
     
@@ -38,7 +44,7 @@ public class Temple {
     public Temple() {
     }
 
-    public Temple(Long id, String name, String location, String distance, String queueStatus, String queueText, String image) {
+    public Temple(@NonNull Long id, String name, String location, String distance, String queueStatus, String queueText, String image) {
         this.id = id;
         this.name = name;
         this.location = location;
@@ -48,11 +54,12 @@ public class Temple {
         this.image = image;
     }
 
+    @NonNull
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(@NonNull Long id) {
         this.id = id;
     }
 
@@ -133,7 +140,7 @@ public class Temple {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Temple temple = (Temple) o;
-        return id == temple.id &&
+        return Objects.equals(id, temple.id) &&
                 Objects.equals(name, temple.name) &&
                 Objects.equals(location, temple.location) &&
                 Objects.equals(distance, temple.distance) &&
