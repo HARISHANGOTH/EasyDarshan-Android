@@ -1,12 +1,13 @@
 package com.easydarshan.ui.login;
 
 import android.app.Application;
+import android.os.Build;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.AppInfo;
 import com.easydarshan.data.model.DeviceInfo;
 import com.easydarshan.data.model.OtpReponse;
@@ -17,7 +18,7 @@ import com.easydarshan.utils.ErrorHandler;
 import com.easydarshan.utils.NetworkUtils;
 import com.easydarshan.utils.ValidationUtils;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -25,105 +26,86 @@ import retrofit2.Response;
 
 public class MobileLoginViewModel extends AndroidViewModel {
     
-    private AppRepository repository;
-    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
-    private MutableLiveData<String> errorMessage = new MutableLiveData<>();
-    private MutableLiveData<String> successMessage = new MutableLiveData<>();
-    private MutableLiveData<String> navigateToOtp = new MutableLiveData<>();
-    private AtomicInteger retryCount = new AtomicInteger(0);
+    private final AppRepository repository;
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<String> navigateToOtp = new MutableLiveData<>();
     
-    public MobileLoginViewModel(Application application) {
+    public MobileLoginViewModel(@NonNull Application application) {
         super(application);
         repository = AppRepository.getInstance(application);
     }
     
-    public LiveData<Boolean> getIsLoading() {
-        return isLoading;
-    }
-    
-    public LiveData<String> getErrorMessage() {
-        return errorMessage;
-    }
-    
-    public LiveData<String> getSuccessMessage() {
-        return successMessage;
-    }
-    
-    public LiveData<String> getNavigateToOtp() {
-        return navigateToOtp;
-    }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
+    public LiveData<String> getErrorMessage() { return errorMessage; }
+    public LiveData<String> getNavigateToOtp() { return navigateToOtp; }
     
     public void sendOtp(String mobile) {
-        // Validate phone number
+        if (mobile == null || mobile.isEmpty()) {
+            errorMessage.setValue("Please enter mobile number");
+            return;
+        }
+
         String validationError = ValidationUtils.getPhoneValidationError(mobile);
         if (validationError != null) {
             errorMessage.setValue(validationError);
             return;
         }
         
-        // Check network connectivity
         if (!NetworkUtils.isNetworkAvailable(getApplication())) {
             errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
             return;
         }
         
-        // Clean phone number
         String cleanedPhone = ValidationUtils.cleanPhoneNumber(mobile);
-        retryCount.set(0);
-        
         isLoading.setValue(true);
         errorMessage.setValue(null);
-        OtpRequest otpRequest = new OtpRequest();
-        otpRequest.setPhoneNumber(cleanedPhone);
-        otpRequest.setCountryCode("+91");
 
-        DeviceInfo deviceInfo = new DeviceInfo();
-        deviceInfo.setDeviceModel("Vivo");
-        deviceInfo.setDeviceId("a1b2c3d4e5");
-        deviceInfo.setManufacturer("Vivo");
-        deviceInfo.setOsVersion("14");
-        deviceInfo.setPushToken("pushToken");
-        deviceInfo.setDeviceType("ANDROID");
-
-        otpRequest.setDeviceInfo(deviceInfo);
-
-        AppInfo appInfo = new AppInfo();
-        appInfo.setAppVersion("1.0.0");
-        appInfo.setBuildNumber("100");
-
-       otpRequest.setAppInfo(appInfo);
-        UserContext userContext = new UserContext();
-        userContext.setLanguage("Asia/kolkata");
-        userContext.setTimezone("en");
-        otpRequest.setUserContext(userContext);
-        repository.sendOtp(otpRequest, new Callback<OtpReponse>() {
+        repository.sendOtp(createOtpRequest(cleanedPhone), new Callback<OtpReponse>() {
             @Override
-            public void onResponse(Call<OtpReponse> call, Response<OtpReponse> response) {
+            public void onResponse(@NonNull Call<OtpReponse> call, @NonNull Response<OtpReponse> response) {
                 isLoading.postValue(false);
-                
                 if (response.isSuccessful() && response.body() != null) {
-                    if (response.code() == 200 && response.body() != null) {
-                        successMessage.postValue(response.body().getMessage() != null ? 
-                            response.body().getMessage() : "OTP sent successfully");
-                        navigateToOtp.postValue(cleanedPhone);
-                        retryCount.set(0);
-                    } else {
-                        String errorMsg = response.body().getMessage();
-                        errorMessage.postValue(errorMsg != null ? errorMsg : "Failed to send OTP");
-                    }
+                    navigateToOtp.postValue(cleanedPhone);
                 } else {
-                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
-                    errorMessage.postValue(errorMsg);
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                 }
             }
             
             @Override
-            public void onFailure(Call<OtpReponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<OtpReponse> call, @NonNull Throwable t) {
                 isLoading.postValue(false);
-                String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
-                errorMessage.postValue(errorMsg);
+                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
             }
         });
+    }
+
+    private OtpRequest createOtpRequest(String mobile) {
+        OtpRequest request = new OtpRequest();
+        request.setPhoneNumber(mobile);
+        request.setCountryCode("+91");
+
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setDeviceModel(Build.MODEL);
+        deviceInfo.setManufacturer(Build.MANUFACTURER);
+        deviceInfo.setOsVersion(Build.VERSION.RELEASE);
+        deviceInfo.setDeviceType("ANDROID");
+        // Device ID and Push Token should ideally come from a helper/provider
+        deviceInfo.setDeviceId("android_" + Build.ID); 
+        deviceInfo.setPushToken(""); 
+        request.setDeviceInfo(deviceInfo);
+
+        AppInfo appInfo = new AppInfo();
+        appInfo.setAppVersion("1.1.1");
+        appInfo.setBuildNumber("1");
+        request.setAppInfo(appInfo);
+
+        UserContext userContext = new UserContext();
+        userContext.setLanguage("en");
+        userContext.setTimezone(TimeZone.getDefault().getID());
+        request.setUserContext(userContext);
+
+        return request;
     }
 
     public void clearErrorMessage() {

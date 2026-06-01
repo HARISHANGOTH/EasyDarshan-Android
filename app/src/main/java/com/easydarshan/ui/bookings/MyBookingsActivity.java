@@ -12,7 +12,6 @@ import com.easydarshan.R;
 import com.easydarshan.databinding.ActivityMyBookingsBinding;
 import com.easydarshan.ui.BaseActivity;
 import com.easydarshan.ui.adapter.BookingAdapter;
-import com.easydarshan.ui.paymenthistory.PaymentHistoryActivity;
 import com.google.android.material.tabs.TabLayout;
 
 public class MyBookingsActivity extends BaseActivity {
@@ -27,9 +26,7 @@ public class MyBookingsActivity extends BaseActivity {
         binding = ActivityMyBookingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        viewModel = new ViewModelProvider(this, 
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
-                .get(MyBookingsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MyBookingsViewModel.class);
         
         setupRecyclerView();
         setupTabs();
@@ -37,8 +34,7 @@ public class MyBookingsActivity extends BaseActivity {
         setupListeners();
         setupBottomNavigation();
         
-        // Initial load with original "active" status for compatibility
-        viewModel.loadBookings("active");
+        refreshCurrentTab();
     }
 
     @Override
@@ -49,11 +45,7 @@ public class MyBookingsActivity extends BaseActivity {
 
     private void refreshCurrentTab() {
         int selectedTab = binding.tabLayout.getSelectedTabPosition();
-        if (selectedTab == 0) {
-            viewModel.loadBookings("active");
-        } else {
-            viewModel.loadBookings("completed");
-        }
+        viewModel.loadBookings(selectedTab == 0 ? "active" : "completed");
     }
 
     @Override
@@ -84,10 +76,8 @@ public class MyBookingsActivity extends BaseActivity {
                     viewModel.loadBookings("completed");
                 }
             }
-
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {}
-
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
                 refreshCurrentTab();
@@ -97,24 +87,19 @@ public class MyBookingsActivity extends BaseActivity {
     
     private void setupObservers() {
         viewModel.getBookings().observe(this, bookings -> {
-            if (bookings != null && !bookings.isEmpty()) {
-                adapter.updateList(bookings);
-                binding.emptyState.setVisibility(View.GONE);
-                binding.bookingsRecyclerView.setVisibility(View.VISIBLE);
-            } else {
-                adapter.updateList(null);
-                binding.emptyState.setVisibility(View.VISIBLE);
-                binding.bookingsRecyclerView.setVisibility(View.GONE);
-            }
+            boolean hasBookings = bookings != null && !bookings.isEmpty();
+            adapter.updateList(bookings);
+            binding.emptyState.setVisibility(hasBookings ? View.GONE : View.VISIBLE);
+            binding.bookingsRecyclerView.setVisibility(hasBookings ? View.VISIBLE : View.GONE);
         });
 
-        viewModel.getIsLoading().observe(this, isLoading -> {
-            binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        });
+        viewModel.getIsLoading().observe(this, isLoading -> 
+            binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE));
         
         viewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                viewModel.clearErrorMessage();
             }
         });
     }
@@ -122,7 +107,8 @@ public class MyBookingsActivity extends BaseActivity {
     private void setupListeners() {
         if (binding.viewPreviousVisitsLink != null) {
             binding.viewPreviousVisitsLink.setOnClickListener(v -> {
-                binding.tabLayout.getTabAt(1).select();
+                TabLayout.Tab tab = binding.tabLayout.getTabAt(1);
+                if (tab != null) tab.select();
             });
         }
     }

@@ -1,6 +1,7 @@
 package com.easydarshan.ui.splash;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -13,29 +14,23 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.easydarshan.R;
-import com.easydarshan.data.session.SessionManager;
+import com.easydarshan.ui.home.HomeActivity;
 import com.easydarshan.ui.login.MobileLoginActivity;
 
+@SuppressLint("CustomSplash")
 public class SplashActivity extends AppCompatActivity {
 
     private SplashViewModel viewModel;
 
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                // Permission granted or denied — proceed with splash regardless
-                viewModel.startSplash();
-            });
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> viewModel.startSplash());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        SessionManager.getInstance(this);
-
-        viewModel = new ViewModelProvider(this,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
-                .get(SplashViewModel.class);
+        viewModel = new ViewModelProvider(this).get(SplashViewModel.class);
 
         viewModel.getNavigateToLogin().observe(this, shouldNavigate -> {
             if (shouldNavigate) {
@@ -46,7 +41,7 @@ public class SplashActivity extends AppCompatActivity {
 
         viewModel.getNavigateToHome().observe(this, shouldNavigate -> {
             if (shouldNavigate) {
-                startActivity(new Intent(this, com.easydarshan.ui.home.HomeActivity.class));
+                startActivity(new Intent(this, HomeActivity.class));
                 finish();
             }
         });

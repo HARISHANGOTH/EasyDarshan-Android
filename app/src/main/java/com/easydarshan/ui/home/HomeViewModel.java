@@ -1,9 +1,8 @@
 package com.easydarshan.ui.home;
 
 import android.app.Application;
-import android.os.Handler;
-import android.os.Looper;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -24,79 +23,59 @@ import retrofit2.Response;
 
 public class HomeViewModel extends AndroidViewModel {
     
-    private AppRepository repository;
-    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
-    private MutableLiveData<String> errorMessage = new MutableLiveData<>();
-    private MutableLiveData<List<Temple>> temples = new MutableLiveData<>();
-    private MutableLiveData<Temple> selectedTemple = new MutableLiveData<>();
-    private Debouncer searchDebouncer = new Debouncer(500); // 500ms debounce
+    private final AppRepository repository;
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<List<Temple>> temples = new MutableLiveData<>(new ArrayList<>());
+    private final Debouncer searchDebouncer = new Debouncer(500);
+    private String lastSearch = "";
     
-    public HomeViewModel(Application application) {
+    public HomeViewModel(@NonNull Application application) {
         super(application);
         repository = AppRepository.getInstance(application);
     }
     
-    public LiveData<Boolean> getIsLoading() {
-        return isLoading;
-    }
-    
-    public LiveData<String> getErrorMessage() {
-        return errorMessage;
-    }
-    
-    public LiveData<List<Temple>> getTemples() {
-        return temples;
-    }
-    
-    public LiveData<Temple> getSelectedTemple() {
-        return selectedTemple;
-    }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
+    public LiveData<String> getErrorMessage() { return errorMessage; }
+    public LiveData<List<Temple>> getTemples() { return temples; }
     
     public void loadTemples(String search) {
-        // Check network connectivity
-        if (!NetworkUtils.isNetworkAvailable(getApplication())) {
-            errorMessage.setValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+        String query = search != null ? search.trim() : "";
+        if (query.equals(lastSearch) && !temples.getValue().isEmpty()) {
             return;
         }
-        
-        // Debounce search to avoid too many API calls
+        lastSearch = query;
+
         searchDebouncer.debounce(() -> {
-            isLoading.setValue(true);
-            errorMessage.setValue(null);
-            
-            String searchQuery = search != null ? search.trim() : "";
-            repository.getTemples(searchQuery.isEmpty() ? null : searchQuery, new Callback<TempleListResponse>() {
+            if (!NetworkUtils.isNetworkAvailable(getApplication())) {
+                errorMessage.postValue(NetworkUtils.getNetworkErrorMessage(getApplication()));
+                return;
+            }
+
+            isLoading.postValue(true);
+            repository.getTemples(query.isEmpty() ? null : query, new Callback<TempleListResponse>() {
                 @Override
-                public void onResponse(Call<TempleListResponse> call, Response<TempleListResponse> response) {
+                public void onResponse(@NonNull Call<TempleListResponse> call, @NonNull Response<TempleListResponse> response) {
                     isLoading.postValue(false);
-                    
                     if (response.isSuccessful() && response.body() != null) {
-                        List<Temple> templeList = response.body().getTemples();
-                        if (templeList != null && !templeList.isEmpty()) {
-                            temples.postValue(templeList);
-                        } else {
-                            temples.postValue(new ArrayList<>()); // Empty list
-                        }
+                        List<Temple> list = response.body().getTemples();
+                        temples.postValue(list != null ? list : new ArrayList<>());
                     } else {
-                        String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
-                        errorMessage.postValue(errorMsg);
-                        temples.postValue(new ArrayList<>());
+                        errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                     }
                 }
                 
                 @Override
-                public void onFailure(Call<TempleListResponse> call, Throwable t) {
+                public void onFailure(@NonNull Call<TempleListResponse> call, @NonNull Throwable t) {
                     isLoading.postValue(false);
-                    String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
-                    errorMessage.postValue(errorMsg);
-                    temples.postValue(new ArrayList<>());
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
                 }
             });
         });
     }
-    
-    public void onTempleSelected(Temple temple) {
-        selectedTemple.setValue(temple);
+
+    public void clearErrorMessage() {
+        errorMessage.setValue(null);
     }
 
     @Override

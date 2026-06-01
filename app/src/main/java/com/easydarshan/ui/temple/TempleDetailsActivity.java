@@ -5,8 +5,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Window;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -19,6 +17,8 @@ import com.easydarshan.databinding.ActivityTempleDetailsBinding;
 import com.easydarshan.databinding.DialogBookingOptionsBinding;
 import com.easydarshan.data.model.DarshanType;
 import com.easydarshan.ui.prebooking.PreBookingFlowActivity;
+
+import java.util.List;
 
 public class TempleDetailsActivity extends AppCompatActivity {
     
@@ -33,20 +33,9 @@ public class TempleDetailsActivity extends AppCompatActivity {
         binding = ActivityTempleDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        if (getIntent().hasExtra("temple_id")) {
-            try {
-                templeId = getIntent().getLongExtra("temple_id", 1L);
-            } catch (Exception e) {
-                int templeIdInt = getIntent().getIntExtra("temple_id", 1);
-                templeId = (long) templeIdInt;
-            }
-        } else {
-            templeId = 1L;
-        }
+        templeId = getIntent().getLongExtra("temple_id", 1L);
         
-        viewModel = new ViewModelProvider(this, 
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
-                .get(TempleDetailsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(TempleDetailsViewModel.class);
         
         setupObservers();
         setupListeners();
@@ -60,6 +49,7 @@ public class TempleDetailsActivity extends AppCompatActivity {
                 this.templeName = temple.getName();
                 binding.templeName.setText(temple.getName());
                 binding.templeLocation.setText(temple.getLocation());
+                
                 if (temple.getDistance() != null) {
                     binding.templeDistance.setText(temple.getDistance());
                 }
@@ -78,7 +68,7 @@ public class TempleDetailsActivity extends AppCompatActivity {
                 String closing = temple.getClosingTime();
 
                 if (opening != null && !opening.isEmpty() && closing != null && !closing.isEmpty()) {
-                    binding.templeOpeningTime.setText(opening + " - " + closing);
+                    binding.templeOpeningTime.setText(String.format("%s - %s", opening, closing));
                 } else if (opening != null && !opening.isEmpty()) {
                     binding.templeOpeningTime.setText(opening);
                 } else if (closing != null && !closing.isEmpty()) {
@@ -90,6 +80,7 @@ public class TempleDetailsActivity extends AppCompatActivity {
         viewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                viewModel.clearErrorMessage();
             }
         });
     }
@@ -110,7 +101,7 @@ public class TempleDetailsActivity extends AppCompatActivity {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
 
-        java.util.List<DarshanType> darshanTypes = viewModel.getDarshanTypes().getValue();
+        List<DarshanType> darshanTypes = viewModel.getDarshanTypes().getValue();
         
         if (darshanTypes != null && !darshanTypes.isEmpty()) {
             for (DarshanType type : darshanTypes) {
@@ -136,7 +127,7 @@ public class TempleDetailsActivity extends AppCompatActivity {
         dialog.show();
     }
     
-    private Long getDarshanTypeId(java.util.List<DarshanType> types, String searchTerm) {
+    private Long getDarshanTypeId(List<DarshanType> types, String searchTerm) {
         if (types == null) return 1L; 
         for (DarshanType type : types) {
             if (type.getName().toLowerCase().contains(searchTerm)) {

@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.easydarshan.databinding.ActivityMobileLoginBinding;
-import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.ui.otp.OtpVerificationActivity;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -27,12 +26,7 @@ public class MobileLoginActivity extends AppCompatActivity {
         binding = ActivityMobileLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        // Initialize SessionManager with context
-        SessionManager.getInstance(this);
-        
-        viewModel = new ViewModelProvider(this, 
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
-                .get(MobileLoginViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MobileLoginViewModel.class);
         
         setupObservers();
         setupListeners();
@@ -42,11 +36,13 @@ public class MobileLoginActivity extends AppCompatActivity {
         viewModel.getIsLoading().observe(this, isLoading -> {
             binding.getOtpButton.setEnabled(!isLoading);
             binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            binding.mobileNumberInput.setEnabled(!isLoading);
         });
         
         viewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
                 Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_LONG).show();
+                viewModel.clearErrorMessage();
             }
         });
         
@@ -69,9 +65,6 @@ public class MobileLoginActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 binding.getOtpButton.setEnabled(s.length() == 10);
-                if (s.length() < 10) {
-                    viewModel.clearErrorMessage();
-                }
             }
             
             @Override

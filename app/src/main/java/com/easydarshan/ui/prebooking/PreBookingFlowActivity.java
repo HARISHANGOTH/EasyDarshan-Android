@@ -4,32 +4,31 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.easydarshan.R;
 import com.easydarshan.databinding.ActivityPreBookingFlowBinding;
-import com.easydarshan.data.model.Booking;
 import com.easydarshan.data.model.PaymentOrderResponse;
 import com.easydarshan.data.model.PaymentVerificationRequest;
 import com.easydarshan.data.model.PaymentVerificationResponse;
+import com.easydarshan.data.model.User;
 import com.easydarshan.data.repository.AppRepository;
+import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.payment.RazorpayPaymentHelper;
 import com.easydarshan.ui.adapter.DateAdapter;
 import com.easydarshan.ui.adapter.TimeSlotAdapter;
-import com.easydarshan.ui.bookings.MyBookingsActivity;
 import com.easydarshan.ui.livequeue.LiveQueueActivity;
 import com.razorpay.PaymentResultListener;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,52 +40,41 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
     
     private ActivityPreBookingFlowBinding binding;
     private PreBookingViewModel viewModel;
-    private Long templeId;
-    private String templeName;
     private RazorpayPaymentHelper paymentHelper;
     private AppRepository repository;
     private DateAdapter dateAdapter;
     private TimeSlotAdapter timeSlotAdapter;
-    private Handler redirectHandler = new Handler(Looper.getMainLooper());
+    private final Handler redirectHandler = new Handler(Looper.getMainLooper());
     private Runnable redirectRunnable;
-    private String pendingOrderId = null;
     private boolean paymentInProgress = false;
 
-    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPreBookingFlowBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        // Handle temple info from intent
-        templeId = getIntent().getLongExtra("temple_id", 1L);
-        templeName = getIntent().getStringExtra("temple_name");
+        long templeId = getIntent().getLongExtra("temple_id", 1L);
+        String templeName = getIntent().getStringExtra("temple_name");
+        long darshanTypeId = getIntent().getLongExtra("darshan_type_id", 1L);
+        String darshanType = getIntent().getStringExtra("darshan_type");
+
         if (templeName != null) {
             binding.templeName.setText(templeName);
         }
         
-        Long darshanTypeId = getIntent().getLongExtra("darshan_type_id", 1L);
-        String darshanType = getIntent().getStringExtra("darshan_type");
-        
-        viewModel = new ViewModelProvider(this, 
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
-                .get(PreBookingViewModel.class);
+        viewModel = new ViewModelProvider(this).get(PreBookingViewModel.class);
         viewModel.setTempleId(templeId);
         viewModel.setDarshanTypeId(darshanTypeId);
         viewModel.setSelectedDarshanType(darshanType);
         
-        repository = AppRepository.getInstance(getApplication());
+        repository = AppRepository.getInstance(this);
         paymentHelper = new RazorpayPaymentHelper(this, new RazorpayPaymentHelper.PaymentCallback() {
             @Override
-            public void onPaymentSuccess(String paymentId, String orderId) {
-                // Handled by PaymentResultListener.onPaymentSuccess — this is a secondary hook
-            }
-
+            public void onPaymentSuccess(String paymentId, String orderId) {}
             @Override
             public void onPaymentError(int code, String response) {
-                // Handled by PaymentResultListener.onPaymentError — this fires on checkout.open() exception only
-                handlePaymentFailure(code, response);
+                handlePaymentFailure();
             }
         });
         
@@ -100,14 +88,12 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
     }
     
     private void setupRecyclerViews() {
-        binding.datesRecyclerView.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        dateAdapter = new DateAdapter(new java.util.ArrayList<>(), date -> viewModel.selectDate(date));
+        binding.datesRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        dateAdapter = new DateAdapter(new ArrayList<>(), date -> viewModel.selectDate(date));
         binding.datesRecyclerView.setAdapter(dateAdapter);
 
-        binding.slotsRecyclerView.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        timeSlotAdapter = new TimeSlotAdapter(new java.util.ArrayList<>(), slot -> viewModel.selectSlot(slot));
+        binding.slotsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        timeSlotAdapter = new TimeSlotAdapter(new ArrayList<>(), slot -> viewModel.selectSlot(slot));
         binding.slotsRecyclerView.setAdapter(timeSlotAdapter);
     }
     
@@ -123,40 +109,27 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         });
         
         viewModel.getAdultCount().observe(this, count -> {
-            if (count != null) {
-                binding.adultCount.setText(String.valueOf(count));
-                updateDevoteeNameInputs();
-            }
+            binding.adultCount.setText(String.valueOf(count));
+            updateDevoteeNameInputs();
         });
 
         viewModel.getChildrenCount().observe(this, count -> {
-            if (count != null) {
-                binding.childrenCount.setText(String.valueOf(count));
-                updateDevoteeNameInputs();
-            }
+            binding.childrenCount.setText(String.valueOf(count));
+            updateDevoteeNameInputs();
         });
         
-        viewModel.getAvailableDates().observe(this, dates -> {
-            if (dates != null && dateAdapter != null) {
-                dateAdapter.updateDates(dates);
-            }
-        });
-
-        viewModel.getTimeSlots().observe(this, slots -> {
-            if (slots != null && timeSlotAdapter != null) {
-                timeSlotAdapter.updateSlots(slots);
-            }
-        });
+        viewModel.getAvailableDates().observe(this, dates -> dateAdapter.updateDates(dates));
+        viewModel.getTimeSlots().observe(this, slots -> timeSlotAdapter.updateSlots(slots));
         
         viewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                viewModel.clearErrorMessage();
             }
         });
 
-        viewModel.getIsLoading().observe(this, isLoading -> {
-            binding.loadingOverlay.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        });
+        viewModel.getIsLoading().observe(this, isLoading -> 
+            binding.loadingOverlay.setVisibility(isLoading ? View.VISIBLE : View.GONE));
         
         viewModel.getPaymentOrderCreated().observe(this, paymentOrder -> {
             if (paymentOrder != null && paymentOrder.isSuccess() && !paymentInProgress) {
@@ -205,8 +178,8 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
             try {
                 SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault());
-                java.util.Date date = inputFormat.parse(dateStr);
-                binding.summaryDate.setText(outputFormat.format(date));
+                Date date = inputFormat.parse(dateStr);
+                if (date != null) binding.summaryDate.setText(outputFormat.format(date));
             } catch (Exception e) {
                 binding.summaryDate.setText(dateStr);
             }
@@ -219,47 +192,33 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         }
 
         int count = viewModel.getTotalDevotees();
-        binding.summaryDevotees.setText(count + (count > 1 ? " Devotees" : " Devotee"));
+        binding.summaryDevotees.setText(String.format(Locale.getDefault(), "%d %s", count, count > 1 ? "Devotees" : "Devotee"));
 
         int unitPrice = 0;
         if (viewModel.isLiveQueue()) {
             String type = getIntent().getStringExtra("darshan_type");
-            if (type != null && type.toLowerCase().contains("paid")) {
-                unitPrice = 500;
-            }
+            if (type != null && type.toLowerCase().contains("paid")) unitPrice = 500;
         } else if (viewModel.getSelectedSlot().getValue() != null) {
             unitPrice = viewModel.getSelectedSlot().getValue().getPrice();
         }
 
         int darshanTotal = unitPrice * count;
-        // Fix: Platform fee is always 20
         int platformFee = 20;
         int total = darshanTotal + platformFee;
 
-        binding.darshanFeeLabel.setText("Darshan Fee (" + count + " Members)");
-        binding.darshanFee.setText("₹" + darshanTotal);
-        binding.totalAmount.setText("₹" + total);
-        binding.confirmPayButton.setText("Confirm & Pay ₹" + total);
+        binding.darshanFeeLabel.setText(String.format(Locale.getDefault(), "Darshan Fee (%d Members)", count));
+        binding.darshanFee.setText(String.format(Locale.getDefault(), "₹%d", darshanTotal));
+        binding.totalAmount.setText(String.format(Locale.getDefault(), "₹%d", total));
+        binding.confirmPayButton.setText(total > 0 ? String.format(Locale.getDefault(), "Confirm & Pay ₹%d", total) : "Confirm Booking");
         
-        if (total == 0) {
-            binding.confirmPayButton.setText("Confirm Booking");
-        }
-        
-        // Show names in summary
         List<String> names = viewModel.getDevoteeNames().getValue();
         if (names != null && !names.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Names: ");
-            for (int i = 0; i < names.size(); i++) {
-                sb.append(names.get(i));
-                if (i < names.size() - 1) sb.append(", ");
-            }
-            binding.summaryDevoteeNames.setText(sb.toString());
+            binding.summaryDevoteeNames.setText(String.format("Names: %s", String.join(", ", names)));
             binding.summaryDevoteeNames.setVisibility(View.VISIBLE);
         } else {
             binding.summaryDevoteeNames.setVisibility(View.GONE);
         }
         
-        // Show temporary reference ID
         binding.summaryReferenceId.setText(viewModel.getTempReferenceId().getValue());
     }
 
@@ -268,20 +227,13 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         binding.successPersons.setText(String.valueOf(viewModel.getTotalDevotees()));
         
         String refId = viewModel.getTempReferenceId().getValue();
-        if (refId != null) {
-            binding.successBookingId.setText(refId);
-        } else {
-            binding.successBookingId.setText("BK" + System.currentTimeMillis() / 100000);
-        }
-
-        binding.successToken.setText("#" + (100 + (int)(Math.random() * 900)));
+        binding.successBookingId.setText(refId != null ? refId : String.format(Locale.getDefault(), "BK%d", System.currentTimeMillis() / 1000));
+        binding.successToken.setText(String.format(Locale.getDefault(), "#%d", 100 + (int)(Math.random() * 900)));
         binding.successEntryTime.setText("11:30 AM"); 
     }
 
     private void startAutoRedirect() {
-        if (redirectRunnable != null) {
-            redirectHandler.removeCallbacks(redirectRunnable);
-        }
+        if (redirectRunnable != null) redirectHandler.removeCallbacks(redirectRunnable);
         redirectRunnable = this::navigateToLiveQueue;
         redirectHandler.postDelayed(redirectRunnable, 3000);
     }
@@ -294,18 +246,11 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         
         Intent intent = new Intent(this, LiveQueueActivity.class);
         String bId = viewModel.getBookingId();
-        if (bId == null || bId.isEmpty()) {
-            bId = binding.successBookingId.getText().toString();
-        }
+        if (bId == null || bId.isEmpty()) bId = binding.successBookingId.getText().toString();
         
         intent.putExtra("booking_id", bId);
         intent.putExtra("temple_name", binding.templeName.getText().toString());
-        
-        String dateStr = viewModel.getSelectedDate().getValue();
-        if (dateStr == null) {
-            dateStr = binding.summaryDate.getText().toString();
-        }
-        intent.putExtra("booking_date", dateStr);
+        intent.putExtra("booking_date", viewModel.getSelectedDate().getValue());
         intent.putExtra("devotees", viewModel.getTotalDevotees());
 
         startActivity(intent);
@@ -325,20 +270,16 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         binding.continueToPaymentButton.setVisibility(step == 3 ? View.VISIBLE : View.GONE);
         binding.confirmPayButton.setVisibility(step == 4 ? View.VISIBLE : View.GONE);
         
-        if (step >= 5) {
-            binding.headerLayout.setVisibility(View.GONE);
-            binding.bottomActionArea.setVisibility(View.GONE);
-        } else {
-            binding.headerLayout.setVisibility(View.VISIBLE);
-            binding.bottomActionArea.setVisibility(View.VISIBLE);
-        }
+        boolean showHeader = step < 5;
+        binding.headerLayout.setVisibility(showHeader ? View.VISIBLE : View.GONE);
+        binding.bottomActionArea.setVisibility(showHeader ? View.VISIBLE : View.GONE);
     }
     
     private void setupListeners() {
         binding.backButton.setOnClickListener(v -> {
-            Integer currentStep = viewModel.getCurrentStep().getValue();
-            if (currentStep != null && currentStep > 1 && !viewModel.isLiveQueue()) {
-                viewModel.setCurrentStep(currentStep - 1);
+            Integer step = viewModel.getCurrentStep().getValue();
+            if (step != null && step > 1 && !viewModel.isLiveQueue()) {
+                viewModel.setCurrentStep(step - 1);
             } else {
                 finish();
             }
@@ -356,11 +297,7 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
                 View view = binding.namesContainer.getChildAt(i);
                 if (view instanceof com.google.android.material.textfield.TextInputLayout) {
                     com.google.android.material.textfield.TextInputLayout layout = (com.google.android.material.textfield.TextInputLayout) view;
-                    String name = "";
-                    if (layout.getEditText() != null && layout.getEditText().getText() != null) {
-                        name = layout.getEditText().getText().toString().trim();
-                    }
-
+                    String name = layout.getEditText() != null ? layout.getEditText().getText().toString().trim() : "";
                     if (name.isEmpty()) {
                         layout.setError("Name required");
                         allFilled = false;
@@ -370,7 +307,6 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
                     }
                 }
             }
-            
             if (allFilled) {
                 viewModel.setDevoteeNames(names);
                 viewModel.continueToPayment();
@@ -380,20 +316,14 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         });
         
         binding.confirmPayButton.setOnClickListener(v -> {
-            if (paymentInProgress) return; // Prevent double-tap
+            if (paymentInProgress) return;
             int total = calculateTotalAmount();
-            if (total > 0) {
-                viewModel.createBookingAndPayment("RAZORPAY");
-            } else {
-                viewModel.createBookingAndPayment("FREE");
-            }
+            viewModel.createBookingAndPayment(total > 0 ? "RAZORPAY" : "FREE");
         });
 
         binding.goToLiveQueueButton.setOnClickListener(v -> navigateToLiveQueue());
-        
         binding.retryPaymentButton.setOnClickListener(v -> {
             paymentInProgress = false;
-            // Clear the payment order so a fresh one is created on next attempt
             viewModel.clearPaymentOrder();
             viewModel.setCurrentStep(4);
         });
@@ -409,48 +339,34 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         } else if (viewModel.getSelectedSlot().getValue() != null) {
             unitPrice = viewModel.getSelectedSlot().getValue().getPrice();
         }
-        // Always include platform fee of 20
         return (unitPrice * count) + 20;
     }
 
     private void startRazorpayPayment(PaymentOrderResponse paymentOrder) {
         if (paymentInProgress) return;
         paymentInProgress = true;
-
-        pendingOrderId = paymentOrder.getPaymentOrderId();
-        String amountInPaise = String.valueOf(paymentOrder.getAmount().multiply(new java.math.BigDecimal(100)).intValue());
-
-        com.easydarshan.data.session.SessionManager session = com.easydarshan.data.session.SessionManager.getInstance(this);
-        com.easydarshan.data.model.User user = session.getCurrentUser();
-        String phone = (user != null && user.getPhone() != null) ? user.getPhone() : "";
-
-        paymentHelper.startStandardCheckout(pendingOrderId, amountInPaise, phone, "user@easydarshan.com");
+        String amountInPaise = String.valueOf(paymentOrder.getAmount().multiply(new BigDecimal(100)).intValue());
+        User user = SessionManager.getInstance(this).getCurrentUser();
+        paymentHelper.startStandardCheckout(paymentOrder.getPaymentOrderId(), amountInPaise, 
+                user != null ? user.getPhone() : "", "user@easydarshan.com");
     }
     
     private void verifyPayment(String paymentId, String orderId, String signature) {
         viewModel.setCurrentStep(5);
         PaymentOrderResponse paymentOrder = viewModel.getPaymentOrderCreated().getValue();
-        String resolvedOrderId = (paymentOrder != null) ? paymentOrder.getPaymentOrderId() : orderId;
-
         PaymentVerificationRequest request = new PaymentVerificationRequest(
-                resolvedOrderId,
-                paymentId,
-                signature != null ? signature : "",
-                null
-        );
+                paymentOrder != null ? paymentOrder.getPaymentOrderId() : orderId,
+                paymentId, signature != null ? signature : "", null);
 
         repository.verifyPayment(request, new Callback<PaymentVerificationResponse>() {
             @Override
-            public void onResponse(Call<PaymentVerificationResponse> call, Response<PaymentVerificationResponse> response) {
+            public void onResponse(@NonNull Call<PaymentVerificationResponse> call, @NonNull Response<PaymentVerificationResponse> response) {
                 paymentInProgress = false;
-                if (response.body() != null && response.body().isSuccess()) {
-                    viewModel.confirmBooking();
-                } else {
-                    viewModel.setCurrentStep(7);
-                }
+                if (response.body() != null && response.body().isSuccess()) viewModel.confirmBooking();
+                else viewModel.setCurrentStep(7);
             }
             @Override
-            public void onFailure(Call<PaymentVerificationResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<PaymentVerificationResponse> call, @NonNull Throwable t) {
                 paymentInProgress = false;
                 viewModel.setCurrentStep(7);
             }
@@ -459,29 +375,21 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
 
     @Override
     public void onPaymentSuccess(String razorpayPaymentId) {
-        PaymentOrderResponse paymentOrder = viewModel.getPaymentOrderCreated().getValue();
-        verifyPayment(razorpayPaymentId,
-                paymentOrder != null ? paymentOrder.getPaymentOrderId() : "",
-                "");
+        PaymentOrderResponse order = viewModel.getPaymentOrderCreated().getValue();
+        verifyPayment(razorpayPaymentId, order != null ? order.getPaymentOrderId() : "", "");
     }
 
     @Override
-    public void onPaymentError(int code, String response) {
-        handlePaymentFailure(code, response);
-    }
+    public void onPaymentError(int code, String response) { handlePaymentFailure(); }
 
-    private void handlePaymentFailure(int code, String response) {
+    private void handlePaymentFailure() {
         paymentInProgress = false;
-        // Do NOT silently fallback to Razorpay UI — that creates the duplicate screen problem.
-        // Instead show the failure screen so user can consciously choose to retry or use other method.
         viewModel.setCurrentStep(7);
     }
 
     @Override
     protected void onDestroy() {
-        if (redirectRunnable != null) {
-            redirectHandler.removeCallbacks(redirectRunnable);
-        }
+        if (redirectRunnable != null) redirectHandler.removeCallbacks(redirectRunnable);
         super.onDestroy();
     }
 }

@@ -2,6 +2,7 @@ package com.easydarshan.ui.notifications;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -21,27 +22,19 @@ import retrofit2.Response;
 
 public class NotificationsViewModel extends AndroidViewModel {
     
-    private AppRepository repository;
-    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
-    private MutableLiveData<String> errorMessage = new MutableLiveData<>();
-    private MutableLiveData<List<Notification>> notifications = new MutableLiveData<>();
+    private final AppRepository repository;
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<List<Notification>> notifications = new MutableLiveData<>(new ArrayList<>());
     
-    public NotificationsViewModel(Application application) {
+    public NotificationsViewModel(@NonNull Application application) {
         super(application);
         repository = AppRepository.getInstance(application);
     }
     
-    public LiveData<Boolean> getIsLoading() {
-        return isLoading;
-    }
-    
-    public LiveData<String> getErrorMessage() {
-        return errorMessage;
-    }
-    
-    public LiveData<List<Notification>> getNotifications() {
-        return notifications;
-    }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
+    public LiveData<String> getErrorMessage() { return errorMessage; }
+    public LiveData<List<Notification>> getNotifications() { return notifications; }
     
     public void loadNotifications() {
         if (!NetworkUtils.isNetworkAvailable(getApplication())) {
@@ -53,79 +46,56 @@ public class NotificationsViewModel extends AndroidViewModel {
         errorMessage.setValue(null);
         repository.getNotifications(new Callback<ApiResponse<List<Notification>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<List<Notification>>> call, Response<ApiResponse<List<Notification>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<List<Notification>>> call, @NonNull Response<ApiResponse<List<Notification>>> response) {
                 isLoading.postValue(false);
-                
                 if (response.isSuccessful() && response.body() != null) {
                     if (response.body().isSuccess()) {
-                        List<Notification> notificationList = response.body().getData();
-                        notifications.postValue(notificationList != null ? notificationList : new ArrayList<>());
+                        List<Notification> list = response.body().getData();
+                        notifications.postValue(list != null ? list : new ArrayList<>());
                     } else {
-                        String errorMsg = response.body().getMessage();
-                        errorMessage.postValue(errorMsg != null ? errorMsg : "Failed to load notifications");
-                        notifications.postValue(new ArrayList<>());
+                        errorMessage.postValue(response.body().getMessage() != null ? response.body().getMessage() : "Failed to load notifications");
                     }
                 } else {
-                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
-                    errorMessage.postValue(errorMsg);
-                    notifications.postValue(new ArrayList<>());
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                 }
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<List<Notification>>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<List<Notification>>> call, @NonNull Throwable t) {
                 isLoading.postValue(false);
-                String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
-                errorMessage.postValue(errorMsg);
-                notifications.postValue(new ArrayList<>());
+                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
             }
         });
     }
     
     public void markAllAsRead() {
-        List<Notification> currentNotifications = notifications.getValue();
-        if (currentNotifications == null || currentNotifications.isEmpty()) {
-            return;
+        List<Notification> current = notifications.getValue();
+        if (current == null || current.isEmpty()) return;
+        
+        List<Notification> unread = new ArrayList<>();
+        for (Notification n : current) {
+            if (!n.isRead()) unread.add(n);
         }
         
-        // Mark each unread notification as read
-        List<Notification> unreadNotifications = new java.util.ArrayList<>();
-        for (Notification notification : currentNotifications) {
-            if (!notification.isRead()) {
-                unreadNotifications.add(notification);
-            }
-        }
+        if (unread.isEmpty()) return;
         
-        if (unreadNotifications.isEmpty()) {
-            // All notifications already read
-            return;
-        }
-        
-        final int[] completedCount = {0};
-        final int totalCount = unreadNotifications.size();
-        
-        for (Notification notification : unreadNotifications) {
-            repository.markNotificationRead((long) notification.getId(), new Callback<ApiResponse<Void>>() {
+        final int[] completed = {0};
+        for (Notification n : unread) {
+            repository.markNotificationRead((long) n.getId(), new Callback<ApiResponse<Void>>() {
                 @Override
-                public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
-                    completedCount[0]++;
-                    // Reload notifications after all are marked
-                    if (completedCount[0] == totalCount) {
-                        loadNotifications();
-                    }
+                public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
+                    if (++completed[0] == unread.size()) loadNotifications();
                 }
                 
                 @Override
-                public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
-                    completedCount[0]++;
-                    if (completedCount[0] == totalCount) {
-                        loadNotifications();
-                    } else {
-                        errorMessage.postValue("Failed to mark some notifications as read");
-                    }
+                public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+                    if (++completed[0] == unread.size()) loadNotifications();
                 }
             });
         }
     }
-}
 
+    public void clearErrorMessage() {
+        errorMessage.setValue(null);
+    }
+}
