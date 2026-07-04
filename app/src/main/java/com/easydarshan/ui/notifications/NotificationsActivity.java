@@ -24,9 +24,7 @@ public class NotificationsActivity extends BaseActivity {
         binding = ActivityNotificationsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        viewModel = new ViewModelProvider(this, 
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
-                .get(NotificationsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(NotificationsViewModel.class);
         
         setupRecyclerView();
         setupObservers();
@@ -42,7 +40,6 @@ public class NotificationsActivity extends BaseActivity {
 
     @Override
     protected int getNavigationMenuItemId() {
-        // Notifications removed from bottom nav, return home as fallback
         return R.id.nav_home;
     }
     
@@ -54,19 +51,16 @@ public class NotificationsActivity extends BaseActivity {
     
     private void setupObservers() {
         viewModel.getNotifications().observe(this, notifications -> {
-            if (notifications != null && !notifications.isEmpty()) {
-                adapter.updateList(notifications);
-                binding.emptyState.setVisibility(View.GONE);
-                binding.notificationsRecyclerView.setVisibility(View.VISIBLE);
-            } else {
-                binding.emptyState.setVisibility(View.VISIBLE);
-                binding.notificationsRecyclerView.setVisibility(View.GONE);
-            }
+            boolean hasNotifications = notifications != null && !notifications.isEmpty();
+            adapter.updateList(notifications);
+            binding.emptyState.setVisibility(hasNotifications ? View.GONE : View.VISIBLE);
+            binding.notificationsRecyclerView.setVisibility(hasNotifications ? View.VISIBLE : View.GONE);
         });
         
         viewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                viewModel.clearErrorMessage();
             }
         });
     }

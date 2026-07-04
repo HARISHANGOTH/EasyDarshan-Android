@@ -11,51 +11,43 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.easydarshan.R;
 import com.easydarshan.databinding.ActivityOtpVerificationBinding;
-import com.easydarshan.data.model.User;
-import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.ui.home.HomeActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class OtpVerificationActivity extends AppCompatActivity {
-    
+
     private ActivityOtpVerificationBinding binding;
     private OtpVerificationViewModel viewModel;
     private List<EditText> otpInputs;
-    private String mobile;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityOtpVerificationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        
-        // Initialize SessionManager with context
-        SessionManager.getInstance(this);
-        
-        mobile = getIntent().getStringExtra("mobile");
+
+        String mobile = getIntent().getStringExtra("mobile");
         if (mobile == null) {
             finish();
             return;
         }
-        
-        viewModel = new ViewModelProvider(this, 
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
-                .get(OtpVerificationViewModel.class);
+
+        viewModel = new ViewModelProvider(this).get(OtpVerificationViewModel.class);
         viewModel.setMobile(mobile);
-        
-        binding.subtitleText.setText("Enter the 6-digit code sent to\n+91 " + mobile);
-        
+
+        binding.subtitleText.setText(String.format(Locale.getDefault(), "Enter the 6-digit code sent to\n+91 %s", mobile));
+
         setupOtpInputs();
         setupObservers();
         setupListeners();
-        
+
         viewModel.startTimer();
     }
-    
+
     private void setupOtpInputs() {
         otpInputs = new ArrayList<>();
         otpInputs.add(binding.otpInput1);
@@ -64,65 +56,66 @@ public class OtpVerificationActivity extends AppCompatActivity {
         otpInputs.add(binding.otpInput4);
         otpInputs.add(binding.otpInput5);
         otpInputs.add(binding.otpInput6);
-        
+
         for (int i = 0; i < otpInputs.size(); i++) {
             final int index = i;
             EditText input = otpInputs.get(i);
-            
+
             input.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                
+
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (s.length() == 1 && index < otpInputs.size() - 1) {
                         otpInputs.get(index + 1).requestFocus();
                     }
-                    checkOtpComplete();
+                    updateVerifyButtonState();
                 }
-                
+
                 @Override
                 public void afterTextChanged(Editable s) {}
             });
         }
     }
-    
-    private void checkOtpComplete() {
+
+    private void updateVerifyButtonState() {
+        binding.verifyButton.setEnabled(getEnteredOtp().length() == 6);
+    }
+
+    private String getEnteredOtp() {
         StringBuilder otp = new StringBuilder();
         for (EditText input : otpInputs) {
             otp.append(input.getText().toString());
         }
-        
-        if (otp.length() == 6) {
-            binding.verifyButton.setEnabled(true);
-        } else {
-            binding.verifyButton.setEnabled(false);
-        }
+        return otp.toString();
     }
-    
+
     private void setupObservers() {
         viewModel.getIsLoading().observe(this, isLoading -> {
-            binding.verifyButton.setEnabled(!isLoading && isOtpComplete());
+            binding.verifyButton.setEnabled(!isLoading && getEnteredOtp().length() == 6);
             binding.verifyButton.setText(isLoading ? "Verifying..." : "Verify & Continue");
         });
-        
+
         viewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                viewModel.clearErrorMessage();
             }
         });
-        
-        viewModel.getNavigateToHome().observe(this, user -> {
-            if (user != null) {
+
+        viewModel.getNavigateToHome().observe(this, shouldNavigate -> {
+            if (shouldNavigate) {
                 Intent intent = new Intent(this, HomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
             }
         });
-        
+
         viewModel.getTimer().observe(this, seconds -> {
             if (seconds > 0) {
-                binding.resendTimer.setText("Resend OTP in " + seconds + "s");
+                binding.resendTimer.setText(String.format(Locale.getDefault(), "Resend OTP in %ds", seconds));
                 binding.resendTimer.setVisibility(View.VISIBLE);
                 binding.resendButton.setVisibility(View.GONE);
             } else {
@@ -131,16 +124,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
             }
         });
     }
-    
-    private boolean isOtpComplete() {
-        for (EditText input : otpInputs) {
-            if (input.getText().toString().isEmpty()) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
+
     private void setupListeners() {
         binding.resendButton.setOnClickListener(v -> {
             viewModel.resendOtp();
@@ -150,12 +134,6 @@ public class OtpVerificationActivity extends AppCompatActivity {
             otpInputs.get(0).requestFocus();
         });
 
-        binding.verifyButton.setOnClickListener(v -> {
-            StringBuilder otp = new StringBuilder();
-            for (EditText input : otpInputs) {
-                otp.append(input.getText().toString());
-            }
-            viewModel.verifyOtp(otp.toString());
-        });
+        binding.verifyButton.setOnClickListener(v -> viewModel.verifyOtp(getEnteredOtp()));
     }
 }

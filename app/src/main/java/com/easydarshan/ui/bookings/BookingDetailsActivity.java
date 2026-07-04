@@ -1,25 +1,18 @@
 package com.easydarshan.ui.bookings;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.easydarshan.R;
 import com.easydarshan.databinding.ActivityBookingDetailsBinding;
 import com.easydarshan.data.model.Booking;
-import com.easydarshan.data.model.SingleBookingResponse;
-import com.easydarshan.data.repository.AppRepository;
 import com.easydarshan.ui.livequeue.LiveQueueActivity;
-import com.easydarshan.utils.ErrorHandler;
-import com.easydarshan.utils.NetworkUtils;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -30,16 +23,10 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import java.util.HashMap;
 import java.util.Map;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class BookingDetailsActivity extends AppCompatActivity {
     
     private ActivityBookingDetailsBinding binding;
-    private String bookingId;
-    private AppRepository repository;
-    private Booking currentBooking;
+    private BookingDetailsViewModel viewModel;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,116 +34,63 @@ public class BookingDetailsActivity extends AppCompatActivity {
         binding = ActivityBookingDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        bookingId = getIntent().getStringExtra("booking_id");
-        repository = AppRepository.getInstance(getApplication());
+        String bookingId = getIntent().getStringExtra("booking_id");
+        viewModel = new ViewModelProvider(this).get(BookingDetailsViewModel.class);
         
+        setupObservers();
         setupListeners();
-        loadBookingDetails();
+        
+        viewModel.loadBookingDetails(bookingId);
+    }
+    
+    private void setupObservers() {
+        viewModel.getBooking().observe(this, booking -> {
+            if (booking != null) displayBookingDetails(booking);
+        });
+
+        viewModel.getErrorMessage().observe(this, error -> {
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                viewModel.clearErrorMessage();
+            }
+        });
     }
     
     private void setupListeners() {
         binding.backButton.setOnClickListener(v -> finish());
         
         binding.liveQueueButton.setOnClickListener(v -> {
-            if (bookingId != null) {
+            Booking booking = viewModel.getBooking().getValue();
+            if (booking != null) {
                 Intent intent = new Intent(this, LiveQueueActivity.class);
-                intent.putExtra("booking_id", bookingId);
-                intent.putExtra("temple_name", binding.templeName.getText().toString());
-                intent.putExtra("booking_date", binding.bookingDate.getText().toString());
-                
-                if (currentBooking != null && currentBooking.getDevotees() != null) {
-                    intent.putExtra("devotees", currentBooking.getDevotees());
-                }
-                
+                intent.putExtra("booking_id", booking.getId());
+                intent.putExtra("temple_name", booking.getTemple());
+                intent.putExtra("booking_date", booking.getDate());
+                if (booking.getDevotees() != null) intent.putExtra("devotees", booking.getDevotees());
                 startActivity(intent);
             }
         });
     }
     
-    private void loadBookingDetails() {
-        if (bookingId == null || bookingId.isEmpty()) {
-            Toast.makeText(this, "Invalid booking ID", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-        
-        if (!NetworkUtils.isNetworkAvailable(this)) {
-            Toast.makeText(this, NetworkUtils.getNetworkErrorMessage(this), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        repository.getBookingDetails(bookingId, new Callback<SingleBookingResponse>() {
-            @Override
-            public void onResponse(Call<SingleBookingResponse> call, Response<SingleBookingResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Booking booking = response.body().getBooking();
-                    if (booking != null) {
-                        displayBookingDetails(booking);
-                    } else {
-                        Toast.makeText(BookingDetailsActivity.this, "Booking not found", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
-                    Toast.makeText(BookingDetailsActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
-                }
-            }
-            
-            @Override
-            public void onFailure(Call<SingleBookingResponse> call, Throwable t) {
-                String errorMsg = ErrorHandler.getErrorMessage(t, BookingDetailsActivity.this);
-                Toast.makeText(BookingDetailsActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-    
     private void displayBookingDetails(Booking booking) {
-        if (booking == null) return;
-        this.currentBooking = booking;
+        binding.templeName.setText(booking.getTemple());
+        binding.bookingDate.setText(booking.getDate());
+        binding.bookingTime.setText(booking.getTime());
+        binding.ticketType.setText(booking.getType());
+        binding.bookingId.setText(String.format("ID: %s", booking.getId()));
         
-        try {
-            if (binding.templeName != null && booking.getTemple() != null) {
-                binding.templeName.setText(booking.getTemple());
-            }
-            if (binding.bookingDate != null && booking.getDate() != null) {
-                binding.bookingDate.setText(booking.getDate());
-            }
-            if (binding.bookingTime != null && booking.getTime() != null) {
-                binding.bookingTime.setText(booking.getTime());
-            }
-            if (binding.ticketType != null && booking.getType() != null) {
-                binding.ticketType.setText(booking.getType());
-            }
-            if (binding.bookingId != null && booking.getId() != null) {
-                binding.bookingId.setText("ID: " + booking.getId());
-            }
-            
-            // Generate QR Code
-            String qrData = booking.getQrCode();
-            if (qrData == null || qrData.isEmpty()) {
-                qrData = booking.getId(); // Fallback to booking ID if qrCode is empty
-            }
-            
-            if (qrData != null && !qrData.isEmpty()) {
-                generateQRCode(qrData);
-            } else {
-                Toast.makeText(this, "QR code data not available", Toast.LENGTH_SHORT).show();
-            }
+        String qrData = booking.getQrCode();
+        if (qrData == null || qrData.isEmpty()) qrData = booking.getId();
+        
+        if (qrData != null) generateQRCode(qrData);
 
-            // Show Live Queue button if applicable
-            boolean isLiveQueue = (booking.getTime() != null && booking.getTime().toLowerCase().contains("live")) 
-                                || "LIVE_QUEUE".equals(booking.getTime());
-            binding.liveQueueButton.setVisibility(isLiveQueue ? View.VISIBLE : View.GONE);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error displaying booking details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        boolean isLive = (booking.getTime() != null && booking.getTime().toLowerCase().contains("live")) 
+                        || "LIVE_QUEUE".equals(booking.getTime());
+        binding.liveQueueButton.setVisibility(isLive ? View.VISIBLE : View.GONE);
     }
     
     private void generateQRCode(String data) {
         try {
-            if (binding.qrCodeImage == null) return;
-            
             QRCodeWriter writer = new QRCodeWriter();
             Map<EncodeHintType, Object> hints = new HashMap<>();
             hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
@@ -173,10 +107,8 @@ public class BookingDetailsActivity extends AppCompatActivity {
                     bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
                 }
             }
-            
             binding.qrCodeImage.setImageBitmap(bitmap);
         } catch (WriterException e) {
-            e.printStackTrace();
             Toast.makeText(this, "Failed to generate QR code", Toast.LENGTH_SHORT).show();
         }
     }

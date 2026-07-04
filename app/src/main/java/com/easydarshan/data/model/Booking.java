@@ -1,10 +1,16 @@
 package com.easydarshan.data.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
+@Entity(tableName = "bookings")
 public class Booking {
+    @PrimaryKey
+    @NonNull
     @SerializedName("id")
     private String id;
     
@@ -47,11 +53,12 @@ public class Booking {
     public Booking() {
     }
 
+    @NonNull
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(@NonNull String id) {
         this.id = id;
     }
 

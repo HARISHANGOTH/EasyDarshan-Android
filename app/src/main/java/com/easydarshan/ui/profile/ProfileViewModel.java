@@ -2,6 +2,7 @@ package com.easydarshan.ui.profile;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -19,35 +20,28 @@ import retrofit2.Response;
 
 public class ProfileViewModel extends AndroidViewModel {
     
-    private AppRepository repository;
-    private SessionManager sessionManager;
-    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
-    private MutableLiveData<String> errorMessage = new MutableLiveData<>();
-    private MutableLiveData<User> user = new MutableLiveData<>();
+    private final AppRepository repository;
+    private final SessionManager sessionManager;
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<User> user = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> profileUpdated = new MutableLiveData<>(false);
     
-    public ProfileViewModel(Application application) {
+    public ProfileViewModel(@NonNull Application application) {
         super(application);
         repository = AppRepository.getInstance(application);
         sessionManager = SessionManager.getInstance(application);
     }
     
-    public LiveData<Boolean> getIsLoading() {
-        return isLoading;
-    }
-    
-    public LiveData<String> getErrorMessage() {
-        return errorMessage;
-    }
-    
-    public LiveData<User> getUser() {
-        return user;
-    }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
+    public LiveData<String> getErrorMessage() { return errorMessage; }
+    public LiveData<User> getUser() { return user; }
+    public LiveData<Boolean> getProfileUpdated() { return profileUpdated; }
     
     public void loadUserProfile() {
-        User currentUser = sessionManager.getCurrentUser();
-        if (currentUser != null) {
-            user.setValue(currentUser);
-            return;
+        User current = sessionManager.getCurrentUser();
+        if (current != null) {
+            user.setValue(current);
         }
 
         if (!NetworkUtils.isNetworkAvailable(getApplication())) {
@@ -59,29 +53,21 @@ public class ProfileViewModel extends AndroidViewModel {
         errorMessage.setValue(null);
         repository.getUserProfile(new Callback<ApiResponse<User>>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<User>> call, @NonNull Response<ApiResponse<User>> response) {
                 isLoading.postValue(false);
-                
-                if (response.isSuccessful() && response.body() != null) {
-                    if (response.body().isSuccess()) {
-                        User userData = response.body().getData();
-                        sessionManager.setCurrentUser(userData);
-                        user.postValue(userData);
-                    } else {
-                        String errorMsg = response.body().getMessage();
-                        errorMessage.postValue(errorMsg != null ? errorMsg : "Failed to load profile");
-                    }
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    User userData = response.body().getData();
+                    sessionManager.setCurrentUser(userData);
+                    user.postValue(userData);
                 } else {
-                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
-                    errorMessage.postValue(errorMsg);
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                 }
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<User>> call, @NonNull Throwable t) {
                 isLoading.postValue(false);
-                String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
-                errorMessage.postValue(errorMsg);
+                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
             }
         });
     }
@@ -96,34 +82,35 @@ public class ProfileViewModel extends AndroidViewModel {
         errorMessage.setValue(null);
         repository.updateUserProfile(updatedUser, new Callback<ApiResponse<User>>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<User>> call, @NonNull Response<ApiResponse<User>> response) {
                 isLoading.postValue(false);
-                
-                if (response.isSuccessful() && response.body() != null) {
-                    if (response.body().isSuccess()) {
-                        User userData = response.body().getData();
-                        sessionManager.setCurrentUser(userData);
-                        user.postValue(userData);
-                    } else {
-                        String errorMsg = response.body().getMessage();
-                        errorMessage.postValue(errorMsg != null ? errorMsg : "Failed to update profile");
-                    }
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    User userData = response.body().getData();
+                    sessionManager.setCurrentUser(userData);
+                    user.postValue(userData);
+                    profileUpdated.postValue(true);
                 } else {
-                    String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
-                    errorMessage.postValue(errorMsg);
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<User>> call, @NonNull Throwable t) {
                 isLoading.postValue(false);
-                String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
-                errorMessage.postValue(errorMsg);
+                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
             }
         });
     }
-    
+
     public void logout() {
         sessionManager.clearSession();
+    }
+
+    public void clearErrorMessage() {
+        errorMessage.setValue(null);
+    }
+    
+    public void onUpdateHandled() {
+        profileUpdated.setValue(false);
     }
 }

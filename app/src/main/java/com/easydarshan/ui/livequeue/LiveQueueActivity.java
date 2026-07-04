@@ -2,15 +2,12 @@ package com.easydarshan.ui.livequeue;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.easydarshan.data.api.ApiService;
-import com.easydarshan.data.api.RetrofitClient;
 import com.easydarshan.data.model.LiveQueuePositionResponse;
 import com.easydarshan.databinding.ActivityLiveQueueBinding;
 import com.easydarshan.ui.bookings.BookingDetailsActivity;
@@ -19,17 +16,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class LiveQueueActivity extends AppCompatActivity {
 
     private ActivityLiveQueueBinding binding;
+    private LiveQueueViewModel viewModel;
     private String bookingId;
-    private String templeName;
-    private Handler handler = new Handler(Looper.getMainLooper());
-    private Runnable statusPoller;
     private boolean isAtEntryPoint = false;
 
     @Override
@@ -39,28 +30,28 @@ public class LiveQueueActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         bookingId = getIntent().getStringExtra("booking_id");
-        templeName = getIntent().getStringExtra("temple_name");
+        String templeName = getIntent().getStringExtra("temple_name");
         String date = getIntent().getStringExtra("booking_date");
         int devotees = getIntent().getIntExtra("devotees", 1);
 
-        if (templeName != null) {
-            binding.tvTempleName.setText(templeName);
-        }
+        if (templeName != null) binding.tvTempleName.setText(templeName);
         
-        if (date != null) {
-            binding.tvBookingDate.setText(date);
-        } else {
-            binding.tvBookingDate.setText(new SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault()).format(new Date()));
-        }
-        
-        binding.tvDevotees.setText(devotees + (devotees > 1 ? " Devotees" : " Devotee"));
-        
-        if (bookingId != null) {
-            binding.tvBookingId.setText("Booking ID: " + bookingId);
-        }
+        binding.tvBookingDate.setText(date != null ? date : new SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault()).format(new Date()));
+        binding.tvDevotees.setText(String.format(Locale.getDefault(), "%d %s", devotees, devotees > 1 ? "Devotees" : "Devotee"));
+        if (bookingId != null) binding.tvBookingId.setText(String.format("Booking ID: %s", bookingId));
 
+        viewModel = new ViewModelProvider(this).get(LiveQueueViewModel.class);
+        
+        setupObservers();
         setupListeners();
-        startQueuePolling();
+        
+        if (bookingId != null) viewModel.startPolling(bookingId);
+    }
+
+    private void setupObservers() {
+        viewModel.getQueueStatus().observe(this, status -> {
+            if (status != null) updateUI(status);
+        });
     }
 
     private void setupListeners() {
@@ -73,40 +64,9 @@ public class LiveQueueActivity extends AppCompatActivity {
         });
 
         binding.btnRefresh.setOnClickListener(v -> {
-            binding.btnRefresh.setEnabled(false);
-            fetchQueueStatus();
-            handler.postDelayed(() -> binding.btnRefresh.setEnabled(true), 2000);
-        });
-    }
-
-    private void startQueuePolling() {
-        statusPoller = new Runnable() {
-            @Override
-            public void run() {
-                fetchQueueStatus();
-                // Poll every 10 seconds
-                handler.postDelayed(this, 10000);
-            }
-        };
-        handler.post(statusPoller);
-    }
-
-    private void fetchQueueStatus() {
-        if (bookingId == null) return;
-
-        ApiService apiService = RetrofitClient.getInstance(this).getApiService();
-        apiService.getQueuePosition(bookingId).enqueue(new Callback<LiveQueuePositionResponse>() {
-            @Override
-            public void onResponse(Call<LiveQueuePositionResponse> call, Response<LiveQueuePositionResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    updateUI(response.body());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LiveQueuePositionResponse> call, Throwable t) {
-                // Silently handle failure for polling
-            }
+            v.setEnabled(false);
+            viewModel.fetchStatus();
+            v.postDelayed(() -> v.setEnabled(true), 2000);
         });
     }
 
@@ -114,34 +74,21 @@ public class LiveQueueActivity extends AppCompatActivity {
         int position = status.getPosition();
         binding.tvPeopleAhead.setText(String.valueOf(position));
         
-        // Dynamic wait time calculation (e.g., 2 mins per person)
-        int waitTimeMinutes = position * 2;
-        if (waitTimeMinutes >= 60) {
-            int hours = waitTimeMinutes / 60;
-            int mins = waitTimeMinutes % 60;
-            binding.tvWaitTime.setText(hours + "h " + mins + "m");
+        int waitTime = position * 2;
+        if (waitTime >= 60) {
+            binding.tvWaitTime.setText(String.format(Locale.getDefault(), "%dh %dm", waitTime / 60, waitTime % 60));
         } else {
-            binding.tvWaitTime.setText(waitTimeMinutes + "m");
+            binding.tvWaitTime.setText(String.format(Locale.getDefault(), "%dm", waitTime));
         }
 
-        String currentTime = new SimpleDateFormat("h:mm a", Locale.getDefault()).format(new Date());
-        binding.tvLastUpdated.setText("Last Updated: " + currentTime);
+        binding.tvLastUpdated.setText(String.format("Last Updated: %s", new SimpleDateFormat("h:mm a", Locale.getDefault()).format(new Date())));
 
-        if (position <= 1 && !isAtEntryPoint) {
+        if (position <= 1 && !isAtEntryPoint && position > 0) {
             isAtEntryPoint = true;
             Toast.makeText(this, "It's almost your turn! Please reach the entry point.", Toast.LENGTH_LONG).show();
         } else if (position == 0) {
-            // position 0 means scanned/completed
             Toast.makeText(this, "Welcome to the Temple!", Toast.LENGTH_LONG).show();
             finish();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (handler != null && statusPoller != null) {
-            handler.removeCallbacks(statusPoller);
         }
     }
 }
