@@ -2,64 +2,48 @@ package com.easydarshan.data.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 public class PaymentVerificationResponse {
-    @SerializedName("success")
-    private boolean success;
-    
-    @SerializedName("message")
-    private String message;
-    
-    @SerializedName("paymentStatus")
-    private String paymentStatus;
-    
-    @SerializedName("bookingId")
-    private String bookingId;
-    
-    @SerializedName("transactionId")
-    private String transactionId;
 
+    @SerializedName("statusCode")
+    private String statusCode;
+
+    @SerializedName("statusMessage")
+    private String statusMessage;
+
+    // Backend returns: { statusCode, statusMessage, payment: { ... } }
+    @SerializedName("payment")
+    private PaymentData payment;
+
+    public String getStatusCode() { return statusCode; }
+    public String getStatusMessage() { return statusMessage; }
+    public PaymentData getPayment() { return payment; }
+
+    // Convenience getters
+    public Long getId() { return payment != null ? payment.id : null; }
+    public String getTransactionReference() { return payment != null ? payment.transactionReference : null; }
+    public String getGatewayPaymentId() { return payment != null ? payment.gatewayPaymentId : null; }
+    public String getPaymentStatus() { return payment != null ? payment.paymentStatus : null; }
+    public BigDecimal getAmount() { return payment != null ? payment.amount : null; }
+    public String getBookingId() { return payment != null ? payment.bookingId : null; }
+
+    // Success = backend returned SUCCESS_200 and paymentStatus is SUCCESS
     public boolean isSuccess() {
-        return success;
+        return statusCode != null && statusCode.startsWith("SUCCESS")
+                && payment != null && "SUCCESS".equals(payment.paymentStatus);
     }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
-    public String getBookingId() {
-        return bookingId;
-    }
-
-    public void setBookingId(String bookingId) {
-        this.bookingId = bookingId;
-    }
-
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
+    public static class PaymentData {
+        @SerializedName("id")                   Long id;
+        @SerializedName("transactionReference") String transactionReference;
+        @SerializedName("gatewayPaymentId")     String gatewayPaymentId;
+        @SerializedName("gatewayProvider")      String gatewayProvider;
+        @SerializedName("amount")               BigDecimal amount;
+        @SerializedName("paymentMethod")        String paymentMethod;
+        @SerializedName("paymentStatus")        String paymentStatus;
+        @SerializedName("paidAt")               String paidAt;
+        @SerializedName("bookingId")            String bookingId;
     }
 }
-
-
-
-
-

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing System -->
+    <dimen name="spacing_2">2dp</dimen>
+    <dimen name="spacing_4">4dp</dimen>
+    <dimen name="spacing_6">6dp</dimen>
+    <dimen name="spacing_8">8dp</dimen>
+    <dimen name="spacing_12">12dp</dimen>
+    <dimen name="spacing_16">16dp</dimen>
+    <dimen name="spacing_20">20dp</dimen>
+    <dimen name="spacing_24">24dp</dimen>
+    <dimen name="spacing_28">28dp</dimen>
+    <dimen name="spacing_32">32dp</dimen>
+    <dimen name="spacing_40">40dp</dimen>
+    <dimen name="spacing_48">48dp</dimen>
+    <dimen name="spacing_64">64dp</dimen>
+
+    <!-- Corner Radius -->
+    <dimen name="radius_small">8dp</dimen>
+    <dimen name="radius_medium">12dp</dimen>
+    <dimen name="radius_large">16dp</dimen>
+    <dimen name="radius_xlarge">24dp</dimen>
+    <dimen name="radius_card">18dp</dimen>
+    <dimen name="radius_full">100dp</dimen>
+
+    <!-- Typography -->
+    <dimen name="text_xs">12sp</dimen>
+    <dimen name="text_sm">14sp</dimen>
+    <dimen name="text_caption">13sp</dimen>
+    <dimen name="text_body">15sp</dimen>
+    <dimen name="text_base">15sp</dimen>
+    <dimen name="text_md">16sp</dimen>
+    <dimen name="text_lg">18sp</dimen>
+    <dimen name="text_xl">20sp</dimen>
+    <dimen name="text_temple_name">18sp</dimen>
+    <dimen name="text_section">20sp</dimen>
+    <dimen name="text_section_title">20sp</dimen>
+    <dimen name="text_app_name">22sp</dimen>
+    <dimen name="text_2xl">22sp</dimen>
+    <dimen name="text_heading">28sp</dimen>
+    <dimen name="text_user_name">28sp</dimen>
+    <dimen name="text_greeting">16sp</dimen>
+
+    <!-- Toolbar -->
+    <dimen name="toolbar_height">64dp</dimen>
+    <dimen name="toolbar_icon_size">24dp</dimen>
+    <dimen name="logo_icon_size">32dp</dimen>
+
+    <!-- Search Bar -->
+    <dimen name="search_bar_height">56dp</dimen>
+    <dimen name="search_icon_size">22dp</dimen>
+
+    <!-- Temple Card -->
+    <dimen name="card_elevation">3dp</dimen>
+    <dimen name="temple_card_width">0dp</dimen>
+    <dimen name="temple_card_image_height">180dp</dimen>
+    <dimen name="temple_card_radius">18dp</dimen>
+
+    <!-- Banner & Notif -->
+    <dimen name="banner_height">150dp</dimen>
+    <dimen name="banner_illustration_size">120dp</dimen>
+    <dimen name="btn_enable_width">110dp</dimen>
+    <dimen name="btn_enable_height">44dp</dimen>
+    <dimen name="btn_height_sm">40dp</dimen>
+
+    <!-- Bottom Nav -->
+    <dimen name="bottom_nav_height">72dp</dimen>
+    <dimen name="bottom_nav_radius">24dp</dimen>
+    <dimen name="bottom_nav_margin">16dp</dimen>
+    <dimen name="bottom_content_padding">120dp</dimen>
+
+    <!-- Standard Layout -->
+    <dimen name="screen_margin_horizontal">20dp</dimen>
+    <dimen name="touch_target_min">48dp</dimen>
+    <dimen name="icon_size_md">20dp</dimen>
+    <dimen name="icon_size_xxl">48dp</dimen>
+</resources>

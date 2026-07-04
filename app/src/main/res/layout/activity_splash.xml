@@ -4,10 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_orange"
-    android:padding="24dp"
-    tools:context=".SplashActivity">
+    android:background="@color/background"
+    tools:context=".ui.splash.SplashActivity">
 
+    <!-- Hero Illustration -->
+    <ImageView
+        android:id="@+id/ivSplashIllustration"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:src="@drawable/img_plan_visit"
+        android:scaleType="centerCrop"
+        android:alpha="0.4"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        android:contentDescription="@null" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/bg_header_fade"
+        app:layout_constraintBottom_toBottomOf="@id/ivSplashIllustration" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <!-- Content Container -->
     <LinearLayout
         android:id="@+id/contentContainer"
         android:layout_width="wrap_content"
@@ -17,73 +42,57 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/guideline">
 
-        <!-- Temple Icon -->
-        <ImageView
-            android:id="@+id/templeIcon"
-            android:layout_width="128dp"
-            android:layout_height="128dp"
-            android:src="@drawable/ic_temple"
-            android:contentDescription="@string/temple_icon"
-            android:layout_marginBottom="24dp"
-            app:tint="@color/primary" />
-
-        <!-- App Name -->
-        <TextView
-            android:id="@+id/appName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textColor="@color/primary"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Tagline -->
-        <TextView
-            android:id="@+id/tagline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Peaceful Darshan Without Waiting"
-            android:textColor="@color/primary_dark"
-            android:textSize="16sp"
-            android:alpha="0.8"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
-            android:gravity="center" />
-
-        <!-- Loading Indicator -->
         <LinearLayout
-            android:id="@+id/loadingIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="48dp"
-            android:visibility="visible">
+            android:layout_marginBottom="8dp">
 
-            <View
-                android:id="@+id/dot1"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:background="@drawable/bg_circle_primary"
-                android:layout_marginEnd="8dp" />
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_logo_temple"
+                android:contentDescription="@null" />
 
-            <View
-                android:id="@+id/dot2"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:background="@drawable/bg_circle_primary"
-                android:layout_marginEnd="8dp" />
+            <TextView
+                android:id="@+id/tvLogoEasy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/app_logo_easy"
+                android:textAppearance="@style/TextAppearance.EasyDarshan.AppName"
+                android:textSize="32sp" />
 
-            <View
-                android:id="@+id/dot3"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:background="@drawable/bg_circle_primary" />
+            <TextView
+                android:id="@+id/tvLogoDarshan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_logo_darshan"
+                android:textAppearance="@style/TextAppearance.EasyDarshan.AppName"
+                android:textSize="32sp" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tagline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tagline"
+            android:textAppearance="@style/TextAppearance.EasyDarshan.Greeting"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp" />
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:indeterminateTint="@color/primary" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

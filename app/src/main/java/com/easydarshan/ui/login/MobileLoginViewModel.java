@@ -102,15 +102,10 @@ public class MobileLoginViewModel extends AndroidViewModel {
                 isLoading.postValue(false);
                 
                 if (response.isSuccessful() && response.body() != null) {
-                    if (response.code() == 200 && response.body() != null) {
-                        successMessage.postValue(response.body().getMessage() != null ? 
-                            response.body().getMessage() : "OTP sent successfully");
-                        navigateToOtp.postValue(cleanedPhone);
-                        retryCount.set(0);
-                    } else {
-                        String errorMsg = response.body().getMessage();
-                        errorMessage.postValue(errorMsg != null ? errorMsg : "Failed to send OTP");
-                    }
+                    successMessage.postValue(response.body().getMessage() != null ? 
+                        response.body().getMessage() : "OTP sent successfully");
+                    navigateToOtp.postValue(cleanedPhone);
+                    retryCount.set(0);
                 } else {
                     String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
                     errorMessage.postValue(errorMsg);

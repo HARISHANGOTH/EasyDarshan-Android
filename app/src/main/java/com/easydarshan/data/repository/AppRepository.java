@@ -26,10 +26,11 @@ import com.easydarshan.data.model.PaymentVerificationResponse;
 import com.easydarshan.data.model.SingleBookingResponse;
 import com.easydarshan.data.model.SlotLockRequest;
 import com.easydarshan.data.model.SlotsResponse;
-import com.easydarshan.data.model.Temple;
 import com.easydarshan.data.model.TempleListResponse;
-import com.easydarshan.data.model.UpdatePasswordRequest;
+import com.easydarshan.data.model.TempleDetailResponse;
+import com.easydarshan.data.model.Temple;
 import com.easydarshan.data.model.UploadAvatarRequest;
+import com.easydarshan.data.model.UpdatePasswordRequest;
 import com.easydarshan.data.model.User;
 import com.easydarshan.data.model.VerifyOtpResponse;
 
@@ -44,13 +45,13 @@ public class AppRepository {
     private Context context;
     
     private AppRepository(Context context) {
-        this.context = context;
-        apiService = RetrofitClient.getInstance(context).getApiService();
+        this.context = context.getApplicationContext();
+        apiService = RetrofitClient.getInstance(this.context).getApiService();
     }
-    
+
     public static synchronized AppRepository getInstance(Context context) {
-        if (instance == null || instance.context != context) {
-            instance = new AppRepository(context);
+        if (instance == null) {
+            instance = new AppRepository(context.getApplicationContext());
         }
         return instance;
     }
@@ -73,7 +74,7 @@ public class AppRepository {
         apiService.getFeaturedTemples().enqueue(callback);
     }
     
-    public void getTempleDetails(Long id, Callback<Temple> callback) {
+    public void getTempleDetails(Long id, Callback<TempleDetailResponse> callback) {
         apiService.getTempleDetails(id).enqueue(callback);
     }
     

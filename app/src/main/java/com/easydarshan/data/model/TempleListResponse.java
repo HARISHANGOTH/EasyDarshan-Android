@@ -6,15 +6,20 @@ import java.util.List;
 
 public class TempleListResponse {
 
-    @SerializedName("temples")
-    private List<Temple> temples;
+    // Backend wraps list in: { "data": { "temples": [...], "total": N } }
+    @SerializedName("data")
+    private DataWrapper data;
 
     public List<Temple> getTemples() {
-        return temples;
+        return data != null ? data.temples : null;
     }
 
-    public void setTemples(List<Temple> temples) {
-        this.temples = temples;
+    public static class DataWrapper {
+        @SerializedName("temples")
+        private List<Temple> temples;
+
+        @SerializedName("total")
+        private Integer total;
     }
 }
 

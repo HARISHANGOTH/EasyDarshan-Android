@@ -2,112 +2,79 @@ package com.easydarshan.data.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class CreateBookingRequest {
+
     @SerializedName("templeId")
     private Long templeId;
-    
-    @SerializedName("date")
-    private String date;
-    
-    @SerializedName("timeSlot")
-    private String timeSlot;
-    
-    @SerializedName("darshanType")
-    private String darshanType;
-    
-    @SerializedName("devotees")
-    private Integer devotees;
-    
-    @SerializedName("paymentMethod")
-    private String paymentMethod;
-    
-    @SerializedName("amount")
-    private Double amount;
 
-    @SerializedName("devoteeNames")
-    private String devoteeNames;
+    @SerializedName("darshanTypeId")
+    private Long darshanTypeId;
+
+    @SerializedName("slotId")
+    private Long slotId;
+
+    @SerializedName("darshanDate")
+    private String darshanDate;
+
+    @SerializedName("members")
+    private List<MemberRequest> members;
 
     public CreateBookingRequest() {
     }
 
-    public CreateBookingRequest(Long templeId, String date, String timeSlot, String darshanType, 
-                                Integer devotees, String paymentMethod, Double amount, String devoteeNames) {
+    public CreateBookingRequest(Long templeId, Long darshanTypeId, Long slotId,
+                                String darshanDate, List<MemberRequest> members) {
         this.templeId = templeId;
-        this.date = date;
-        this.timeSlot = timeSlot;
-        this.darshanType = darshanType;
-        this.devotees = devotees;
-        this.paymentMethod = paymentMethod;
-        this.amount = amount;
-        this.devoteeNames = devoteeNames;
+        this.darshanTypeId = darshanTypeId;
+        this.slotId = slotId;
+        this.darshanDate = darshanDate;
+        this.members = members;
     }
 
-    public Long getTempleId() {
-        return templeId;
-    }
+    public Long getTempleId() { return templeId; }
+    public void setTempleId(Long templeId) { this.templeId = templeId; }
 
-    public void setTempleId(Long templeId) {
-        this.templeId = templeId;
-    }
+    public Long getDarshanTypeId() { return darshanTypeId; }
+    public void setDarshanTypeId(Long darshanTypeId) { this.darshanTypeId = darshanTypeId; }
 
-    public String getDate() {
-        return date;
-    }
+    public Long getSlotId() { return slotId; }
+    public void setSlotId(Long slotId) { this.slotId = slotId; }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
+    public String getDarshanDate() { return darshanDate; }
+    public void setDarshanDate(String darshanDate) { this.darshanDate = darshanDate; }
 
-    public String getTimeSlot() {
-        return timeSlot;
-    }
+    public List<MemberRequest> getMembers() { return members; }
+    public void setMembers(List<MemberRequest> members) { this.members = members; }
 
-    public void setTimeSlot(String timeSlot) {
-        this.timeSlot = timeSlot;
-    }
+    public static class MemberRequest {
+        @SerializedName("devoteeName")
+        private String devoteeName;
 
-    public String getDarshanType() {
-        return darshanType;
-    }
+        @SerializedName("age")
+        private Integer age;
 
-    public void setDarshanType(String darshanType) {
-        this.darshanType = darshanType;
-    }
+        @SerializedName("gender")
+        private String gender;
 
-    public Integer getDevotees() {
-        return devotees;
-    }
+        public MemberRequest(String devoteeName) {
+            this.devoteeName = devoteeName;
+        }
 
-    public void setDevotees(Integer devotees) {
-        this.devotees = devotees;
-    }
+        public MemberRequest(String devoteeName, Integer age, String gender) {
+            this.devoteeName = devoteeName;
+            this.age = age;
+            this.gender = gender;
+        }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
+        public String getDevoteeName() { return devoteeName; }
+        public void setDevoteeName(String devoteeName) { this.devoteeName = devoteeName; }
 
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
+        public Integer getAge() { return age; }
+        public void setAge(Integer age) { this.age = age; }
 
-    public Double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
-
-    public String getDevoteeNames() {
-        return devoteeNames;
-    }
-
-    public void setDevoteeNames(String devoteeNames) {
-        this.devoteeNames = devoteeNames;
+        public String getGender() { return gender; }
+        public void setGender(String gender) { this.gender = gender; }
     }
 }
-
-
-
-
-

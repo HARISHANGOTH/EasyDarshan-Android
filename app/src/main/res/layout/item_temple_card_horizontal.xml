@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="3dp"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp">
+
+        <!-- Temple Image -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivTempleImage"
+            android:layout_width="0dp"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/cd_temple_image"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.EasyDarshan.CardImage"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:src="@drawable/ic_temple_placeholder" />
+
+        <!-- Distance Badge -->
+        <TextView
+            android:id="@+id/tvDistanceBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/primary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_distance_badge"
+            android:layout_margin="12dp"
+            android:contentDescription="@string/cd_distance_badge"
+            android:drawableStart="@drawable/ic_location_small"
+            app:drawableTint="@color/primary"
+            android:drawablePadding="4dp"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="@id/ivTempleImage"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="1.2 km" />
+
+        <!-- Temple Name -->
+        <TextView
+            android:id="@+id/tvTempleName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/foreground"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="14dp"
+            app:layout_constraintTop_toBottomOf="@id/ivTempleImage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Tirupati Balaji Temple" />
+
+        <!-- City Row -->
+        <TextView
+            android:id="@+id/tvTempleCity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/foreground_secondary"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="6dp"
+            android:drawableStart="@drawable/ic_location_small"
+            app:drawableTint="@color/foreground_muted"
+            android:drawablePadding="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tvTempleName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Tirupati, AP" />
+
+        <!-- Live Queue Status Pill -->
+        <TextView
+            android:id="@+id/tvQueueStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:gravity="center"
+            android:background="@drawable/bg_status_pill"
+            android:text="@string/live_queue"
+            android:textColor="@color/success"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            tools:text="● Live Queue"
+            app:layout_constraintTop_toBottomOf="@id/tvTempleCity"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Wait Time -->
+        <TextView
+            android:id="@+id/tvWaitTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="15-20 min"
+            android:textColor="@color/success"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="@id/tvQueueStatus"
+            app:layout_constraintTop_toTopOf="@id/tvQueueStatus"/>
+
+        <!-- Join Queue Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnJoinQueue"
+            style="@style/Widget.EasyDarshan.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/join_queue"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:cornerRadius="14dp"
+            android:contentDescription="@string/cd_join_queue"
+            app:layout_constraintTop_toBottomOf="@id/tvQueueStatus"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

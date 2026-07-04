@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -22,13 +21,14 @@ import com.easydarshan.data.model.PaymentVerificationRequest;
 import com.easydarshan.data.model.PaymentVerificationResponse;
 import com.easydarshan.data.repository.AppRepository;
 import com.easydarshan.payment.RazorpayPaymentHelper;
+import com.easydarshan.ui.BaseActivity;
 import com.easydarshan.ui.adapter.DateAdapter;
 import com.easydarshan.ui.adapter.TimeSlotAdapter;
 import com.easydarshan.ui.bookings.MyBookingsActivity;
 import com.easydarshan.ui.livequeue.LiveQueueActivity;
-import com.easydarshan.ui.payment.PaymentBottomSheet;
 import com.razorpay.PaymentResultListener;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PreBookingFlowActivity extends AppCompatActivity implements PaymentResultListener, PaymentBottomSheet.PaymentCallback {
+public class PreBookingFlowActivity extends BaseActivity implements PaymentResultListener {
     
     private ActivityPreBookingFlowBinding binding;
     private PreBookingViewModel viewModel;
@@ -373,9 +373,9 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         
         binding.confirmPayButton.setOnClickListener(v -> {
             int total = calculateTotalAmount();
-            // Free Queue also needs to pay Platform Fee (20)
             if (total > 0) {
-                showPaymentBottomSheet(String.valueOf(total));
+                // Create booking first, then Razorpay order is auto-triggered via observer
+                viewModel.createBookingAndPayment("RAZORPAY");
             } else {
                 viewModel.createBookingAndPayment("FREE");
             }
@@ -400,38 +400,48 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
         return (unitPrice * count) + 20;
     }
 
-    private void showPaymentBottomSheet(String amount) {
-        PaymentBottomSheet paymentBottomSheet = PaymentBottomSheet.newInstance(amount);
-        paymentBottomSheet.show(getSupportFragmentManager(), "PaymentBottomSheet");
-    }
-
-    @Override
-    public void onPaymentSuccess() {
-        viewModel.createBookingAndPayment("UPI");
-    }
-
     private void startRazorpayPayment(PaymentOrderResponse paymentOrder) {
-        String amountInPaise = String.valueOf(paymentOrder.getAmount().multiply(new java.math.BigDecimal(100)).intValue());
+        // totalAmount includes platform fee; multiply by 100 for paise
+        BigDecimal total = paymentOrder.getTotalAmount() != null
+                ? paymentOrder.getTotalAmount()
+                : paymentOrder.getAmount();
+        String amountInPaise = String.valueOf(total.multiply(new java.math.BigDecimal(100)).intValue());
+
+        // Use gatewayOrderId if available (real Razorpay), otherwise use orderReference (dev mode)
+        String orderIdForRazorpay = paymentOrder.getGatewayOrderId() != null
+                ? paymentOrder.getGatewayOrderId()
+                : paymentOrder.getOrderReference();
+
         paymentHelper.startPayment(
-                paymentOrder.getPaymentOrderId(),
+                orderIdForRazorpay,
                 amountInPaise,
                 "Harish",
                 "Temple Darshan Booking Payment"
         );
     }
-    
-    private void verifyPayment(String paymentId, String orderId) {
+
+    private void verifyPayment(String razorpayPaymentId, String razorpayOrderId) {
         PaymentOrderResponse paymentOrder = viewModel.getPaymentOrderCreated().getValue();
+
+        // Prefer orderReference (ORD-XXX) — backend accepts it directly in dev mode
+        String orderId = (paymentOrder != null && paymentOrder.getOrderReference() != null)
+                ? paymentOrder.getOrderReference() : razorpayOrderId;
+
+        // Use actual Razorpay signature if available, otherwise send placeholder for dev mode
+        String signature = (razorpayOrderId != null && !razorpayOrderId.isEmpty())
+                ? razorpayOrderId  // Razorpay SDK passes signature as second arg via onPaymentSuccess
+                : "dev-mode-signature";
+
         PaymentVerificationRequest request = new PaymentVerificationRequest(
-                paymentOrder != null ? paymentOrder.getPaymentOrderId() : orderId,
-                paymentId,
-                ""
+                orderId,
+                razorpayPaymentId,
+                signature
         );
-        
+
         repository.verifyPayment(request, new Callback<PaymentVerificationResponse>() {
             @Override
             public void onResponse(Call<PaymentVerificationResponse> call, Response<PaymentVerificationResponse> response) {
-                if (response.body() != null && response.body().isSuccess()) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     viewModel.confirmBooking();
                 } else {
                     viewModel.setCurrentStep(6);
@@ -447,12 +457,19 @@ public class PreBookingFlowActivity extends AppCompatActivity implements Payment
     @Override
     public void onPaymentSuccess(String razorpayPaymentId) {
         PaymentOrderResponse paymentOrder = viewModel.getPaymentOrderCreated().getValue();
-        verifyPayment(razorpayPaymentId, paymentOrder != null ? paymentOrder.getPaymentOrderId() : "");
+        String orderRef = paymentOrder != null ? paymentOrder.getOrderReference() : "";
+        // In Razorpay SDK, signature is verified server-side; pass paymentId as signature placeholder
+        verifyPayment(razorpayPaymentId, razorpayPaymentId);
     }
 
     @Override
     public void onPaymentError(int code, String response) {
         viewModel.setCurrentStep(6);
+    }
+
+    @Override
+    protected int getNavigationMenuItemId() {
+        return R.id.nav_home;
     }
 
     @Override

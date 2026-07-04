@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/temple_card_width"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/spacing_16"
+    android:layout_marginBottom="@dimen/spacing_8"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="@dimen/radius_large"
+    app:cardElevation="@dimen/card_elevation">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/spacing_16">
+
+        <!-- Temple Image -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivTemple"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/temple_card_image_height"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_temple_placeholder"
+            android:contentDescription="@string/cd_temple_image"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.EasyDarshan.CardImage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <!-- Distance Badge -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_margin="@dimen/spacing_12"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/white"
+            app:layout_constraintTop_toTopOf="@id/ivTemple"
+            app:layout_constraintEnd_toEndOf="@id/ivTemple">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/spacing_12"
+                android:paddingEnd="@dimen/spacing_12">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_location"
+                    app:tint="@color/primary"/>
+
+                <TextView
+                    android:id="@+id/tvDistance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    tools:text="1.2 km"
+                    android:textColor="@color/primary"
+                    android:textSize="@dimen/text_xs"
+                    android:textStyle="bold"/>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Temple Name -->
+        <TextView
+            android:id="@+id/tvTempleName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_16"
+            android:layout_marginTop="@dimen/spacing_16"
+            android:layout_marginEnd="@dimen/spacing_16"
+            tools:text="Tirupati Balaji Temple"
+            android:textColor="@color/foreground"
+            android:textSize="@dimen/text_lg"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/ivTemple"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- Location -->
+        <LinearLayout
+            android:id="@+id/layoutLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="@id/tvTempleName"
+            app:layout_constraintTop_toBottomOf="@id/tvTempleName">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_location"
+                app:tint="@color/foreground_muted"/>
+
+            <TextView
+                android:id="@+id/tvLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                tools:text="Tirupati"
+                android:textColor="@color/foreground_secondary"
+                android:textSize="@dimen/text_sm"/>
+
+        </LinearLayout>
+
+        <!-- Live Queue Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipQueue"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_12"
+            android:text="@string/live_queue"
+            android:textColor="@color/success_foreground"
+            android:textSize="@dimen/text_xs"
+            app:chipBackgroundColor="@color/success_light"
+            app:chipCornerRadius="20dp"
+            app:chipIcon="@drawable/ic_circle_green"
+            app:chipIconTint="@color/success_foreground"
+            app:chipStrokeWidth="0dp"
+            app:layout_constraintStart_toStartOf="@id/tvTempleName"
+            app:layout_constraintTop_toBottomOf="@id/layoutLocation"/>
+
+        <!-- Waiting Time -->
+        <TextView
+            android:id="@+id/tvWaiting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="15-20 min"
+            android:textColor="@color/primary"
+            android:textSize="@dimen/text_lg"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="@dimen/spacing_16"
+            app:layout_constraintBottom_toBottomOf="@id/chipQueue"
+            app:layout_constraintTop_toTopOf="@id/chipQueue"/>
+
+        <!-- Join Queue Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnJoinQueue"
+            style="@style/Widget.EasyDarshan.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_marginStart="@dimen/spacing_16"
+            android:layout_marginTop="@dimen/spacing_16"
+            android:layout_marginEnd="@dimen/spacing_16"
+            android:text="@string/join_queue"
+            android:textAllCaps="false"
+            android:textSize="@dimen/text_md"
+            android:contentDescription="@string/cd_join_queue"
+            app:layout_constraintTop_toBottomOf="@id/chipQueue"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

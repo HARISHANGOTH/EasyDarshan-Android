@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.DarshanType;
 import com.easydarshan.data.model.Temple;
+import com.easydarshan.data.model.TempleDetailResponse;
 import com.easydarshan.data.repository.AppRepository;
 import com.easydarshan.utils.ErrorHandler;
 import com.easydarshan.utils.NetworkUtils;
@@ -72,16 +73,20 @@ public class TempleDetailsViewModel extends AndroidViewModel {
         
         isLoading.setValue(true);
         errorMessage.setValue(null);
-        repository.getTempleDetails(templeId, new Callback<Temple>() {
+        repository.getTempleDetails(templeId, new Callback<TempleDetailResponse>() {
             @Override
-            public void onResponse(Call<Temple> call, Response<Temple> response) {
+            public void onResponse(Call<TempleDetailResponse> call, Response<TempleDetailResponse> response) {
                 isLoading.postValue(false);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    // Backend returns a plain Temple object (not wrapped in ApiResponse)
-                    temple.postValue(response.body());
-                    // Load darshan types for this temple
-                    loadDarshanTypes(templeId);
+                    TempleDetailResponse body = response.body();
+                    // Backend wraps in: { data: { temple: { ... } } }
+                    if (body.getData() != null && body.getData().getTemple() != null) {
+                        temple.postValue(body.getData().getTemple());
+                        loadDarshanTypes(templeId);
+                    } else {
+                        errorMessage.postValue("Temple details unavailable");
+                    }
                 } else {
                     String errorMsg = ErrorHandler.getErrorMessage(response.code(), null);
                     errorMessage.postValue(errorMsg);
@@ -89,7 +94,7 @@ public class TempleDetailsViewModel extends AndroidViewModel {
             }
             
             @Override
-            public void onFailure(Call<Temple> call, Throwable t) {
+            public void onFailure(Call<TempleDetailResponse> call, Throwable t) {
                 isLoading.postValue(false);
                 String errorMsg = ErrorHandler.getErrorMessage(t, getApplication());
                 errorMessage.postValue(errorMsg);
@@ -101,7 +106,7 @@ public class TempleDetailsViewModel extends AndroidViewModel {
         repository.getTempleDarshans(templeId, new Callback<ApiResponse<List<DarshanType>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<DarshanType>>> call, Response<ApiResponse<List<DarshanType>>> response) {
-                if (response.body() != null && response.body().isSuccess()) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     darshanTypes.postValue(response.body().getData());
                 }
             }

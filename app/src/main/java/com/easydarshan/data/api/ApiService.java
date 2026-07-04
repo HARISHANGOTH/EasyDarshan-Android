@@ -20,8 +20,10 @@ import com.easydarshan.data.model.PaymentVerificationResponse;
 import com.easydarshan.data.model.SingleBookingResponse;
 import com.easydarshan.data.model.SlotsResponse;
 import com.easydarshan.data.model.Temple;
+import com.easydarshan.data.model.TempleDetailResponse;
 import com.easydarshan.data.model.TempleListResponse;
 import com.easydarshan.data.model.User;
+
 import com.easydarshan.data.model.VerifyOtpResponse;
 
 import java.util.List;
@@ -53,9 +55,9 @@ public interface ApiService {
     Call<TempleListResponse> getFeaturedTemples();
     
     @GET("api/v1/temples/{id}")
-    Call<Temple> getTempleDetails(@Path("id") Long id);
+    Call<TempleDetailResponse> getTempleDetails(@Path("id") Long id);
     
-    @GET("api/v1/temples/{id}/darshans")
+    @GET("api/v1/temples/{id}/darshan-types")
     Call<ApiResponse<List<com.easydarshan.data.model.DarshanType>>> getTempleDarshans(@Path("id") Long id);
     
     // Booking flow endpoints (auth required)
@@ -96,7 +98,7 @@ public interface ApiService {
     @GET("api/v1/payments/calculate/{bookingId}")
     Call<ApiResponse<com.easydarshan.data.model.PaymentCalculationResponse>> calculatePayment(@Path("bookingId") String bookingId);
     
-    @POST("api/v1/payments/order")
+    @POST("api/v1/payments/orders")
     Call<PaymentOrderResponse> createPaymentOrder(@Body PaymentOrderRequest request);
     
     @POST("api/v1/payments/verify")

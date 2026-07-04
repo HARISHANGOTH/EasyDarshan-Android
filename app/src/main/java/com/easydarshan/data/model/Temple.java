@@ -5,14 +5,20 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Objects;
 
 public class Temple {
-    @SerializedName("id")
+    // Backend field: templeId (used in detail endpoint)
+    @SerializedName("templeId")
     private Long id;
     
-    @SerializedName("name")
+    // Backend field: templeName
+    @SerializedName("templeName")
     private String name;
     
-    @SerializedName("location")
+    // Backend uses city+state separately; this holds the composed location string
+    @SerializedName("city")
     private String location;
+
+    @SerializedName("state")
+    private String state;
     
     @SerializedName("distance")
     private String distance;
@@ -23,7 +29,8 @@ public class Temple {
     @SerializedName("queueText")
     private String queueText;
     
-    @SerializedName("image")
+    // List endpoint sends "primaryImageUrl", detail endpoint sends "imageUrl"
+    @SerializedName(value = "primaryImageUrl", alternate = {"imageUrl"})
     private String image;
     
     @SerializedName("openingTime")
@@ -48,6 +55,14 @@ public class Temple {
         this.image = image;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
     public Long getId() {
         return id;
     }
@@ -65,7 +80,11 @@ public class Temple {
     }
 
     public String getLocation() {
-        return location;
+        // Compose a readable location from city and state
+        if (location != null && state != null) return location + ", " + state;
+        if (location != null) return location;
+        if (state != null) return state;
+        return null;
     }
 
     public void setLocation(String location) {

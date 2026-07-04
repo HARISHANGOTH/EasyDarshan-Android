@@ -1,62 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base Colors -->
+    <!-- Base -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    
-    <!-- Primary Colors (Refined) -->
-    <color name="primary">#FF6A00</color>
-    <color name="primary_foreground">#FFFFFFFF</color>
-    <color name="primary_dark">#E65C00</color>
-    <color name="primary_light">#FFF3EB</color>
 
-    <!-- Secondary Colors -->
+    <!-- Branding -->
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1D4ED8</color>
+    <color name="primary_light">#DBEAFE</color>
     <color name="secondary">#F3F4F6</color>
 
-    <!-- Background Colors -->
-    <color name="background">#FFFFFF</color>
-    <color name="background_gray">#F9FAFB</color>
+    <!-- Backgrounds -->
+    <color name="background">#F8FAFC</color>
+    <color name="background_gray">#F8FAFC</color>
     <color name="background_orange_light">#FFF3EB</color>
     <color name="background_orange_lighter">#FFF4E6</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="banner_background">#EAF2FF</color>
+    <color name="notif_card_bg">#F0F6FF</color>
 
-    <!-- Foreground Colors (Professional Palette) -->
-    <color name="foreground">#1F1F1F</color>
-    <color name="foreground_secondary">#777777</color>
-    <color name="foreground_muted">#9CA3AF</color>
+    <!-- Text -->
+    <color name="foreground">#111827</color>
+    <color name="foreground_secondary">#6B7280</color>
+    <color name="foreground_muted">#94A3B8</color>
+    <color name="text_hint">#98A2B3</color>
+    <color name="text_body">#64748B</color>
 
-    <!-- Status Colors -->
-    <color name="success">#10B981</color>
+    <!-- Status -->
+    <color name="success">#047857</color>
     <color name="success_light">#D1FAE5</color>
-    <color name="success_foreground">#065F46</color>
-
+    <color name="success_foreground">#047857</color>
     <color name="warning">#F59E0B</color>
     <color name="warning_light">#FEF3C7</color>
-
-    <color name="error">#D4183D</color>
+    <color name="error">#EF4444</color>
     <color name="error_light">#FEE2E2</color>
-
     <color name="info">#3B82F6</color>
     <color name="info_light">#DBEAFE</color>
 
-    <!-- Muted & Utility -->
-    <color name="muted">#ECECF0</color>
+    <!-- Borders -->
+    <color name="border_light">#E8EDF4</color>
+    <color name="border">#E5E7EB</color>
     <color name="input_border">#E5E7EB</color>
+
+    <!-- Utility -->
+    <color name="muted">#ECECF0</color>
     <color name="queue_high_bg">#FEE2E2</color>
-
-    <!-- Border Colors -->
-    <color name="border">#EAEAEA</color>
-    <color name="border_light">#F3F4F5</color>
-
-    <!-- Gradient Colors -->
-    <color name="gradient_orange_start">#FF6A00</color>
-    <color name="gradient_orange_end">#FF8C00</color>
-    
-    <!-- Overlay Colors -->
     <color name="overlay_white">#E6FFFFFF</color>
     <color name="overlay_black">#80000000</color>
-    
-    <!-- Devotional Colors -->
+
+    <!-- Devotional Legacy -->
     <color name="gold">#D4AF37</color>
     <color name="gold_light">#F4E4BC</color>
     <color name="gold_dark">#B8941F</color>
+    <color name="gradient_orange_start">#FF6A00</color>
+    <color name="gradient_orange_end">#FF8C00</color>
+
+    <!-- Shimmer -->
+    <color name="shimmer_base">#E2E8F0</color>
+    <color name="shimmer_highlight">#F8FAFC</color>
 </resources>

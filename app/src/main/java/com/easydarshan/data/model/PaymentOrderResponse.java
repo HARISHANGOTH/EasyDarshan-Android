@@ -1,77 +1,56 @@
 package com.easydarshan.data.model;
 
 import com.google.gson.annotations.SerializedName;
+
 import java.math.BigDecimal;
 
 public class PaymentOrderResponse {
-    @SerializedName("success")
-    private boolean success;
-    
-    @SerializedName("message")
-    private String message;
-    
-    @SerializedName("paymentOrderId")
-    private String paymentOrderId;
-    
-    @SerializedName("gateway")
-    private String gateway;
-    
-    @SerializedName("amount")
-    private BigDecimal amount;
-    
-    @SerializedName("bookingId")
-    private String bookingId;
 
+    @SerializedName("statusCode")
+    private String statusCode;
+
+    @SerializedName("statusMessage")
+    private String statusMessage;
+
+    // Backend returns: { statusCode, statusMessage, paymentOrder: { ... } }
+    @SerializedName("paymentOrder")
+    private PaymentOrderData paymentOrder;
+
+    public String getStatusCode() { return statusCode; }
+    public String getStatusMessage() { return statusMessage; }
+    public PaymentOrderData getPaymentOrder() { return paymentOrder; }
+
+    // Convenience getters — delegate to inner paymentOrder object
+    public Long getId() { return paymentOrder != null ? paymentOrder.id : null; }
+    public String getOrderReference() { return paymentOrder != null ? paymentOrder.orderReference : null; }
+    public String getGatewayOrderId() { return paymentOrder != null ? paymentOrder.gatewayOrderId : null; }
+    public String getGatewayProvider() { return paymentOrder != null ? paymentOrder.gatewayProvider : null; }
+    public BigDecimal getAmount() { return paymentOrder != null ? paymentOrder.amount : null; }
+    public BigDecimal getPlatformFee() { return paymentOrder != null ? paymentOrder.platformFee : null; }
+    public BigDecimal getTotalAmount() { return paymentOrder != null ? paymentOrder.totalAmount : null; }
+    public String getCurrency() { return paymentOrder != null ? paymentOrder.currency : null; }
+    public String getOrderStatus() { return paymentOrder != null ? paymentOrder.orderStatus : null; }
+    public String getRazorpayKeyId() { return paymentOrder != null ? paymentOrder.razorpayKeyId : null; }
+
+    // Legacy alias used by PreBookingViewModel
+    public String getPaymentOrderId() { return getOrderReference(); }
+
+    // Success = order was created and we have a reference
     public boolean isSuccess() {
-        return success;
+        return statusCode != null && statusCode.startsWith("SUCCESS")
+                && paymentOrder != null && paymentOrder.orderReference != null;
     }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getPaymentOrderId() {
-        return paymentOrderId;
-    }
-
-    public void setPaymentOrderId(String paymentOrderId) {
-        this.paymentOrderId = paymentOrderId;
-    }
-
-    public String getGateway() {
-        return gateway;
-    }
-
-    public void setGateway(String gateway) {
-        this.gateway = gateway;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public String getBookingId() {
-        return bookingId;
-    }
-
-    public void setBookingId(String bookingId) {
-        this.bookingId = bookingId;
+    public static class PaymentOrderData {
+        @SerializedName("id")           Long id;
+        @SerializedName("orderReference") String orderReference;
+        @SerializedName("gatewayOrderId") String gatewayOrderId;
+        @SerializedName("gatewayProvider") String gatewayProvider;
+        @SerializedName("amount")        BigDecimal amount;
+        @SerializedName("platformFee")   BigDecimal platformFee;
+        @SerializedName("totalAmount")   BigDecimal totalAmount;
+        @SerializedName("currency")      String currency;
+        @SerializedName("orderStatus")   String orderStatus;
+        @SerializedName("razorpayKeyId") String razorpayKeyId;
     }
 }
-
-
-
-
-

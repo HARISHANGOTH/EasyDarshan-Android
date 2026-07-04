@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Simple temple illustration -->
+    <path
+        android:fillColor="#BFDBFE"
+        android:pathData="M60,20 L100,60 L100,100 L20,100 L20,60 Z" />
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M55,10 H65 V20 H55 Z" />
+    <path
+        android:fillColor="#3B82F6"
+        android:pathData="M40,100 L40,80 H80 V100 Z" />
+</vector>

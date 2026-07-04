@@ -26,15 +26,63 @@
     <string name="verify_continue">Verify &amp; Continue</string>
     
     <!-- Home Screen -->
-    <string name="namaste">Namaste 🙏</string>
+    <string name="namaste">Namaste,</string>
     <string name="find_temple">Find your temple</string>
-    <string name="search_temple">Search temple by name or city</string>
+    <string name="search_temple">Search temple, city...</string>
     <string name="special_occasion">Special Occasion</string>
     <string name="book_darshan_early">Book your darshan early</string>
+    <string name="nearby_live_queues">Nearby Live Queues</string>
     <string name="nearby_temples">Nearby Temples</string>
     <string name="view_all">View All</string>
     <string name="book_darshan">Book Darshan</string>
-    
+    <string name="live_queue">Live Queue</string>
+    <string name="join_queue">Join Queue</string>
+
+    <!-- Home Banner Card -->
+    <string name="banner_title">Plan your visit in advance</string>
+    <string name="banner_subtitle">Book Darshan now and avoid last-minute waiting.</string>
+    <string name="banner_cta">Book Darshan Now</string>
+
+    <!-- Notification Permission Card -->
+    <string name="notif_card_title">Stay updated!</string>
+    <string name="notif_card_subtitle">Enable notifications for queue updates and temple announcements.</string>
+    <string name="notif_card_enable">Enable</string>
+    <string name="notif_card_dismiss">Dismiss</string>
+
+    <!-- Empty / Error States -->
+    <string name="no_nearby_temples">No Nearby Temples</string>
+    <string name="no_nearby_temples_msg">Please try searching another location.</string>
+    <string name="retry">Retry</string>
+    <string name="no_internet">No Internet Connection</string>
+    <string name="no_internet_msg">Please check your connection and try again.</string>
+
+    <!-- Logo split text -->
+    <string name="app_logo_easy">Easy</string>
+    <string name="app_logo_darshan">Darshan</string>
+
+    <!-- Bottom Navigation tabs -->
+    <string name="home_tab">Home</string>
+    <string name="live_queue_tab">Live Queue</string>
+    <string name="bookings_tab">Bookings</string>
+    <string name="profile_tab">Profile</string>
+
+    <!-- Accessibility -->
+    <string name="cd_logo">EasyDarshan logo</string>
+    <string name="cd_retry">Retry loading temples</string>
+    <string name="cd_banner_illustration">Temple illustration</string>
+    <string name="cd_bell_illustration">Bell illustration</string>
+    <string name="cd_menu">Open menu</string>
+    <string name="cd_notification">Notifications</string>
+    <string name="cd_search">Search temples</string>
+    <string name="cd_temple_image">Temple image</string>
+    <string name="cd_view_all_temples">View all temples</string>
+    <string name="cd_book_darshan_now">Book darshan now</string>
+    <string name="cd_enable_notifications">Enable notifications</string>
+    <string name="cd_dismiss_notification_card">Dismiss notification card</string>
+    <string name="cd_distance_badge">Distance badge</string>
+    <string name="cd_join_queue">Join queue for this temple</string>
+    <string name="cd_bell_illustration_alt">Bell illustration</string>
+
     <!-- Temple Details -->
     <string name="about_temple">About Temple</string>
     <string name="darshan_types">Darshan Types</string>

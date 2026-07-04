@@ -2,36 +2,58 @@ package com.easydarshan.data.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.math.BigDecimal;
+
 public class PaymentOrderRequest {
+
     @SerializedName("bookingId")
     private String bookingId;
-    
-    @SerializedName("paymentMethod")
-    private String paymentMethod; // UPI, CARD, NET_BANKING
 
-    public PaymentOrderRequest(String bookingId, String paymentMethod) {
+    @SerializedName("amount")
+    private BigDecimal amount;
+
+    @SerializedName("platformFee")
+    private BigDecimal platformFee;
+
+    @SerializedName("userId")
+    private Long userId;
+
+    @SerializedName("templeId")
+    private Long templeId;
+
+    @SerializedName("currency")
+    private String currency = "INR";
+
+    @SerializedName("gatewayProvider")
+    private String gatewayProvider = "RAZORPAY";
+
+    public PaymentOrderRequest(String bookingId, BigDecimal amount, BigDecimal platformFee,
+                               Long userId, Long templeId) {
         this.bookingId = bookingId;
-        this.paymentMethod = paymentMethod;
+        this.amount = amount;
+        this.platformFee = platformFee;
+        this.userId = userId;
+        this.templeId = templeId;
     }
 
-    public String getBookingId() {
-        return bookingId;
-    }
+    public String getBookingId() { return bookingId; }
+    public void setBookingId(String bookingId) { this.bookingId = bookingId; }
 
-    public void setBookingId(String bookingId) {
-        this.bookingId = bookingId;
-    }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
+    public BigDecimal getPlatformFee() { return platformFee; }
+    public void setPlatformFee(BigDecimal platformFee) { this.platformFee = platformFee; }
 
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
+    public Long getTempleId() { return templeId; }
+    public void setTempleId(Long templeId) { this.templeId = templeId; }
+
+    public String getCurrency() { return currency; }
+    public void setCurrency(String currency) { this.currency = currency; }
+
+    public String getGatewayProvider() { return gatewayProvider; }
+    public void setGatewayProvider(String gatewayProvider) { this.gatewayProvider = gatewayProvider; }
 }
-
-
-
-
-

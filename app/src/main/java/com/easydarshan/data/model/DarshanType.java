@@ -3,19 +3,22 @@ package com.easydarshan.data.model;
 import com.google.gson.annotations.SerializedName;
 
 public class DarshanType {
-    @SerializedName("id")
+    // Backend field: darshanTypeId
+    @SerializedName("darshanTypeId")
     private Long id;
     
     @SerializedName("name")
     private String name;
     
-    @SerializedName("price")
+    // Backend field: amount (BigDecimal serialized as number)
+    @SerializedName("amount")
     private String price;
     
     @SerializedName("duration")
     private String duration;
     
-    @SerializedName("isActive")
+    // Backend field: active (boolean, not isActive)
+    @SerializedName("active")
     private Boolean isActive;
 
     public DarshanType() {

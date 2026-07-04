@@ -1,127 +1,146 @@
 package com.easydarshan.ui.adapter;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.easydarshan.R;
 import com.easydarshan.data.model.Temple;
+import com.easydarshan.databinding.ItemTempleCardHorizontalBinding;
 
-import java.util.List;
+public class TempleAdapter extends ListAdapter<Temple, TempleAdapter.TempleViewHolder> {
 
-public class TempleAdapter extends RecyclerView.Adapter<TempleAdapter.TempleViewHolder> {
-    
-    private List<Temple> temples;
-    private OnTempleClickListener listener;
-    
     public interface OnTempleClickListener {
         void onTempleClick(Temple temple);
     }
-    
-    public TempleAdapter(List<Temple> temples, OnTempleClickListener listener) {
-        this.temples = temples;
+
+    private final OnTempleClickListener listener;
+
+    public TempleAdapter(OnTempleClickListener listener) {
+        super(DIFF_CALLBACK);
         this.listener = listener;
     }
-    
+
+    // Backward-compatible constructor (null first arg ignored)
+    public TempleAdapter(Object ignored, OnTempleClickListener listener) {
+        this(listener);
+    }
+
+    private static final DiffUtil.ItemCallback<Temple> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<Temple>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull Temple o, @NonNull Temple n) {
+                    return o.getId() != null && o.getId().equals(n.getId());
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull Temple o, @NonNull Temple n) {
+                    return o.equals(n);
+                }
+            };
+
     @NonNull
     @Override
     public TempleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_temple_card, parent, false);
-        return new TempleViewHolder(view);
+        ItemTempleCardHorizontalBinding binding = ItemTempleCardHorizontalBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+
+        // Calculate card width as 78% of screen width for responsive "peek" effect
+        android.util.DisplayMetrics metrics = parent.getContext().getResources().getDisplayMetrics();
+        int screenWidth = metrics.widthPixels;
+        int cardWidth = (int) (screenWidth * 0.78f);
+
+        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) binding.getRoot().getLayoutParams();
+        if (params == null) {
+            params = new RecyclerView.LayoutParams(cardWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+        } else {
+            params.width = cardWidth;
+        }
+        binding.getRoot().setLayoutParams(params);
+
+        return new TempleViewHolder(binding);
     }
-    
+
     @Override
     public void onBindViewHolder(@NonNull TempleViewHolder holder, int position) {
-        Temple temple = temples.get(position);
-        holder.templeName.setText(temple.getName());
-        holder.templeLocation.setText(temple.getLocation());
-        holder.templeDistance.setText(temple.getDistance());
-        holder.queueStatusBadge.setText(temple.getQueueText());
+        holder.bind(getItem(position), listener);
+    }
 
-        Glide.with(holder.itemView.getContext())
-                .load(temple.getImage())
-                .placeholder(R.drawable.ic_temple_placeholder)
-                .into(holder.templeImage);
-        
-        View.OnClickListener clickListener = v -> {
-            if (listener != null) {
-                listener.onTempleClick(temple);
-            }
-        };
+    /** Legacy method — delegates to ListAdapter submitList */
+    public void updateList(java.util.List<Temple> temples) {
+        submitList(temples);
+    }
 
-        holder.itemView.setOnClickListener(clickListener);
-        if (holder.bookDarshanButton != null) {
-            holder.bookDarshanButton.setOnClickListener(clickListener);
-        }
-    }
-    
-    @Override
-    public int getItemCount() {
-        return temples != null ? temples.size() : 0;
-    }
-    
-    public void updateList(List<Temple> newTemples) {
-        TempleDiffCallback diffCallback = new TempleDiffCallback(this.temples, newTemples);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-        
-        this.temples = newTemples;
-        diffResult.dispatchUpdatesTo(this);
-    }
-    
     static class TempleViewHolder extends RecyclerView.ViewHolder {
-        ImageView templeImage;
-        TextView templeName;
-        TextView templeLocation;
-        TextView templeDistance;
-        TextView queueStatusBadge;
-        View bookDarshanButton;
-        
-        public TempleViewHolder(@NonNull View itemView) {
-            super(itemView);
-            templeImage = itemView.findViewById(R.id.templeImage);
-            templeName = itemView.findViewById(R.id.templeName);
-            templeLocation = itemView.findViewById(R.id.templeLocation);
-            templeDistance = itemView.findViewById(R.id.templeDistance);
-            queueStatusBadge = itemView.findViewById(R.id.queueStatusBadge);
-            bookDarshanButton = itemView.findViewById(R.id.bookDarshanButton);
-        }
-    }
 
-    private static class TempleDiffCallback extends DiffUtil.Callback {
-        private final List<Temple> oldList;
-        private final List<Temple> newList;
+        private final ItemTempleCardHorizontalBinding b;
 
-        public TempleDiffCallback(List<Temple> oldList, List<Temple> newList) {
-            this.oldList = oldList;
-            this.newList = newList;
+        TempleViewHolder(ItemTempleCardHorizontalBinding binding) {
+            super(binding.getRoot());
+            this.b = binding;
         }
 
-        @Override
-        public int getOldListSize() {
-            return oldList != null ? oldList.size() : 0;
+        void bind(Temple temple, OnTempleClickListener listener) {
+            b.tvTempleName.setText(temple.getName());
+            b.tvTempleCity.setText(temple.getLocation());
+            b.tvDistanceBadge.setText(temple.getDistance());
+
+            bindQueueStatus(temple.getQueueStatus(), temple.getQueueText());
+
+            Glide.with(b.ivTempleImage.getContext())
+                    .load(temple.getImage())
+                    .placeholder(R.drawable.ic_temple_placeholder)
+                    .error(R.drawable.ic_temple_placeholder)
+                    .centerCrop()
+                    .into(b.ivTempleImage);
+
+            b.getRoot().setOnClickListener(v -> {
+                if (listener != null) listener.onTempleClick(temple);
+            });
+            b.btnJoinQueue.setOnClickListener(v -> {
+                if (listener != null) listener.onTempleClick(temple);
+            });
         }
 
-        @Override
-        public int getNewListSize() {
-            return newList != null ? newList.size() : 0;
-        }
+        private void bindQueueStatus(String status, String queueText) {
+            // Live Queue chip — always green per spec
+            String chipLabel = (queueText != null && !queueText.isEmpty())
+                    ? "● " + queueText
+                    : "● Live Queue";
+            b.tvQueueStatus.setText(chipLabel);
 
-        @Override
-        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-            return oldList.get(oldItemPosition).getId() == newList.get(newItemPosition).getId();
-        }
+            // Wait time derived from queue status
+            String waitTime;
+            int chipBg;
+            int chipText;
 
-        @Override
-        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-            return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
+            if ("HIGH".equalsIgnoreCase(status)) {
+                waitTime = "~60+ min wait";
+                chipBg = R.color.error_light;
+                chipText = R.color.error;
+            } else if ("MEDIUM".equalsIgnoreCase(status)) {
+                waitTime = "~30 min wait";
+                chipBg = R.color.warning_light;
+                chipText = R.color.warning;
+            } else {
+                // Default: LOW / unknown → green
+                waitTime = "~10 min wait";
+                chipBg = R.color.success_light;
+                chipText = R.color.success_foreground;
+            }
+
+            b.tvWaitTime.setText(waitTime);
+            b.tvQueueStatus.setBackgroundTintList(ColorStateList.valueOf(
+                    ContextCompat.getColor(b.getRoot().getContext(), chipBg)));
+            b.tvQueueStatus.setTextColor(
+                    ContextCompat.getColor(b.getRoot().getContext(), chipText));
         }
     }
 }

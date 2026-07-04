@@ -4,13 +4,20 @@
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorSecondary">@color/secondary</item>
-        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
     <style name="Theme.EasyDarshan" parent="Base.Theme.EasyDarshan" />
 
-    <style name="App.Custom.Indicator.Transparent" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+    <!-- Transparent active indicator for bottom nav -->
+    <style name="App.Custom.Indicator.Transparent" parent="">
         <item name="android:color">@android:color/transparent</item>
-        <item name="marginHorizontal">0dp</item>
+    </style>
+
+    <style name="NavViewTheme">
+        <item name="colorSecondaryContainer">@android:color/transparent</item>
     </style>
 </resources>
