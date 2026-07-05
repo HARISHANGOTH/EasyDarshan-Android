@@ -102,7 +102,7 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
         binding.step1Content.setVisibility(step == 1 ? View.VISIBLE : View.GONE);
         binding.step2Content.setVisibility(step == 2 ? View.VISIBLE : View.GONE);
         binding.step3Content.setVisibility(View.GONE); // Extras screen always hidden
-        binding.step4Content.setVisibility(step == 3 ? View.VISIBLE : View.GONE); // logic step 3 is visual step 4
+        binding.step4Content.setVisibility(step == 3 ? View.VISIBLE : View.GONE); // logic step 3 is Review & Pay
         binding.successContent.setVisibility(step == 4 ? View.VISIBLE : View.GONE);
         binding.failedContent.setVisibility(step == 5 ? View.VISIBLE : View.GONE);
 
@@ -127,16 +127,11 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
         binding.step2Circle.setTextColor(ContextCompat.getColor(this, step >= 2 ? R.color.white : R.color.foreground));
         binding.label2.setTextColor(ContextCompat.getColor(this, step >= 2 ? R.color.primary : R.color.foreground_secondary));
 
-        // Step 3 (Extras) - logic step 3 skips extras but stepper still has 4 dots
+        // Step 3 (Review & Pay)
         binding.step3Circle.setBackgroundResource(step >= 3 ? R.drawable.bg_step_done : R.drawable.bg_step_todo);
-        binding.step3Circle.setText(step >= 3 ? "✓" : "3");
+        binding.step3Circle.setText("3");
         binding.step3Circle.setTextColor(ContextCompat.getColor(this, step >= 3 ? R.color.white : R.color.foreground));
         binding.label3.setTextColor(ContextCompat.getColor(this, step >= 3 ? R.color.primary : R.color.foreground_secondary));
-
-        // Step 4 (Review & Pay)
-        binding.step4Circle.setBackgroundResource(step >= 3 ? R.drawable.bg_step_done : R.drawable.bg_step_todo);
-        binding.step4Circle.setTextColor(ContextCompat.getColor(this, step >= 3 ? R.color.white : R.color.foreground));
-        binding.label4.setTextColor(ContextCompat.getColor(this, step >= 3 ? R.color.primary : R.color.foreground_secondary));
     }
     
     private void setupListeners() {
@@ -290,10 +285,10 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
             @Override
             public void onResponse(@NonNull Call<PaymentVerificationResponse> call, @NonNull Response<PaymentVerificationResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) viewModel.confirmBooking();
-                else viewModel.setCurrentStep(6);
+                else viewModel.setCurrentStep(5);
             }
             @Override
-            public void onFailure(@NonNull Call<PaymentVerificationResponse> call, @NonNull Throwable t) { viewModel.setCurrentStep(6); }
+            public void onFailure(@NonNull Call<PaymentVerificationResponse> call, @NonNull Throwable t) { viewModel.setCurrentStep(5); }
         });
     }
 
@@ -303,6 +298,6 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
     }
 
     @Override public void onPaymentSuccess(String pId) { verifyPayment(pId, pId); }
-    @Override public void onPaymentError(int c, String r) { viewModel.setCurrentStep(6); }
+    @Override public void onPaymentError(int c, String r) { viewModel.setCurrentStep(5); }
     @Override protected int getNavigationMenuItemId() { return R.id.nav_home; }
 }
