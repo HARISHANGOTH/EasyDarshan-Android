@@ -1,11 +1,16 @@
 package com.easydarshan.data.model;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
+@Entity(tableName = "temples")
 public class Temple {
     // Backend field: templeId (used in detail endpoint)
+    @PrimaryKey
     @SerializedName("templeId")
     private Long id;
     
@@ -45,6 +50,7 @@ public class Temple {
     public Temple() {
     }
 
+    @Ignore
     public Temple(Long id, String name, String location, String distance, String queueStatus, String queueText, String image) {
         this.id = id;
         this.name = name;

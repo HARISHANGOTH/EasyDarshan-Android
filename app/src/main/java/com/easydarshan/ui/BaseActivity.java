@@ -2,16 +2,10 @@ package com.easydarshan.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.easydarshan.R;
 import com.easydarshan.data.session.SessionManager;
@@ -26,7 +20,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         SessionManager.getInstance(this);
     }
@@ -47,16 +40,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void setupBottomNavigation() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
         if (bottomNav != null) {
-            // Apply insets to the container so it floats above navigation bar
-            View bottomNavContainer = findViewById(R.id.bottomNavContainer);
-            if (bottomNavContainer != null) {
-                ViewCompat.setOnApplyWindowInsetsListener(bottomNavContainer, (v, insets) -> {
-                    Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                    v.setTranslationY(-systemBars.bottom);
-                    return insets;
-                });
-            }
-
             bottomNav.getMenu().findItem(getNavigationMenuItemId()).setChecked(true);
 
             bottomNav.setOnItemSelectedListener(item -> {

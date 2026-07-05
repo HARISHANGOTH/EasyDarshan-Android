@@ -11,10 +11,11 @@ import com.easydarshan.data.model.CreateBookingResponse;
 import com.easydarshan.data.model.PaymentOrderRequest;
 import com.easydarshan.data.model.PaymentOrderResponse;
 import com.easydarshan.data.model.SlotsResponse;
+import com.easydarshan.data.model.Temple;
 import com.easydarshan.data.model.TimeSlot;
+import com.easydarshan.data.model.Visitor;
 import com.easydarshan.data.repository.AppRepository;
 import com.easydarshan.utils.ErrorHandler;
-import com.easydarshan.utils.NetworkUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,11 +33,10 @@ public class PreBookingViewModel extends AndroidViewModel {
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private MutableLiveData<Integer> currentStep = new MutableLiveData<>(1);
+    private MutableLiveData<Temple> temple = new MutableLiveData<>();
     private MutableLiveData<String> selectedDate = new MutableLiveData<>();
     private MutableLiveData<TimeSlot> selectedSlot = new MutableLiveData<>();
-    private MutableLiveData<Integer> adultCount = new MutableLiveData<>(1);
-    private MutableLiveData<Integer> childrenCount = new MutableLiveData<>(0);
-    private MutableLiveData<List<String>> devoteeNames = new MutableLiveData<>(new ArrayList<>());
+    private MutableLiveData<List<Visitor>> visitors = new MutableLiveData<>(new ArrayList<>());
     private MutableLiveData<String> tempReferenceId = new MutableLiveData<>();
     private MutableLiveData<List<String>> availableDates = new MutableLiveData<>();
     private MutableLiveData<List<TimeSlot>> timeSlots = new MutableLiveData<>();
@@ -47,36 +47,56 @@ public class PreBookingViewModel extends AndroidViewModel {
     private Long darshanTypeId;
     private String selectedDarshanType;
     private String bookingId;
-    private String lockId;
     private boolean isLiveQueue = false;
     private boolean isBookingInProgress = false;
 
     public PreBookingViewModel(Application application) {
         super(application);
         repository = AppRepository.getInstance(application);
+        
+        // Initialize with one visitor
+        List<Visitor> list = new ArrayList<>();
+        list.add(new Visitor(true));
+        visitors.setValue(list);
     }
 
-    public void setTempleId(Long templeId) { this.templeId = templeId; }
+    public void setTempleId(Long templeId) { 
+        this.templeId = templeId;
+        loadTempleDetails();
+    }
+
+    private void loadTempleDetails() {
+        if (templeId == null) return;
+        repository.getTempleDetails(templeId, new Callback<com.easydarshan.data.model.TempleDetailResponse>() {
+            @Override
+            public void onResponse(Call<com.easydarshan.data.model.TempleDetailResponse> call, Response<com.easydarshan.data.model.TempleDetailResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    temple.postValue(response.body().getData().getTemple());
+                }
+            }
+            @Override
+            public void onFailure(Call<com.easydarshan.data.model.TempleDetailResponse> call, Throwable t) {}
+        });
+    }
+
     public void setDarshanTypeId(Long darshanTypeId) { this.darshanTypeId = darshanTypeId; }
 
     public void setSelectedDarshanType(String darshanType) {
         this.selectedDarshanType = darshanType;
-        if (darshanType != null && darshanType.toLowerCase().contains("live")) {
-            this.isLiveQueue = true;
-            this.selectedDate.setValue(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
-            this.currentStep.setValue(3);
-        }
+    }
+
+    public String getSelectedDarshanType() {
+        return selectedDarshanType;
     }
 
     public LiveData<Boolean> getIsLoading() { return isLoading; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
     public LiveData<Integer> getCurrentStep() { return currentStep; }
     public void setCurrentStep(int step) { currentStep.setValue(step); }
+    public LiveData<Temple> getTemple() { return temple; }
     public LiveData<String> getSelectedDate() { return selectedDate; }
     public LiveData<TimeSlot> getSelectedSlot() { return selectedSlot; }
-    public LiveData<Integer> getAdultCount() { return adultCount; }
-    public LiveData<Integer> getChildrenCount() { return childrenCount; }
-    public LiveData<List<String>> getDevoteeNames() { return devoteeNames; }
+    public LiveData<List<Visitor>> getVisitors() { return visitors; }
     public LiveData<String> getTempReferenceId() { return tempReferenceId; }
     public LiveData<List<String>> getAvailableDates() { return availableDates; }
     public LiveData<List<TimeSlot>> getTimeSlots() { return timeSlots; }
@@ -85,94 +105,42 @@ public class PreBookingViewModel extends AndroidViewModel {
 
     public String getBookingId() { return bookingId; }
 
-    public void incrementAdults() {
-        int current = adultCount.getValue() != null ? adultCount.getValue() : 1;
-        if (current < 10) adultCount.setValue(current + 1);
+    public void addVisitor() {
+        List<Visitor> list = visitors.getValue();
+        if (list == null) list = new ArrayList<>();
+        if (list.size() < 10) {
+            list.add(new Visitor(true));
+            visitors.setValue(list);
+        }
     }
 
-    public void decrementAdults() {
-        int current = adultCount.getValue() != null ? adultCount.getValue() : 1;
-        if (current > 1) adultCount.setValue(current - 1);
+    public void removeVisitor(int index) {
+        List<Visitor> list = visitors.getValue();
+        if (list != null && list.size() > 1) {
+            list.remove(index);
+            visitors.setValue(list);
+        }
     }
 
-    public void incrementChildren() {
-        int current = childrenCount.getValue() != null ? childrenCount.getValue() : 0;
-        if (current < 10) childrenCount.setValue(current + 1);
-    }
-
-    public void decrementChildren() {
-        int current = childrenCount.getValue() != null ? childrenCount.getValue() : 0;
-        if (current > 0) childrenCount.setValue(current - 1);
+    public void setVisitorCount(int count) {
+        List<Visitor> list = visitors.getValue();
+        if (list == null) list = new ArrayList<>();
+        
+        if (count > list.size()) {
+            while (list.size() < count) list.add(new Visitor(true));
+        } else if (count < list.size() && count >= 1) {
+            while (list.size() > count) list.remove(list.size() - 1);
+        }
+        visitors.setValue(list);
     }
 
     public int getTotalDevotees() {
-        return (adultCount.getValue() != null ? adultCount.getValue() : 0) +
-               (childrenCount.getValue() != null ? childrenCount.getValue() : 0);
-    }
-
-    public void loadAvailableDates() {
-        if (isLiveQueue) return;
-        isLoading.setValue(true);
-        repository.getAvailableDates(templeId, darshanTypeId, new Callback<AvailableDatesResponse>() {
-            @Override
-            public void onResponse(Call<AvailableDatesResponse> call, Response<AvailableDatesResponse> response) {
-                isLoading.postValue(false);
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    availableDates.postValue(response.body().getAvailableDates());
-                } else {
-                    errorMessage.postValue("Failed to load dates");
-                }
-            }
-            @Override
-            public void onFailure(Call<AvailableDatesResponse> call, Throwable t) {
-                isLoading.postValue(false);
-                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
-            }
-        });
-    }
-
-    public void selectDate(String date) {
-        selectedDate.setValue(date);
-        loadTimeSlots(date);
-        currentStep.setValue(2);
-    }
-
-    private void loadTimeSlots(String date) {
-        isLoading.setValue(true);
-        repository.getSlots(date, templeId, darshanTypeId, new Callback<SlotsResponse>() {
-            @Override
-            public void onResponse(Call<SlotsResponse> call, Response<SlotsResponse> response) {
-                isLoading.postValue(false);
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    List<TimeSlot> slots = new ArrayList<>();
-                    for (SlotsResponse.SlotInfo info : response.body().getSlots()) {
-                        TimeSlot s = new TimeSlot();
-                        s.setTime(info.getTime());
-                        s.setPrice(info.getPrice().intValue());
-                        s.setAvailable("AVAILABLE".equals(info.getStatus()));
-                        s.setSlotId(info.getSlotId());
-                        slots.add(s);
-                    }
-                    timeSlots.postValue(slots);
-                }
-            }
-            @Override
-            public void onFailure(Call<SlotsResponse> call, Throwable t) {
-                isLoading.postValue(false);
-            }
-        });
-    }
-
-    public void selectSlot(TimeSlot slot) {
-        if (slot.isAvailable()) {
-            selectedSlot.setValue(slot);
-            currentStep.setValue(3);
-        }
+        return visitors.getValue() != null ? visitors.getValue().size() : 0;
     }
 
     public void continueToPayment() {
         generateTempReferenceId();
-        currentStep.setValue(4);
+        currentStep.setValue(3);
     }
 
     private void generateTempReferenceId() {
@@ -181,39 +149,21 @@ public class PreBookingViewModel extends AndroidViewModel {
         tempReferenceId.setValue("ED" + datePart + randomPart);
     }
 
-    public void setDevoteeNames(List<String> names) {
-        devoteeNames.setValue(names);
-    }
-
     public void createBookingAndPayment(String paymentMethod) {
         if (isBookingInProgress) return;
         isBookingInProgress = true;
         isLoading.setValue(true);
 
-        List<String> names = devoteeNames.getValue();
+        List<Visitor> visitorList = visitors.getValue();
         List<CreateBookingRequest.MemberRequest> members = new ArrayList<>();
-        if (names != null) {
-            for (String name : names) {
-                members.add(new CreateBookingRequest.MemberRequest(name));
-            }
-        }
-        if (members.isEmpty()) {
-            int total = getTotalDevotees();
-            for (int i = 0; i < total; i++) {
-                members.add(new CreateBookingRequest.MemberRequest("Devotee " + (i + 1)));
-            }
-        }
-
-        Long slotIdLong = null;
-        if (!isLiveQueue && selectedSlot.getValue() != null) {
-            String slotIdStr = selectedSlot.getValue().getSlotId();
-            if (slotIdStr != null) {
-                try { slotIdLong = Long.parseLong(slotIdStr); } catch (NumberFormatException ignored) {}
+        if (visitorList != null) {
+            for (Visitor v : visitorList) {
+                members.add(new CreateBookingRequest.MemberRequest(v.getFullName()));
             }
         }
 
         CreateBookingRequest request = new CreateBookingRequest(
-                templeId, darshanTypeId, slotIdLong, selectedDate.getValue(), members);
+                templeId, darshanTypeId, null, selectedDate.getValue(), members);
 
         repository.createBooking(request, new Callback<CreateBookingResponse>() {
             @Override
@@ -238,7 +188,6 @@ public class PreBookingViewModel extends AndroidViewModel {
     }
 
     private void createPaymentOrder(String paymentMethod) {
-        // Guard: bookingId must be set from createBooking response
         if (bookingId == null || bookingId.isEmpty()) {
             errorMessage.postValue("Booking ID missing. Please try again.");
             isBookingInProgress = false;
@@ -246,23 +195,19 @@ public class PreBookingViewModel extends AndroidViewModel {
             return;
         }
 
-        int unitPrice = isLiveQueue ?
-                (selectedDarshanType != null && selectedDarshanType.toLowerCase().contains("paid") ? 500 : 0) :
-                (selectedSlot.getValue() != null ? selectedSlot.getValue().getPrice() : 0);
+        int unitPrice = (selectedDarshanType != null && selectedDarshanType.toLowerCase().contains("paid")) ? 500 : 300;
         int totalDevotees = getTotalDevotees();
         java.math.BigDecimal darshanAmount = java.math.BigDecimal.valueOf((long) unitPrice * totalDevotees);
         java.math.BigDecimal platformFee = java.math.BigDecimal.valueOf(20);
 
-        com.easydarshan.data.session.SessionManager sm =
-                com.easydarshan.data.session.SessionManager.getInstance(getApplication());
+        com.easydarshan.data.session.SessionManager sm = com.easydarshan.data.session.SessionManager.getInstance(getApplication());
         Long userId = null;
         try {
             String uid = sm.getCurrentUser() != null ? sm.getCurrentUser().getId() : null;
             if (uid != null) userId = Long.parseLong(uid);
         } catch (NumberFormatException ignored) {}
 
-        PaymentOrderRequest request = new PaymentOrderRequest(
-                bookingId, darshanAmount, platformFee, userId, templeId);
+        PaymentOrderRequest request = new PaymentOrderRequest(bookingId, darshanAmount, platformFee, userId, templeId);
 
         repository.createPaymentOrder(request, new Callback<PaymentOrderResponse>() {
             @Override
@@ -291,6 +236,4 @@ public class PreBookingViewModel extends AndroidViewModel {
         response.setStatus("CONFIRMED");
         bookingCreated.postValue(response);
     }
-
-    public boolean isLiveQueue() { return isLiveQueue; }
 }

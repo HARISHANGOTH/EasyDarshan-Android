@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
+    android:fitsSystemWindows="true"
     tools:context=".ui.home.HomeActivity">
 
     <androidx.core.widget.NestedScrollView
@@ -36,7 +37,7 @@
                 android:background="@drawable/bg_header_fade"
                 app:layout_constraintBottom_toBottomOf="@id/ivHeaderHero" />
 
-            <!-- ===== TOOLBAR (64dp) ===== -->
+            <!-- ===== TOOLBAR ===== -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/toolbar"
                 android:layout_width="0dp"
@@ -354,11 +355,11 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- ===== BANNER CARD (150dp) ===== -->
+            <!-- ===== BANNER CARD ===== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/bannerCard"
                 android:layout_width="0dp"
-                android:layout_height="@dimen/banner_height"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/screen_margin_horizontal"
                 android:layout_marginEnd="@dimen/screen_margin_horizontal"
                 android:layout_marginTop="32dp"
@@ -372,7 +373,7 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:padding="20dp">
 
                     <TextView
@@ -405,19 +406,20 @@
                         android:layout_height="48dp"
                         android:text="@string/banner_cta"
                         android:layout_marginTop="16dp"
+                        android:layout_marginBottom="4dp"
                         app:layout_constraintTop_toBottomOf="@id/tvBannerSubtitle"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <ImageView
                         android:id="@+id/ivBannerIllustration"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:layout_width="110dp"
+                        android:layout_height="110dp"
                         android:src="@drawable/img_plan_visit"
-                        android:scaleType="fitEnd"
+                        android:scaleType="fitCenter"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/tvBannerTitle" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -507,9 +509,11 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottomNavContainer"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         app:cardCornerRadius="24dp"
         app:cardElevation="10dp"
         app:strokeWidth="0dp"
@@ -518,7 +522,7 @@
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigation"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="72dp"
             android:background="@color/white"
             app:itemIconSize="24dp"
             app:itemIconTint="@color/bottom_nav_selector"

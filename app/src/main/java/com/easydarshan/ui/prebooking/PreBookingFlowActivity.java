@@ -2,37 +2,30 @@ package com.easydarshan.ui.prebooking;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.bumptech.glide.Glide;
 import com.easydarshan.R;
 import com.easydarshan.databinding.ActivityPreBookingFlowBinding;
-import com.easydarshan.data.model.Booking;
+import com.easydarshan.databinding.ItemVisitorCardBinding;
 import com.easydarshan.data.model.PaymentOrderResponse;
 import com.easydarshan.data.model.PaymentVerificationRequest;
 import com.easydarshan.data.model.PaymentVerificationResponse;
+import com.easydarshan.data.model.Visitor;
 import com.easydarshan.data.repository.AppRepository;
 import com.easydarshan.payment.RazorpayPaymentHelper;
 import com.easydarshan.ui.BaseActivity;
-import com.easydarshan.ui.adapter.DateAdapter;
-import com.easydarshan.ui.adapter.TimeSlotAdapter;
-import com.easydarshan.ui.bookings.MyBookingsActivity;
 import com.easydarshan.ui.livequeue.LiveQueueActivity;
 import com.razorpay.PaymentResultListener;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,14 +35,9 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
     
     private ActivityPreBookingFlowBinding binding;
     private PreBookingViewModel viewModel;
-    private Long templeId;
     private String templeName;
     private RazorpayPaymentHelper paymentHelper;
     private AppRepository repository;
-    private DateAdapter dateAdapter;
-    private TimeSlotAdapter timeSlotAdapter;
-    private Handler redirectHandler = new Handler(Looper.getMainLooper());
-    private Runnable redirectRunnable;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,426 +45,264 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
         binding = ActivityPreBookingFlowBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        // Handle temple info from intent
-        templeId = getIntent().getLongExtra("temple_id", 1L);
+        Long templeId = getIntent().getLongExtra("temple_id", 1L);
         templeName = getIntent().getStringExtra("temple_name");
-        if (templeName != null) {
-            binding.templeName.setText(templeName);
-        }
-        
-        Long darshanTypeId = getIntent().getLongExtra("darshan_type_id", 1L);
-        String darshanType = getIntent().getStringExtra("darshan_type");
+        if (templeName != null) binding.templeName.setText(templeName);
         
         viewModel = new ViewModelProvider(this, 
                 ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
                 .get(PreBookingViewModel.class);
         viewModel.setTempleId(templeId);
-        viewModel.setDarshanTypeId(darshanTypeId);
-        viewModel.setSelectedDarshanType(darshanType);
         
         repository = AppRepository.getInstance(getApplication());
         paymentHelper = new RazorpayPaymentHelper(this, new RazorpayPaymentHelper.PaymentCallback() {
             @Override
-            public void onPaymentSuccess(String paymentId, String orderId) {
-                verifyPayment(paymentId, orderId);
-            }
-            
+            public void onPaymentSuccess(String paymentId, String orderId) { verifyPayment(paymentId, orderId); }
             @Override
-            public void onPaymentError(int code, String response) {
-                viewModel.setCurrentStep(6); // Step 6: Failed
-            }
+            public void onPaymentError(int code, String response) { viewModel.setCurrentStep(5); }
         });
-        
-        setupRecyclerViews();
-        if (!viewModel.isLiveQueue()) {
-            viewModel.loadAvailableDates();
-        }
         
         setupObservers();
         setupListeners();
     }
     
-    private void setupRecyclerViews() {
-        binding.datesRecyclerView.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        dateAdapter = new DateAdapter(new java.util.ArrayList<>(), date -> viewModel.selectDate(date));
-        binding.datesRecyclerView.setAdapter(dateAdapter);
-
-        binding.slotsRecyclerView.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        timeSlotAdapter = new TimeSlotAdapter(new java.util.ArrayList<>(), slot -> viewModel.selectSlot(slot));
-        binding.slotsRecyclerView.setAdapter(timeSlotAdapter);
-    }
-    
     private void setupObservers() {
-        viewModel.getCurrentStep().observe(this, step -> {
-            updateStepVisibility(step);
-            if (step == 4) {
-                populatePaymentSummary();
-            } else if (step == 5) {
-                populateSuccessSummary();
-                startAutoRedirect();
-            }
-        });
-        
-        viewModel.getAdultCount().observe(this, count -> {
-            if (count != null) {
-                binding.adultCount.setText(String.valueOf(count));
-                updateDevoteeNameInputs();
+        viewModel.getTemple().observe(this, temple -> {
+            if (temple != null) {
+                this.templeName = temple.getName();
+                binding.templeName.setText(temple.getName());
+                binding.templeLocation.setText(temple.getLocation());
+                Glide.with(this).load(temple.getImage()).placeholder(R.drawable.ic_temple_placeholder).into(binding.ivTempleIcon);
             }
         });
 
-        viewModel.getChildrenCount().observe(this, count -> {
-            if (count != null) {
-                binding.childrenCount.setText(String.valueOf(count));
-                updateDevoteeNameInputs();
-            }
-        });
+        viewModel.getCurrentStep().observe(this, this::updateStepVisibility);
         
-        viewModel.getAvailableDates().observe(this, dates -> {
-            if (dates != null && dateAdapter != null) {
-                dateAdapter.updateDates(dates);
-            }
-        });
-
-        viewModel.getTimeSlots().observe(this, slots -> {
-            if (slots != null && timeSlotAdapter != null) {
-                timeSlotAdapter.updateSlots(slots);
+        viewModel.getVisitors().observe(this, visitors -> {
+            if (visitors != null) {
+                binding.tvGlobalVisitorCount.setText(String.valueOf(visitors.size()));
+                renderVisitorCards(visitors);
             }
         });
         
         viewModel.getErrorMessage().observe(this, error -> {
-            if (error != null) {
-                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
-            }
+            if (error != null) Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
         });
         
         viewModel.getPaymentOrderCreated().observe(this, paymentOrder -> {
-            if (paymentOrder != null && paymentOrder.isSuccess()) {
-                startRazorpayPayment(paymentOrder);
-            }
+            if (paymentOrder != null && paymentOrder.isSuccess()) startRazorpayPayment(paymentOrder);
         });
         
         viewModel.getBookingCreated().observe(this, booking -> {
-            if (booking != null) {
-                viewModel.setCurrentStep(5);
-            }
+            if (booking != null) viewModel.setCurrentStep(4);
         });
     }
 
-    private void updateDevoteeNameInputs() {
-        int adultCount = viewModel.getAdultCount().getValue() != null ? viewModel.getAdultCount().getValue() : 1;
-        int childrenCount = viewModel.getChildrenCount().getValue() != null ? viewModel.getChildrenCount().getValue() : 0;
-        int total = adultCount + childrenCount;
-
-        binding.namesContainer.removeAllViews();
-        for (int i = 0; i < total; i++) {
-            com.google.android.material.textfield.TextInputLayout textInputLayout = new com.google.android.material.textfield.TextInputLayout(this, null, com.google.android.material.R.attr.textInputOutlinedStyle);
-            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
-            lp.setMargins(0, 8, 0, 16);
-            textInputLayout.setLayoutParams(lp);
-            textInputLayout.setHint((i < adultCount ? "Adult " + (i + 1) : "Child " + (i - adultCount + 1)) + " Name");
-            float radius = (float) dpToPx(12);
-            textInputLayout.setBoxCornerRadii(radius, radius, radius, radius);
-
-            com.google.android.material.textfield.TextInputEditText editText = new com.google.android.material.textfield.TextInputEditText(textInputLayout.getContext());
-            textInputLayout.addView(editText);
-            binding.namesContainer.addView(textInputLayout);
-        }
-    }
-
-    private int dpToPx(int dp) {
-        float density = getResources().getDisplayMetrics().density;
-        return Math.round((float) dp * density);
-    }
-
-    private void populatePaymentSummary() {
-        binding.summaryTempleName.setText(binding.templeName.getText());
-        
-        String dateStr = viewModel.getSelectedDate().getValue();
-        if (dateStr != null) {
-            try {
-                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault());
-                java.util.Date date = inputFormat.parse(dateStr);
-                binding.summaryDate.setText(outputFormat.format(date));
-            } catch (Exception e) {
-                binding.summaryDate.setText(dateStr);
-            }
-        }
-
-        if (viewModel.isLiveQueue()) {
-            binding.summaryTime.setText("Live Queue Entry");
-        } else if (viewModel.getSelectedSlot().getValue() != null) {
-            binding.summaryTime.setText(viewModel.getSelectedSlot().getValue().getTime());
-        }
-
-        int count = viewModel.getTotalDevotees();
-        binding.summaryDevotees.setText(count + (count > 1 ? " Devotees" : " Devotee"));
-
-        int unitPrice = 0;
-        if (viewModel.isLiveQueue()) {
-            String type = getIntent().getStringExtra("darshan_type");
-            if (type != null && type.toLowerCase().contains("paid")) {
-                unitPrice = 500;
-            }
-        } else if (viewModel.getSelectedSlot().getValue() != null) {
-            unitPrice = viewModel.getSelectedSlot().getValue().getPrice();
-        }
-
-        int darshanTotal = unitPrice * count;
-        // Fix: Platform fee is always 20
-        int platformFee = 20;
-        int total = darshanTotal + platformFee;
-
-        binding.darshanFeeLabel.setText("Darshan Fee (" + count + " Members)");
-        binding.darshanFee.setText("₹" + darshanTotal);
-        binding.totalAmount.setText("₹" + total);
-        binding.confirmPayButton.setText("Confirm & Pay ₹" + total);
-        
-        if (total == 0) {
-            binding.confirmPayButton.setText("Confirm Booking");
-        }
-        
-        // Show names in summary
-        List<String> names = viewModel.getDevoteeNames().getValue();
-        if (names != null && !names.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Names: ");
-            for (int i = 0; i < names.size(); i++) {
-                sb.append(names.get(i));
-                if (i < names.size() - 1) sb.append(", ");
-            }
-            binding.summaryDevoteeNames.setText(sb.toString());
-            binding.summaryDevoteeNames.setVisibility(View.VISIBLE);
-        } else {
-            binding.summaryDevoteeNames.setVisibility(View.GONE);
-        }
-        
-        // Show temporary reference ID
-        binding.summaryReferenceId.setText(viewModel.getTempReferenceId().getValue());
-    }
-
-    private void populateSuccessSummary() {
-        binding.successTempleName.setText(binding.templeName.getText());
-        binding.successPersons.setText(String.valueOf(viewModel.getTotalDevotees()));
-        
-        String refId = viewModel.getTempReferenceId().getValue();
-        if (refId != null) {
-            binding.successBookingId.setText(refId);
-        } else {
-            binding.successBookingId.setText("BK" + System.currentTimeMillis() / 100000);
-        }
-
-        binding.successToken.setText("#" + (100 + (int)(Math.random() * 900)));
-        binding.successEntryTime.setText("11:30 AM"); 
-    }
-
-    private void startAutoRedirect() {
-        if (redirectRunnable != null) {
-            redirectHandler.removeCallbacks(redirectRunnable);
-        }
-        redirectRunnable = this::navigateToLiveQueue;
-        redirectHandler.postDelayed(redirectRunnable, 3000);
-    }
-
-    private void navigateToLiveQueue() {
-        if (redirectRunnable != null) {
-            redirectHandler.removeCallbacks(redirectRunnable);
-            redirectRunnable = null;
-        }
-        
-        Intent intent = new Intent(this, LiveQueueActivity.class);
-        String bId = viewModel.getBookingId();
-        if (bId == null || bId.isEmpty()) {
-            bId = binding.successBookingId.getText().toString();
-        }
-        
-        intent.putExtra("booking_id", bId);
-        intent.putExtra("temple_name", binding.templeName.getText().toString());
-        
-        String dateStr = viewModel.getSelectedDate().getValue();
-        if (dateStr == null) {
-            dateStr = binding.summaryDate.getText().toString();
-        }
-        intent.putExtra("booking_date", dateStr);
-        intent.putExtra("devotees", viewModel.getTotalDevotees());
-
-        startActivity(intent);
-        finish();
-    }
-    
     private void updateStepVisibility(int step) {
-        binding.stepContentContainer.setVisibility(View.VISIBLE);
         binding.step1Content.setVisibility(step == 1 ? View.VISIBLE : View.GONE);
         binding.step2Content.setVisibility(step == 2 ? View.VISIBLE : View.GONE);
-        binding.step3Content.setVisibility(step == 3 ? View.VISIBLE : View.GONE);
-        binding.step4Content.setVisibility(step == 4 ? View.VISIBLE : View.GONE);
-        binding.successContent.setVisibility(step == 5 ? View.VISIBLE : View.GONE);
-        binding.failedContent.setVisibility(step == 6 ? View.VISIBLE : View.GONE);
-        
-        binding.continueToPaymentButton.setVisibility(step == 3 ? View.VISIBLE : View.GONE);
-        binding.confirmPayButton.setVisibility(step == 4 ? View.VISIBLE : View.GONE);
-        
-        if (step >= 5) {
-            binding.headerLayout.setVisibility(View.GONE);
-            binding.bottomActionArea.setVisibility(View.GONE);
-        } else {
-            binding.headerLayout.setVisibility(View.VISIBLE);
-            binding.bottomActionArea.setVisibility(View.VISIBLE);
-        }
+        binding.step3Content.setVisibility(View.GONE); // Extras screen always hidden
+        binding.step4Content.setVisibility(step == 3 ? View.VISIBLE : View.GONE); // logic step 3 is visual step 4
+        binding.successContent.setVisibility(step == 4 ? View.VISIBLE : View.GONE);
+        binding.failedContent.setVisibility(step == 5 ? View.VISIBLE : View.GONE);
+
+        updateStepperUI(step);
+
+        if (step >= 4) binding.bottomActionArea.setVisibility(View.GONE);
+        else binding.bottomActionArea.setVisibility(View.VISIBLE);
+
+        if (step == 3) populatePaymentSummary();
+    }
+
+    private void updateStepperUI(int step) {
+        // Step 1
+        binding.step1Circle.setBackgroundResource(step >= 1 ? R.drawable.bg_step_done : R.drawable.bg_step_todo);
+        binding.step1Circle.setText(step > 1 ? "✓" : "1");
+        binding.step1Circle.setTextColor(ContextCompat.getColor(this, step >= 1 ? R.color.white : R.color.foreground));
+        binding.label1.setTextColor(ContextCompat.getColor(this, step >= 1 ? R.color.primary : R.color.foreground_secondary));
+
+        // Step 2
+        binding.step2Circle.setBackgroundResource(step >= 2 ? R.drawable.bg_step_done : R.drawable.bg_step_todo);
+        binding.step2Circle.setText(step > 2 ? "✓" : "2");
+        binding.step2Circle.setTextColor(ContextCompat.getColor(this, step >= 2 ? R.color.white : R.color.foreground));
+        binding.label2.setTextColor(ContextCompat.getColor(this, step >= 2 ? R.color.primary : R.color.foreground_secondary));
+
+        // Step 3 (Extras) - logic step 3 skips extras but stepper still has 4 dots
+        binding.step3Circle.setBackgroundResource(step >= 3 ? R.drawable.bg_step_done : R.drawable.bg_step_todo);
+        binding.step3Circle.setText(step >= 3 ? "✓" : "3");
+        binding.step3Circle.setTextColor(ContextCompat.getColor(this, step >= 3 ? R.color.white : R.color.foreground));
+        binding.label3.setTextColor(ContextCompat.getColor(this, step >= 3 ? R.color.primary : R.color.foreground_secondary));
+
+        // Step 4 (Review & Pay)
+        binding.step4Circle.setBackgroundResource(step >= 3 ? R.drawable.bg_step_done : R.drawable.bg_step_todo);
+        binding.step4Circle.setTextColor(ContextCompat.getColor(this, step >= 3 ? R.color.white : R.color.foreground));
+        binding.label4.setTextColor(ContextCompat.getColor(this, step >= 3 ? R.color.primary : R.color.foreground_secondary));
     }
     
     private void setupListeners() {
         binding.backButton.setOnClickListener(v -> {
             Integer currentStep = viewModel.getCurrentStep().getValue();
-            if (currentStep != null && currentStep > 1 && !viewModel.isLiveQueue()) {
-                viewModel.setCurrentStep(currentStep - 1);
-            } else {
-                finish();
-            }
+            if (currentStep != null && currentStep > 1) {
+                if (currentStep == 3) viewModel.setCurrentStep(2);
+                else viewModel.setCurrentStep(currentStep - 1);
+            } else finish();
         });
-        
-        binding.incrementAdults.setOnClickListener(v -> viewModel.incrementAdults());
-        binding.decrementAdults.setOnClickListener(v -> viewModel.decrementAdults());
-        binding.incrementChildren.setOnClickListener(v -> viewModel.incrementChildren());
-        binding.decrementChildren.setOnClickListener(v -> viewModel.decrementChildren());
-        
-        binding.continueToPaymentButton.setOnClickListener(v -> {
-            List<String> names = new ArrayList<>();
-            boolean allFilled = true;
-            for (int i = 0; i < binding.namesContainer.getChildCount(); i++) {
-                View view = binding.namesContainer.getChildAt(i);
-                if (view instanceof com.google.android.material.textfield.TextInputLayout) {
-                    com.google.android.material.textfield.TextInputLayout layout = (com.google.android.material.textfield.TextInputLayout) view;
-                    String name = "";
-                    if (layout.getEditText() != null && layout.getEditText().getText() != null) {
-                        name = layout.getEditText().getText().toString().trim();
-                    }
 
-                    if (name.isEmpty()) {
-                        layout.setError("Name required");
-                        allFilled = false;
-                    } else {
-                        layout.setError(null);
-                        names.add(name);
-                    }
-                }
-            }
-            
-            if (allFilled) {
-                viewModel.setDevoteeNames(names);
-                viewModel.continueToPayment();
-            } else {
-                Toast.makeText(this, "Please enter all devotee names", Toast.LENGTH_SHORT).show();
-            }
+        // Step 1 clicks
+        binding.cardSpecial.setOnClickListener(v -> selectDarshanType(1));
+        binding.cardSarva.setOnClickListener(v -> selectDarshanType(2));
+
+        // Step 2 Global Counter
+        binding.btnIncrementGlobal.setOnClickListener(v -> viewModel.addVisitor());
+        binding.btnDecrementGlobal.setOnClickListener(v -> {
+            int current = viewModel.getTotalDevotees();
+            if (current > 1) viewModel.removeVisitor(current - 1);
         });
+        binding.btnAddVisitor.setOnClickListener(v -> viewModel.addVisitor());
         
-        binding.confirmPayButton.setOnClickListener(v -> {
-            int total = calculateTotalAmount();
-            if (total > 0) {
-                // Create booking first, then Razorpay order is auto-triggered via observer
-                viewModel.createBookingAndPayment("RAZORPAY");
-            } else {
-                viewModel.createBookingAndPayment("FREE");
+        binding.continueButton.setOnClickListener(v -> {
+            Integer step = viewModel.getCurrentStep().getValue();
+            if (step == 1) {
+                viewModel.setCurrentStep(2);
+            } else if (step == 2) {
+                if (validateAllVisitors()) viewModel.setCurrentStep(3); // Directly to Review
+            } else if (step == 3) {
+                viewModel.createBookingAndPayment(calculateTotalAmount() > 0 ? "RAZORPAY" : "FREE");
             }
         });
 
         binding.goToLiveQueueButton.setOnClickListener(v -> navigateToLiveQueue());
+        binding.retryPaymentButton.setOnClickListener(v -> viewModel.setCurrentStep(3));
+    }
+
+    private void selectDarshanType(int selection) {
+        binding.rbSpecial.setChecked(selection == 1);
+        binding.rbSarva.setChecked(selection == 2);
+        binding.cardSpecial.setStrokeColor(ContextCompat.getColor(this, selection == 1 ? R.color.primary : R.color.border_light));
+        binding.cardSarva.setStrokeColor(ContextCompat.getColor(this, selection == 2 ? R.color.primary : R.color.border_light));
+
+        String type = (selection == 1) ? "Special Entry" : "Sarva Darshan";
+        viewModel.setSelectedDarshanType(type);
+        binding.chipType.setText(type.split(" ")[0]);
+    }
+
+    private void renderVisitorCards(List<Visitor> visitors) {
+        binding.visitorCardsContainer.removeAllViews();
+        String[] ageRanges = {"Under 5", "5 - 12 Years", "12 - 25 Years", "25 - 60 Years", "Over 60"};
+        String[] idProofs = {"None", "Aadhaar Card", "Voter ID", "Driving License", "Passport"};
         
-        binding.retryPaymentButton.setOnClickListener(v -> viewModel.setCurrentStep(4));
-        binding.cancelBookingButton.setOnClickListener(v -> finish());
+        for (int i = 0; i < visitors.size(); i++) {
+            Visitor visitor = visitors.get(i);
+            ItemVisitorCardBinding itemBinding = ItemVisitorCardBinding.inflate(getLayoutInflater(), binding.visitorCardsContainer, false);
+            
+            itemBinding.tvVisitorTitle.setText("Visitor " + (i + 1));
+            itemBinding.tvPrimaryBadge.setVisibility(i == 0 ? View.VISIBLE : View.GONE);
+            itemBinding.etFullName.setText(visitor.getFullName());
+            
+            ArrayAdapter<String> ageAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, ageRanges);
+            itemBinding.spinnerAge.setAdapter(ageAdapter);
+            if (visitor.getAge() != null) itemBinding.spinnerAge.setText(visitor.getAge(), false);
+            
+            ArrayAdapter<String> idAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, idProofs);
+            itemBinding.spinnerIdProof.setAdapter(idAdapter);
+            if (visitor.getIdProof() == null) visitor.setIdProof("None");
+            itemBinding.spinnerIdProof.setText(visitor.getIdProof(), false);
+            
+            itemBinding.spinnerIdProof.setOnItemClickListener((parent, view, position, id) -> {
+                String selected = idProofs[position];
+                visitor.setIdProof(selected);
+                itemBinding.tilIdNumber.setVisibility(selected.equals("None") ? View.GONE : View.VISIBLE);
+            });
+
+            itemBinding.tilIdNumber.setVisibility(visitor.getIdProof().equals("None") ? View.GONE : View.VISIBLE);
+            itemBinding.etIdNumber.setText(visitor.getIdNumber());
+            
+            if ("Female".equals(visitor.getGender())) itemBinding.toggleGender.check(R.id.btnFemale);
+            else itemBinding.toggleGender.check(R.id.btnMale);
+
+            final int index = i;
+            itemBinding.btnDeleteVisitor.setVisibility(i == 0 ? View.GONE : View.VISIBLE);
+            itemBinding.btnDeleteVisitor.setOnClickListener(v -> viewModel.removeVisitor(index));
+
+            binding.visitorCardsContainer.addView(itemBinding.getRoot());
+        }
+    }
+
+    private boolean validateAllVisitors() {
+        List<Visitor> visitors = viewModel.getVisitors().getValue();
+        if (visitors == null) return false;
+        
+        for (int i = 0; i < binding.visitorCardsContainer.getChildCount(); i++) {
+            View child = binding.visitorCardsContainer.getChildAt(i);
+            ItemVisitorCardBinding itemBinding = ItemVisitorCardBinding.bind(child);
+
+            String name = itemBinding.etFullName.getText() != null ? itemBinding.etFullName.getText().toString().trim() : "";
+            if (name.isEmpty()) {
+                itemBinding.etFullName.setError("Name required");
+                return false;
+            }
+
+            Visitor v = visitors.get(i);
+            v.setFullName(name);
+            v.setAge(itemBinding.spinnerAge.getText().toString());
+            v.setGender(itemBinding.toggleGender.getCheckedButtonId() == R.id.btnFemale ? "Female" : "Male");
+            v.setIdProof(itemBinding.spinnerIdProof.getText().toString());
+            v.setIdNumber(itemBinding.etIdNumber.getText() != null ? itemBinding.etIdNumber.getText().toString() : "");
+        }
+        return true;
+    }
+
+    private void populatePaymentSummary() {
+        binding.summaryTempleName.setText(templeName);
+        List<Visitor> visitors = viewModel.getVisitors().getValue();
+        int count = visitors != null ? visitors.size() : 0;
+        
+        binding.sumDarshanType.setText(viewModel.getSelectedDarshanType());
+        binding.sumDateTime.setText(binding.chipDate.getText().toString());
+        binding.summaryDevotees.setText(count + (count > 1 ? " Adults" : " Adult"));
+
+        int unitPrice = calculateUnitPrice();
+        int darshanTotal = unitPrice * count;
+        int total = darshanTotal + 10; 
+
+        binding.tvDarshanAmountLabel.setText("Darshan Amount (" + count + " × ₹" + unitPrice + ")");
+        binding.summaryDarshanTotal.setText("₹" + darshanTotal);
+        binding.sumTotalAmount.setText("₹" + total);
+        binding.continueButton.setText("Proceed to Pay ₹" + total);
+    }
+
+    private int calculateUnitPrice() {
+        if (binding.rbSarva.isChecked()) return 100;
+        return 300;
     }
 
     private int calculateTotalAmount() {
-        int count = viewModel.getTotalDevotees();
-        int unitPrice = 0;
-        if (viewModel.isLiveQueue()) {
-            String type = getIntent().getStringExtra("darshan_type");
-            if (type != null && type.toLowerCase().contains("paid")) unitPrice = 500;
-        } else if (viewModel.getSelectedSlot().getValue() != null) {
-            unitPrice = viewModel.getSelectedSlot().getValue().getPrice();
-        }
-        // Always include platform fee of 20
-        return (unitPrice * count) + 20;
+        return (calculateUnitPrice() * viewModel.getTotalDevotees()) + 10;
     }
 
     private void startRazorpayPayment(PaymentOrderResponse paymentOrder) {
-        // totalAmount includes platform fee; multiply by 100 for paise
-        BigDecimal total = paymentOrder.getTotalAmount() != null
-                ? paymentOrder.getTotalAmount()
-                : paymentOrder.getAmount();
-        String amountInPaise = String.valueOf(total.multiply(new java.math.BigDecimal(100)).intValue());
-
-        // Use gatewayOrderId if available (real Razorpay), otherwise use orderReference (dev mode)
-        String orderIdForRazorpay = paymentOrder.getGatewayOrderId() != null
-                ? paymentOrder.getGatewayOrderId()
-                : paymentOrder.getOrderReference();
-
-        paymentHelper.startPayment(
-                orderIdForRazorpay,
-                amountInPaise,
-                "Harish",
-                "Temple Darshan Booking Payment"
-        );
+        BigDecimal total = paymentOrder.getTotalAmount() != null ? paymentOrder.getTotalAmount() : paymentOrder.getAmount();
+        paymentHelper.startPayment(paymentOrder.getGatewayOrderId(), String.valueOf(total.multiply(new BigDecimal(100)).intValue()), "Harish", "Darshan Booking");
     }
 
-    private void verifyPayment(String razorpayPaymentId, String razorpayOrderId) {
-        PaymentOrderResponse paymentOrder = viewModel.getPaymentOrderCreated().getValue();
-
-        // Prefer orderReference (ORD-XXX) — backend accepts it directly in dev mode
-        String orderId = (paymentOrder != null && paymentOrder.getOrderReference() != null)
-                ? paymentOrder.getOrderReference() : razorpayOrderId;
-
-        // Use actual Razorpay signature if available, otherwise send placeholder for dev mode
-        String signature = (razorpayOrderId != null && !razorpayOrderId.isEmpty())
-                ? razorpayOrderId  // Razorpay SDK passes signature as second arg via onPaymentSuccess
-                : "dev-mode-signature";
-
-        PaymentVerificationRequest request = new PaymentVerificationRequest(
-                orderId,
-                razorpayPaymentId,
-                signature
-        );
-
-        repository.verifyPayment(request, new Callback<PaymentVerificationResponse>() {
+    private void verifyPayment(String pId, String oId) {
+        repository.verifyPayment(new PaymentVerificationRequest(oId, pId, oId), new Callback<PaymentVerificationResponse>() {
             @Override
-            public void onResponse(Call<PaymentVerificationResponse> call, Response<PaymentVerificationResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    viewModel.confirmBooking();
-                } else {
-                    viewModel.setCurrentStep(6);
-                }
+            public void onResponse(@NonNull Call<PaymentVerificationResponse> call, @NonNull Response<PaymentVerificationResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) viewModel.confirmBooking();
+                else viewModel.setCurrentStep(6);
             }
             @Override
-            public void onFailure(Call<PaymentVerificationResponse> call, Throwable t) {
-                viewModel.setCurrentStep(6);
-            }
+            public void onFailure(@NonNull Call<PaymentVerificationResponse> call, @NonNull Throwable t) { viewModel.setCurrentStep(6); }
         });
     }
 
-    @Override
-    public void onPaymentSuccess(String razorpayPaymentId) {
-        PaymentOrderResponse paymentOrder = viewModel.getPaymentOrderCreated().getValue();
-        String orderRef = paymentOrder != null ? paymentOrder.getOrderReference() : "";
-        // In Razorpay SDK, signature is verified server-side; pass paymentId as signature placeholder
-        verifyPayment(razorpayPaymentId, razorpayPaymentId);
+    private void navigateToLiveQueue() {
+        startActivity(new Intent(this, LiveQueueActivity.class));
+        finish();
     }
 
-    @Override
-    public void onPaymentError(int code, String response) {
-        viewModel.setCurrentStep(6);
-    }
-
-    @Override
-    protected int getNavigationMenuItemId() {
-        return R.id.nav_home;
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (redirectRunnable != null) {
-            redirectHandler.removeCallbacks(redirectRunnable);
-        }
-        super.onDestroy();
-    }
+    @Override public void onPaymentSuccess(String pId) { verifyPayment(pId, pId); }
+    @Override public void onPaymentError(int c, String r) { viewModel.setCurrentStep(6); }
+    @Override protected int getNavigationMenuItemId() { return R.id.nav_home; }
 }

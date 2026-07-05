@@ -4,6 +4,9 @@ import android.content.Context;
 
 import com.easydarshan.data.api.ApiService;
 import com.easydarshan.data.api.RetrofitClient;
+import com.easydarshan.data.local.dao.BookingDao;
+import com.easydarshan.data.local.dao.TempleDao;
+import com.easydarshan.data.local.database.AppDatabase;
 import com.easydarshan.data.model.ApiResponse;
 import com.easydarshan.data.model.AvailableDatesResponse;
 import com.easydarshan.data.model.Booking;
@@ -43,10 +46,16 @@ public class AppRepository {
     private static AppRepository instance;
     private ApiService apiService;
     private Context context;
+    private AppDatabase database;
+    private TempleDao templeDao;
+    private BookingDao bookingDao;
     
     private AppRepository(Context context) {
         this.context = context.getApplicationContext();
         apiService = RetrofitClient.getInstance(this.context).getApiService();
+        database = AppDatabase.getDatabase(this.context);
+        templeDao = database.templeDao();
+        bookingDao = database.bookingDao();
     }
 
     public static synchronized AppRepository getInstance(Context context) {
@@ -54,6 +63,30 @@ public class AppRepository {
             instance = new AppRepository(context.getApplicationContext());
         }
         return instance;
+    }
+
+    public interface BookingDataCallback {
+        void onResult(Booking booking);
+    }
+
+    public interface BookingsDataCallback {
+        void onResult(List<Booking> bookings);
+    }
+
+    public void getCachedBooking(String id, BookingDataCallback callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            callback.onResult(bookingDao.getBookingById(id));
+        });
+    }
+
+    public void getCachedBookings(String status, BookingsDataCallback callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            if (status == null || status.isEmpty()) {
+                callback.onResult(bookingDao.getAllBookings());
+            } else {
+                callback.onResult(bookingDao.getBookingsByStatus(status));
+            }
+        });
     }
     
     // Authentication

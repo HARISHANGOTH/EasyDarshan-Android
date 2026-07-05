@@ -125,5 +125,9 @@ public class TempleDetailsViewModel extends AndroidViewModel {
     public void onJoinQueueClick() {
         navigateToLiveQueue.setValue("live_queue");
     }
+
+    public void clearErrorMessage() {
+        errorMessage.setValue(null);
+    }
 }
 

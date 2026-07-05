@@ -4,264 +4,492 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".ui.temple.TempleDetailsActivity">
+    android:background="@color/background">
 
+    <!-- Sticky Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
         android:layout_width="match_parent"
-        android:layout_height="320dp"
-        android:background="@android:color/transparent">
+        android:layout_height="wrap_content"
+        android:background="@color/background"
+        app:elevation="0dp">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:contentScrim="@color/primary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:titleEnabled="false">
+            android:layout_height="@dimen/toolbar_height">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_collapseMode="parallax">
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/back"
+                android:focusable="true"
+                android:padding="@dimen/spacing_12"
+                android:src="@drawable/ic_arrow_back"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/foreground" />
 
-                <ImageView
-                    android:id="@+id/templeHeaderImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    tools:src="@drawable/ic_temple" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Temple Details"
+                android:textAppearance="@style/TextAppearance.EasyDarshan.SectionTitle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btnBack"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="120dp"
-                    android:layout_gravity="bottom"
-                    android:background="@drawable/bg_gradient_orange"
-                    android:alpha="0.6"
-                    android:rotation="180" />
-            </FrameLayout>
+            <ImageView
+                android:id="@+id/btnShare"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="Share"
+                android:focusable="true"
+                android:padding="@dimen/spacing_12"
+                android:src="@drawable/ic_share"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/foreground" />
 
-            <androidx.appcompat.widget.Toolbar
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin">
+            <ImageView
+                android:id="@+id/btnFavorite"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:layout_marginEnd="@dimen/spacing_4"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/favorite"
+                android:focusable="true"
+                android:padding="@dimen/spacing_12"
+                android:src="@drawable/ic_favorite"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnShare"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/foreground" />
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/backButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/overlay_white"
-                    app:strokeWidth="0dp">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_arrow_back"
-                        app:tint="@color/primary" />
-                </com.google.android.material.card.MaterialCardView>
-            </androidx.appcompat.widget.Toolbar>
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/bg_header_rounded"
-        android:backgroundTint="@color/background_gray"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:layout_marginTop="-40dp"
-        android:paddingTop="24dp">
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingBottom="120dp">
+            android:paddingHorizontal="@dimen/screen_margin_horizontal"
+            android:paddingBottom="160dp">
 
-            <TextView
-                android:id="@+id/templeName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sri Venkateswara Temple"
-                android:textColor="@color/foreground"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                tools:text="Sri Venkateswara Temple" />
+            <!-- Hero Image area -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:layout_marginTop="@dimen/spacing_8"
+                app:cardCornerRadius="@dimen/radius_large"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/ivTempleHero"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        tools:src="@drawable/img_plan_visit" />
+
+                    <!-- Distance Badge -->
+                    <TextView
+                        android:id="@+id/tvDistanceHero"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/spacing_12"
+                        android:background="@drawable/bg_distance_badge"
+                        android:drawableStart="@drawable/ic_location_small"
+                        android:drawablePadding="4dp"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/spacing_8"
+                        android:paddingVertical="@dimen/spacing_4"
+                        android:textColor="@color/foreground"
+                        android:textSize="@dimen/text_xs"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="1.2 km" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Image Indicator Dots -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="24dp">
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/spacing_12"
+                android:orientation="horizontal">
+                <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/bg_circle_primary" android:layout_marginHorizontal="2dp" />
+                <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/bg_circle_muted" android:layout_marginHorizontal="2dp" />
+                <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/bg_circle_muted" android:layout_marginHorizontal="2dp" />
+            </LinearLayout>
 
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_location"
-                    app:tint="@color/primary"
-                    android:layout_marginEnd="4dp" />
+            <!-- Temple Basic Info -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_24">
 
                 <TextView
-                    android:id="@+id/templeLocation"
+                    android:id="@+id/tvTempleTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/spacing_16"
+                    android:textAppearance="@style/TextAppearance.EasyDarshan.UserName"
+                    android:textSize="22sp"
+                    app:layout_constraintEnd_toStartOf="@id/tvDistanceText"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Tirupati Balaji Temple" />
+
+                <TextView
+                    android:id="@+id/tvDistanceText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tirupati, Andhra Pradesh"
+                    android:textColor="@color/primary"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/tvTempleTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tvTempleTitle"
+                    tools:text="1.2 km" />
+
+                <TextView
+                    android:id="@+id/tvTempleLocation"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_4"
+                    android:drawableStart="@drawable/ic_location_small"
+                    android:drawablePadding="4dp"
                     android:textColor="@color/foreground_secondary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_base"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvTempleTitle"
                     tools:text="Tirupati, Andhra Pradesh" />
-            </LinearLayout>
 
-            <!-- Status & Info Chips -->
-            <LinearLayout
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Status Cards -->
+            <!-- Temple Open Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardOpenStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="32dp">
+                android:layout_marginTop="@dimen/spacing_24"
+                app:cardCornerRadius="@dimen/radius_large"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/border_light">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/white"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="@color/border_light">
-                    <LinearLayout
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/ivOpenIcon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_status_pill"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_temple_outline"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/success" />
+
+                    <TextView
+                        android:id="@+id/tvOpenTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="Temple is Open"
+                        android:textColor="@color/success"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@id/ivOpenChevron"
+                        app:layout_constraintStart_toEndOf="@id/ivOpenIcon"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvOpenSubtitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="Closes at 10:00 PM"
+                        android:textColor="@color/foreground"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toStartOf="@id/ivOpenChevron"
+                        app:layout_constraintStart_toEndOf="@id/ivOpenIcon"
+                        app:layout_constraintTop_toBottomOf="@id/tvOpenTitle" />
+
+                    <ImageView
+                        android:id="@+id/ivOpenChevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/foreground_muted" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Info List Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_12"
+                app:cardCornerRadius="@dimen/radius_large"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/border_light">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="8dp">
+
+                    <!-- Opening Hours -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/btnOpeningHours"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp"
-                        android:gravity="center">
+                        android:background="?attr/selectableItemBackground"
+                        android:padding="16dp">
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:id="@+id/ivHoursIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_circle_primary_light"
+                            android:padding="8dp"
                             android:src="@drawable/ic_clock"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
                             app:tint="@color/primary" />
                         <TextView
-                            android:id="@+id/templeOpeningTime"
+                            android:id="@+id/tvHoursTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="Opening Hours"
+                            android:textColor="@color/foreground"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toStartOf="@id/tvHoursVal"
+                            app:layout_constraintStart_toEndOf="@id/ivHoursIcon"
+                            app:layout_constraintTop_toTopOf="parent" />
+                        <TextView
+                            android:id="@+id/tvHoursVal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="6 AM - 9 PM"
-                            android:textColor="@color/foreground"
+                            android:layout_marginEnd="8dp"
+                            android:text="5:00 AM - 10:00 PM"
+                            android:textColor="@color/foreground_secondary"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginHorizontal="4dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/white"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="@color/border_light">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp"
-                        android:gravity="center">
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/ivHoursChevron"
+                            app:layout_constraintTop_toTopOf="parent" />
                         <ImageView
+                            android:id="@+id/ivHoursChevron"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:src="@drawable/ic_launcher_foreground"
+                            android:src="@drawable/ic_chevron_right"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="@color/foreground_muted" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_light" android:layout_marginStart="64dp" />
+
+                    <!-- About Temple -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/btnAboutTemple"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:padding="16dp">
+                        <ImageView
+                            android:id="@+id/ivAboutIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_circle_primary_light"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_info_outline"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
                             app:tint="@color/primary" />
                         <TextView
-                            android:id="@+id/templeDistance"
-                            android:layout_width="wrap_content"
+                            android:id="@+id/tvAboutTitle"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="2.3 km"
+                            android:layout_marginStart="16dp"
+                            android:text="About Temple"
                             android:textColor="@color/foreground"
-                            android:textSize="12sp"
                             android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/white"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="@color/border_light">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp"
-                        android:gravity="center">
+                            app:layout_constraintEnd_toStartOf="@id/ivAboutChevron"
+                            app:layout_constraintStart_toEndOf="@id/ivAboutIcon"
+                            app:layout_constraintTop_toTopOf="parent" />
+                        <TextView
+                            android:id="@+id/tvAboutSubtitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="History, significance and more"
+                            android:textColor="@color/foreground_secondary"
+                            android:textSize="12sp"
+                            app:layout_constraintEnd_toStartOf="@id/ivAboutChevron"
+                            app:layout_constraintStart_toStartOf="@id/tvAboutTitle"
+                            app:layout_constraintTop_toBottomOf="@id/tvAboutTitle" />
                         <ImageView
+                            android:id="@+id/ivAboutChevron"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="@color/foreground_muted" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_light" android:layout_marginStart="64dp" />
+
+                    <!-- Temple Guidelines -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/btnGuidelines"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:padding="16dp">
+                        <ImageView
+                            android:id="@+id/ivGuideIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_circle_primary_light"
+                            android:padding="8dp"
                             android:src="@drawable/ic_shield"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
                             app:tint="@color/primary" />
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/tvGuideTitle"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Verified"
+                            android:layout_marginStart="16dp"
+                            android:text="Temple Guidelines"
                             android:textColor="@color/foreground"
-                            android:textSize="12sp"
                             android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
+                            app:layout_constraintEnd_toStartOf="@id/ivGuideChevron"
+                            app:layout_constraintStart_toEndOf="@id/ivGuideIcon"
+                            app:layout_constraintTop_toTopOf="parent" />
+                        <TextView
+                            android:id="@+id/tvGuideSubtitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Rules and regulations"
+                            android:textColor="@color/foreground_secondary"
+                            android:textSize="12sp"
+                            app:layout_constraintEnd_toStartOf="@id/ivGuideChevron"
+                            app:layout_constraintStart_toStartOf="@id/tvGuideTitle"
+                            app:layout_constraintTop_toBottomOf="@id/tvGuideTitle" />
+                        <ImageView
+                            android:id="@+id/ivGuideChevron"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="@color/foreground_muted" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="About Temple"
-                android:textColor="@color/foreground"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="32dp" />
 
-            <TextView
-                android:id="@+id/templeDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="One of the most revered pilgrimage sites, this ancient temple attracts millions of devotees every year."
-                android:textColor="@color/foreground_secondary"
-                android:textSize="16sp"
-                android:lineSpacingMultiplier="1.5"
-                android:alpha="0.9"
-                tools:text="One of the most revered pilgrimage sites..." />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/bookButton"
+    <!-- Bottom Action Area -->
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="Book Darshan"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="24dp"
-        app:cornerRadius="20dp"
-        app:backgroundTint="@color/primary"
-        android:textColor="@color/white"
-        app:elevation="8dp"
-        app:icon="@drawable/ic_calendar"
-        app:iconGravity="textStart"
-        app:iconPadding="16dp"
-        app:iconTint="@color/white" />
+        app:cardElevation="16dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/screen_margin_horizontal"
+            android:paddingTop="@dimen/spacing_16"
+            android:paddingBottom="@dimen/spacing_24">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnJoinLiveQueue"
+                style="@style/Widget.EasyDarshan.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:text="Join Live Queue"
+                android:textSize="16sp"
+                app:cornerRadius="18dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_groups_outline"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconTint="@color/white" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_16"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_shield"
+                    app:tint="@color/foreground_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Safe &amp; Secure Checkout"
+                    android:textColor="@color/foreground_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
