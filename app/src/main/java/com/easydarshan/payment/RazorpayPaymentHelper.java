@@ -22,19 +22,40 @@ public class RazorpayPaymentHelper {
         Checkout.preload(activity.getApplicationContext());
     }
     
-    public void startPayment(String orderId, String amount, String name, String description) {
+    public void startPayment(String keyId, String orderId, String amount, String name, String description, String contact) {
         try {
             Checkout checkout = new Checkout();
-            checkout.setKeyID("rzp_test_SAcfURPiizpCJo");
+            if (keyId != null && !keyId.isEmpty()) {
+                checkout.setKeyID(keyId);
+            } else {
+                // Fallback to default test key
+                checkout.setKeyID("rzp_test_SAcfURPiizpCJo");
+            }
 
             JSONObject options = new JSONObject();
             options.put("name", name);
             options.put("description", description);
-            options.put("order_id", orderId);
+            
+            if (orderId != null && !orderId.isEmpty()) {
+                options.put("order_id", orderId);
+            } else {
+                Log.w(TAG, "Starting payment without gatewayOrderId. This might fail if the server expects order-linked payments.");
+            }
+
             options.put("currency", "INR");
             options.put("amount", amount);
-            // No "method" forced — Razorpay shows its full native payment screen
-            options.put("theme", new JSONObject().put("color", "#FF6B35"));
+            
+            // Prefill user details
+            JSONObject prefill = new JSONObject();
+            if (contact != null && !contact.isEmpty()) {
+                prefill.put("contact", contact);
+            }
+            options.put("prefill", prefill);
+
+            // Theme color (Matching brand blue #2563EB)
+            JSONObject theme = new JSONObject();
+            theme.put("color", "#2563EB");
+            options.put("theme", theme);
 
             checkout.open(activity, options);
         } catch (Exception e) {

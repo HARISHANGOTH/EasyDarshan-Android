@@ -1,10 +1,16 @@
 package com.easydarshan.ui.prebooking;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -25,7 +31,6 @@ import com.easydarshan.ui.livequeue.LiveQueueActivity;
 import com.razorpay.PaymentResultListener;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,7 +62,7 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
         repository = AppRepository.getInstance(getApplication());
         paymentHelper = new RazorpayPaymentHelper(this, new RazorpayPaymentHelper.PaymentCallback() {
             @Override
-            public void onPaymentSuccess(String paymentId, String orderId) { verifyPayment(paymentId, orderId); }
+            public void onPaymentSuccess(String paymentId, String orderId) { verifyPayment(paymentId, "dev_signature"); }
             @Override
             public void onPaymentError(int code, String response) { viewModel.setCurrentStep(5); }
         });
@@ -106,12 +111,59 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
         binding.successContent.setVisibility(step == 4 ? View.VISIBLE : View.GONE);
         binding.failedContent.setVisibility(step == 5 ? View.VISIBLE : View.GONE);
 
+        // UI design: Hide stepper and main toolbar on success screen
+        boolean isSuccess = step == 4;
+        binding.stepperLayout.setVisibility(isSuccess ? View.GONE : View.VISIBLE);
+        binding.preBookingToolbar.setVisibility(isSuccess ? View.GONE : View.VISIBLE);
+
         updateStepperUI(step);
 
         if (step >= 4) binding.bottomActionArea.setVisibility(View.GONE);
         else binding.bottomActionArea.setVisibility(View.VISIBLE);
 
         if (step == 3) populatePaymentSummary();
+        if (step == 4) populateSuccessDetails();
+    }
+
+    private void populateSuccessDetails() {
+        com.easydarshan.data.model.CreateBookingResponse booking = viewModel.getBookingCreated().getValue();
+        if (booking == null) return;
+
+        binding.successBookingId.setText(booking.getBookingId());
+        String now = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()).format(new java.util.Date());
+        binding.successConfirmDate.setText(now);
+
+        com.easydarshan.data.model.Temple temple = viewModel.getTemple().getValue();
+        if (temple != null) {
+            binding.successTempleName.setText(temple.getName());
+            binding.successTempleLoc.setText(temple.getLocation());
+            Glide.with(this).load(temple.getImage()).placeholder(R.drawable.ic_temple_placeholder).into(binding.successTempleIcon);
+        }
+
+        binding.successDate.setText(binding.chipDate.getText().toString());
+        
+        List<Visitor> visitors = viewModel.getVisitors().getValue();
+        int count = visitors != null ? visitors.size() : 0;
+        binding.successMeta.setText(count + " Visitors\n" + viewModel.getSelectedDarshanType());
+        binding.successVisitorsCount.setText("Visitors (" + count + ")");
+
+        // Payment Summary Re-sync
+        int unitPrice = calculateUnitPrice();
+        int total = (unitPrice * count) + 10;
+        binding.successPaidLabel.setText("Darshan Amount (" + count + " × ₹" + unitPrice + ")");
+        binding.successPaidAmount.setText("₹" + (unitPrice * count));
+        binding.successTotalPaid.setText("₹" + total);
+
+        // Click listeners for actions
+        binding.btnViewPass.setOnClickListener(v -> navigateToLiveQueue());
+        binding.btnDownloadReceipt.setOnClickListener(v -> Toast.makeText(this, "Downloading Receipt...", Toast.LENGTH_SHORT).show());
+        binding.btnShareBooking.setOnClickListener(v -> {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "My Darshan is Booked at " + (temple != null ? temple.getName() : "Temple") + "! Booking ID: " + booking.getBookingId());
+            sendIntent.setType("text/plain");
+            startActivity(Intent.createChooser(sendIntent, null));
+        });
     }
 
     private void updateStepperUI(int step) {
@@ -158,6 +210,10 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
         binding.continueButton.setOnClickListener(v -> {
             Integer step = viewModel.getCurrentStep().getValue();
             if (step == 1) {
+                if (viewModel.getDarshanTypeId() == null) {
+                    Toast.makeText(this, "Please select a darshan type", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 viewModel.setCurrentStep(2);
             } else if (step == 2) {
                 if (validateAllVisitors()) viewModel.setCurrentStep(3); // Directly to Review
@@ -166,7 +222,7 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
             }
         });
 
-        binding.goToLiveQueueButton.setOnClickListener(v -> navigateToLiveQueue());
+        binding.chipDate.setOnClickListener(v -> showDatePicker());
         binding.retryPaymentButton.setOnClickListener(v -> viewModel.setCurrentStep(3));
     }
 
@@ -178,7 +234,19 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
 
         String type = (selection == 1) ? "Special Entry" : "Sarva Darshan";
         viewModel.setSelectedDarshanType(type);
+        viewModel.setDarshanTypeId((long) selection); // 1 = Special, 2 = Sarva
         binding.chipType.setText(type.split(" ")[0]);
+    }
+
+    private void showDatePicker() {
+        Calendar cal = Calendar.getInstance();
+        new DatePickerDialog(this, (view, year, month, day) -> {
+            String date = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, day);
+            cal.set(year, month, day);
+            String displayFormatted = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(cal.getTime());
+            viewModel.setSelectedDate(date);
+            binding.chipDate.setText(displayFormatted);
+        }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private void renderVisitorCards(List<Visitor> visitors) {
@@ -277,11 +345,31 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
 
     private void startRazorpayPayment(PaymentOrderResponse paymentOrder) {
         BigDecimal total = paymentOrder.getTotalAmount() != null ? paymentOrder.getTotalAmount() : paymentOrder.getAmount();
-        paymentHelper.startPayment(paymentOrder.getGatewayOrderId(), String.valueOf(total.multiply(new BigDecimal(100)).intValue()), "Harish", "Darshan Booking");
+        String amountInPaise = String.valueOf(total.multiply(new BigDecimal(100)).intValue());
+        
+        com.easydarshan.data.session.SessionManager session = com.easydarshan.data.session.SessionManager.getInstance(this);
+        String userName = "Mahesh";
+        String contact = "";
+        
+        if (session.getCurrentUser() != null) {
+            if (session.getCurrentUser().getName() != null) userName = session.getCurrentUser().getName();
+            if (session.getCurrentUser().getPhone() != null) contact = session.getCurrentUser().getPhone();
+        }
+
+        paymentHelper.startPayment(
+                paymentOrder.getRazorpayKeyId(),
+                paymentOrder.getGatewayOrderId(), 
+                amountInPaise, 
+                userName, 
+                "Darshan Booking - " + templeName,
+                contact
+        );
     }
 
-    private void verifyPayment(String pId, String oId) {
-        repository.verifyPayment(new PaymentVerificationRequest(oId, pId, oId), new Callback<PaymentVerificationResponse>() {
+    private void verifyPayment(String razorpayPaymentId, String razorpaySignature) {
+        String orderRef = viewModel.getOrderReference();
+        if (orderRef == null) { viewModel.setCurrentStep(5); return; }
+        repository.verifyPayment(new PaymentVerificationRequest(orderRef, razorpayPaymentId, razorpaySignature), new Callback<PaymentVerificationResponse>() {
             @Override
             public void onResponse(@NonNull Call<PaymentVerificationResponse> call, @NonNull Response<PaymentVerificationResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) viewModel.confirmBooking();
@@ -297,7 +385,7 @@ public class PreBookingFlowActivity extends BaseActivity implements PaymentResul
         finish();
     }
 
-    @Override public void onPaymentSuccess(String pId) { verifyPayment(pId, pId); }
+    @Override public void onPaymentSuccess(String pId) { verifyPayment(pId, "dev_signature"); }
     @Override public void onPaymentError(int c, String r) { viewModel.setCurrentStep(5); }
     @Override protected int getNavigationMenuItemId() { return R.id.nav_home; }
 }

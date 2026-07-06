@@ -218,142 +218,136 @@
                 app:layout_constraintTop_toTopOf="@id/tvNearbyTemples"
                 app:layout_constraintBottom_toBottomOf="@id/tvNearbyTemples" />
 
-            <!-- ===== SHIMMER LOADING ===== -->
-            <include
-                android:id="@+id/shimmerLayout"
-                layout="@layout/layout_shimmer_temples"
+            <!-- ===== NEARBY TEMPLES CONTAINER ===== -->
+            <FrameLayout
+                android:id="@+id/templesContainer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/tvNearbyTemples"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <!-- ===== HORIZONTAL TEMPLE RECYCLERVIEW ===== -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvNearbyTemples"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:overScrollMode="never"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tvNearbyTemples"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:listitem="@layout/item_temple_card_horizontal"
-                tools:itemCount="3" />
-
-            <!-- ===== EMPTY STATE ===== -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/emptyState"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginStart="@dimen/screen_margin_horizontal"
-                android:layout_marginEnd="@dimen/screen_margin_horizontal"
-                android:paddingTop="32dp"
-                android:paddingBottom="32dp"
-                android:visibility="gone"
                 app:layout_constraintTop_toBottomOf="@id/tvNearbyTemples"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-                <ImageView
-                    android:id="@+id/ivEmptyIcon"
-                    android:layout_width="@dimen/icon_size_xxl"
-                    android:layout_height="@dimen/icon_size_xxl"
-                    android:src="@drawable/ic_temple_placeholder"
-                    android:alpha="0.4"
-                    app:tint="@color/foreground_muted"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvEmptyTitle"
-                    android:layout_width="wrap_content"
+                <!-- ===== SHIMMER LOADING ===== -->
+                <include
+                    android:id="@+id/shimmerLayout"
+                    layout="@layout/layout_shimmer_temples"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/no_nearby_temples"
-                    android:textColor="@color/foreground"
-                    android:textSize="@dimen/text_xl"
-                    android:textStyle="bold"
-                    android:layout_marginTop="12dp"
-                    app:layout_constraintTop_toBottomOf="@id/ivEmptyIcon"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/tvEmptySubtitle"
-                    android:layout_width="wrap_content"
+                <!-- ===== HORIZONTAL TEMPLE RECYCLERVIEW ===== -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvNearbyTemples"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/no_nearby_temples_msg"
-                    android:textColor="@color/foreground_secondary"
-                    android:textSize="@dimen/text_base"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"
-                    app:layout_constraintTop_toBottomOf="@id/tvEmptyTitle"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:overScrollMode="never"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_temple_card_horizontal"
+                    tools:itemCount="3" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <!-- ===== ERROR STATE ===== -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/errorState"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginStart="@dimen/screen_margin_horizontal"
-                android:layout_marginEnd="@dimen/screen_margin_horizontal"
-                android:paddingTop="24dp"
-                android:paddingBottom="24dp"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/tvNearbyTemples"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <TextView
-                    android:id="@+id/tvErrorTitle"
-                    android:layout_width="wrap_content"
+                <!-- ===== EMPTY STATE ===== -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/emptyState"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/no_internet"
-                    android:textColor="@color/foreground"
-                    android:textSize="@dimen/text_xl"
-                    android:textStyle="bold"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    android:paddingTop="32dp"
+                    android:paddingBottom="32dp"
+                    android:layout_marginHorizontal="@dimen/screen_margin_horizontal"
+                    android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/tvErrorSubtitle"
-                    android:layout_width="wrap_content"
+                    <ImageView
+                        android:id="@+id/ivEmptyIcon"
+                        android:layout_width="@dimen/icon_size_xxl"
+                        android:layout_height="@dimen/icon_size_xxl"
+                        android:src="@drawable/ic_temple_placeholder"
+                        android:alpha="0.4"
+                        app:tint="@color/foreground_muted"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvEmptyTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_nearby_temples"
+                        android:textColor="@color/foreground"
+                        android:textSize="@dimen/text_xl"
+                        android:textStyle="bold"
+                        android:layout_marginTop="12dp"
+                        app:layout_constraintTop_toBottomOf="@id/ivEmptyIcon"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvEmptySubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_nearby_temples_msg"
+                        android:textColor="@color/foreground_secondary"
+                        android:textSize="@dimen/text_base"
+                        android:gravity="center"
+                        android:layout_marginTop="4dp"
+                        app:layout_constraintTop_toBottomOf="@id/tvEmptyTitle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- ===== ERROR STATE ===== -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/errorState"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/no_internet_msg"
-                    android:textColor="@color/foreground_secondary"
-                    android:textSize="@dimen/text_base"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"
-                    app:layout_constraintTop_toBottomOf="@id/tvErrorTitle"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    android:paddingTop="24dp"
+                    android:paddingBottom="24dp"
+                    android:layout_marginHorizontal="@dimen/screen_margin_horizontal"
+                    android:visibility="gone">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRetry"
-                    style="@style/Widget.EasyDarshan.Button.Primary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/retry"
-                    android:layout_marginTop="16dp"
-                    app:layout_constraintTop_toBottomOf="@id/tvErrorSubtitle"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    <TextView
+                        android:id="@+id/tvErrorTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_internet"
+                        android:textColor="@color/foreground"
+                        android:textSize="@dimen/text_xl"
+                        android:textStyle="bold"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:id="@+id/tvErrorSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_internet_msg"
+                        android:textColor="@color/foreground_secondary"
+                        android:textSize="@dimen/text_base"
+                        android:gravity="center"
+                        android:layout_marginTop="4dp"
+                        app:layout_constraintTop_toBottomOf="@id/tvErrorTitle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRetry"
+                        style="@style/Widget.EasyDarshan.Button.Primary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/retry"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintTop_toBottomOf="@id/tvErrorSubtitle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </FrameLayout>
 
             <!-- ===== BANNER CARD ===== -->
             <com.google.android.material.card.MaterialCardView
@@ -367,7 +361,7 @@
                 app:cardElevation="4dp"
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="@color/banner_background"
-                app:layout_constraintTop_toBottomOf="@id/rvNearbyTemples"
+                app:layout_constraintTop_toBottomOf="@id/templesContainer"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
@@ -432,13 +426,15 @@
                 android:layout_marginStart="@dimen/screen_margin_horizontal"
                 android:layout_marginEnd="@dimen/screen_margin_horizontal"
                 android:layout_marginTop="16dp"
+                android:layout_marginBottom="100dp"
                 app:cardCornerRadius="@dimen/radius_card"
                 app:cardElevation="4dp"
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="@color/notif_card_bg"
                 app:layout_constraintTop_toBottomOf="@id/bannerCard"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"

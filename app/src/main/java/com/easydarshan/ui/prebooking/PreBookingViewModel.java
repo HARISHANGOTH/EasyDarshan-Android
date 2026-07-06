@@ -47,6 +47,7 @@ public class PreBookingViewModel extends AndroidViewModel {
     private Long darshanTypeId;
     private String selectedDarshanType;
     private String bookingId;
+    private String orderReference;
     private boolean isLiveQueue = false;
     private boolean isBookingInProgress = false;
 
@@ -81,6 +82,10 @@ public class PreBookingViewModel extends AndroidViewModel {
 
     public void setDarshanTypeId(Long darshanTypeId) { this.darshanTypeId = darshanTypeId; }
 
+    public Long getDarshanTypeId() { return darshanTypeId; }
+
+    public void setSelectedDate(String date) { selectedDate.setValue(date); }
+
     public void setSelectedDarshanType(String darshanType) {
         this.selectedDarshanType = darshanType;
     }
@@ -104,6 +109,7 @@ public class PreBookingViewModel extends AndroidViewModel {
     public LiveData<PaymentOrderResponse> getPaymentOrderCreated() { return paymentOrderCreated; }
 
     public String getBookingId() { return bookingId; }
+    public String getOrderReference() { return orderReference; }
 
     public void addVisitor() {
         List<Visitor> list = visitors.getValue();
@@ -162,8 +168,11 @@ public class PreBookingViewModel extends AndroidViewModel {
             }
         }
 
+        String date = selectedDate.getValue();
+        if (date == null) date = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(new java.util.Date());
+
         CreateBookingRequest request = new CreateBookingRequest(
-                templeId, darshanTypeId, null, selectedDate.getValue(), members);
+                templeId, darshanTypeId, null, date, members);
 
         repository.createBooking(request, new Callback<CreateBookingResponse>() {
             @Override
@@ -200,14 +209,7 @@ public class PreBookingViewModel extends AndroidViewModel {
         java.math.BigDecimal darshanAmount = java.math.BigDecimal.valueOf((long) unitPrice * totalDevotees);
         java.math.BigDecimal platformFee = java.math.BigDecimal.valueOf(20);
 
-        com.easydarshan.data.session.SessionManager sm = com.easydarshan.data.session.SessionManager.getInstance(getApplication());
-        Long userId = null;
-        try {
-            String uid = sm.getCurrentUser() != null ? sm.getCurrentUser().getId() : null;
-            if (uid != null) userId = Long.parseLong(uid);
-        } catch (NumberFormatException ignored) {}
-
-        PaymentOrderRequest request = new PaymentOrderRequest(bookingId, darshanAmount, platformFee, userId, templeId);
+        PaymentOrderRequest request = new PaymentOrderRequest(bookingId, darshanAmount, platformFee, templeId);
 
         repository.createPaymentOrder(request, new Callback<PaymentOrderResponse>() {
             @Override
@@ -215,6 +217,7 @@ public class PreBookingViewModel extends AndroidViewModel {
                 isBookingInProgress = false;
                 isLoading.postValue(false);
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    orderReference = response.body().getOrderReference();
                     paymentOrderCreated.postValue(response.body());
                 } else {
                     errorMessage.postValue("Failed to create payment order. Please try again.");

@@ -60,31 +60,40 @@ public class HomeViewModel extends AndroidViewModel {
             return;
         }
 
-        searchDebouncer.debounce(() -> {
-            isLoading.postValue(true);
-            errorMessage.postValue(null);
+        String query = search != null ? search.trim() : "";
+        
+        // If query is empty, load immediately without debouncing for faster initial/view-all load
+        if (query.isEmpty()) {
+            searchDebouncer.cancel();
+            executeTempleLoad("");
+        } else {
+            searchDebouncer.debounce(() -> executeTempleLoad(query));
+        }
+    }
 
-            String query = search != null ? search.trim() : "";
-            repository.getTemples(query.isEmpty() ? null : query, new Callback<TempleListResponse>() {
-                @Override
-                public void onResponse(Call<TempleListResponse> call, Response<TempleListResponse> response) {
-                    isLoading.postValue(false);
-                    if (response.isSuccessful() && response.body() != null) {
-                        List<Temple> list = response.body().getTemples();
-                        temples.postValue(list != null ? list : new ArrayList<>());
-                    } else {
-                        errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
-                        temples.postValue(new ArrayList<>());
-                    }
-                }
+    private void executeTempleLoad(String query) {
+        isLoading.postValue(true);
+        errorMessage.postValue(null);
 
-                @Override
-                public void onFailure(Call<TempleListResponse> call, Throwable t) {
-                    isLoading.postValue(false);
-                    errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+        repository.getTemples(query.isEmpty() ? null : query, new Callback<TempleListResponse>() {
+            @Override
+            public void onResponse(Call<TempleListResponse> call, Response<TempleListResponse> response) {
+                isLoading.postValue(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Temple> list = response.body().getTemples();
+                    temples.postValue(list != null ? list : new ArrayList<>());
+                } else {
+                    errorMessage.postValue(ErrorHandler.getErrorMessage(response.code(), null));
                     temples.postValue(new ArrayList<>());
                 }
-            });
+            }
+
+            @Override
+            public void onFailure(Call<TempleListResponse> call, Throwable t) {
+                isLoading.postValue(false);
+                errorMessage.postValue(ErrorHandler.getErrorMessage(t, getApplication()));
+                temples.postValue(new ArrayList<>());
+            }
         });
     }
 

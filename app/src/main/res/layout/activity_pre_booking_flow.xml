@@ -13,6 +13,7 @@
 
         <!-- Toolbar -->
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/preBookingToolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
             android:paddingHorizontal="8dp">
@@ -40,7 +41,7 @@
                 android:letterSpacing="-0.02"
                 android:text="Book Darshan"
                 android:textColor="@color/foreground"
-                android:textSize="22sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -49,7 +50,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Stepper (3 Steps: Darshan, Visitors, Review & Pay) -->
+        <!-- Stepper (3 Steps) -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/stepperLayout"
             android:layout_width="match_parent"
@@ -75,15 +76,13 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:clipToPadding="false"
-            android:fillViewport="true"
-            android:paddingBottom="100dp">
+            android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Step-specific content container -->
                 <FrameLayout
                     android:id="@+id/stepContentContainer"
                     android:layout_width="match_parent"
@@ -124,7 +123,6 @@
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="sans-serif-medium" android:text="Select Darshan Type" android:textColor="@color/foreground" android:textSize="18sp" android:textStyle="bold" />
 
                         <RadioGroup android:id="@+id/darshanTypeRadioGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp">
-                            <!-- Card based Radio options here -->
                             <com.google.android.material.card.MaterialCardView android:id="@+id/cardSpecial" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" app:cardCornerRadius="12dp" app:strokeColor="@color/primary" app:strokeWidth="1dp">
                                 <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
                                     <RadioButton android:id="@+id/rbSpecial" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
@@ -329,11 +327,290 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Success Content -->
-                    <LinearLayout android:id="@+id/successContent" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center" android:padding="24dp" android:visibility="gone">
-                        <com.google.android.material.card.MaterialCardView android:layout_width="100dp" android:layout_height="100dp" app:cardCornerRadius="50dp" app:cardElevation="0dp" app:cardBackgroundColor="@color/success_light"><ImageView android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="center" android:src="@drawable/ic_shield" app:tint="@color/success"/></com.google.android.material.card.MaterialCardView>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="Booking Successful" android:textColor="@color/foreground" android:textSize="20sp" android:fontFamily="sans-serif-medium" android:textStyle="bold"/>
-                        <com.google.android.material.button.MaterialButton android:id="@+id/goToLiveQueueButton" style="@style/Widget.EasyDarshan.Button.Primary" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="40dp" android:text="Go to Live Queue" app:cornerRadius="16dp"/>
+                    <!-- Success Content (OVERHAULED PER SHARED UI) -->
+                    <LinearLayout
+                        android:id="@+id/successContent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="40dp"
+                        android:visibility="gone">
+
+                        <!-- Success Header Section -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:paddingVertical="32dp"
+                            android:background="@drawable/bg_notification_light">
+
+                            <ImageView
+                                android:layout_width="72dp"
+                                android:layout_height="72dp"
+                                android:src="@drawable/ic_check_circle_filled" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="16dp"
+                                android:text="Your Darshan is Booked!"
+                                android:textColor="@color/foreground"
+                                android:textSize="22sp"
+                                android:fontFamily="sans-serif-medium"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Booking confirmed successfully."
+                                android:textColor="@color/foreground_secondary"
+                                android:textSize="14sp"/>
+                        </LinearLayout>
+
+                        <!-- Booking ID Card -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:layout_marginTop="-20dp"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="#F0F0F0">
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="16dp">
+                                <TextView
+                                    android:id="@+id/labelBookingId"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Booking ID"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="12sp"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"/>
+                                <TextView
+                                    android:id="@+id/successBookingId"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="EDB28M25052800123"
+                                    android:textColor="@color/foreground"
+                                    android:textSize="17sp"
+                                    android:textStyle="bold"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:letterSpacing="0.02"
+                                    app:layout_constraintTop_toBottomOf="@id/labelBookingId"
+                                    app:layout_constraintStart_toStartOf="parent"/>
+                                <ImageView
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:layout_marginStart="10dp"
+                                    android:src="@drawable/ic_edit"
+                                    app:tint="@color/foreground_muted"
+                                    app:layout_constraintBottom_toBottomOf="@id/successBookingId"
+                                    app:layout_constraintStart_toEndOf="@id/successBookingId"
+                                    app:layout_constraintTop_toTopOf="@id/successBookingId"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/bg_status_pill"
+                                    android:backgroundTint="#E6F4EA"
+                                    android:paddingHorizontal="10dp"
+                                    android:paddingVertical="4dp"
+                                    android:text="Confirmed"
+                                    android:textColor="#1E8E3E"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    app:layout_constraintTop_toBottomOf="@id/successBookingId"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    android:layout_marginTop="8dp"/>
+
+                                <TextView
+                                    android:id="@+id/labelBookingDate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Booking Date"
+                                    android:textColor="@color/foreground_secondary"
+                                    android:textSize="12sp"
+                                    android:gravity="end"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"/>
+                                <TextView
+                                    android:id="@+id/successConfirmDate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="26 May 2025, 09:41 AM"
+                                    android:textColor="@color/foreground"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold"
+                                    app:layout_constraintTop_toBottomOf="@id/labelBookingDate"
+                                    app:layout_constraintEnd_toEndOf="parent"/>
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Temple Details Section -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:layout_marginTop="20dp"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/border_light">
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="12dp">
+                                <com.google.android.material.imageview.ShapeableImageView android:id="@+id/successTempleIcon" android:layout_width="80dp" android:layout_height="80dp" android:scaleType="centerCrop" app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.EasyDarshan.CardImage" tools:src="@drawable/img_plan_visit" />
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginStart="16dp">
+                                    <TextView android:id="@+id/successTempleName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tirupati Balaji Temple" android:textColor="@color/foreground" android:textSize="16sp" android:textStyle="bold" />
+                                    <TextView android:id="@+id/successTempleLoc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Tirupati, Andhra Pradesh" android:textColor="@color/foreground_secondary" android:textSize="13sp" android:drawableStart="@drawable/ic_location_small" app:drawableTint="@color/primary" android:drawablePadding="4dp"/>
+                                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal" android:gravity="center_vertical">
+                                        <TextView android:id="@+id/successDate" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="28 May 2025\n(Wed)" android:textColor="@color/foreground" android:textSize="11sp" android:textStyle="bold" android:drawableStart="@drawable/ic_calendar" app:drawableTint="@color/primary" android:drawablePadding="6dp"/>
+                                        <TextView android:id="@+id/successMeta" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="2 Visitors\nSpecial Entry" android:textColor="@color/foreground" android:textSize="11sp" android:textStyle="bold" android:drawableStart="@drawable/ic_profile" app:drawableTint="@color/primary" android:drawablePadding="6dp"/>
+                                    </LinearLayout>
+                                </LinearLayout>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Visitors Summary Section -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:layout_marginTop="16dp"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/border_light">
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                                <TextView android:id="@+id/successVisitorsCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Visitors (2)" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="15sp"/>
+                                <LinearLayout android:id="@+id/successVisitorsList" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="12dp">
+                                    <!-- Dynamic visitor rows injected here or placeholders for preview -->
+                                    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8dp">
+                                        <ImageView android:id="@+id/v1Icon" android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/bg_circle_primary_light" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+                                        <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_profile" app:tint="@color/primary" app:layout_constraintStart_toStartOf="@id/v1Icon" app:layout_constraintEnd_toEndOf="@id/v1Icon" app:layout_constraintTop_toTopOf="@id/v1Icon" app:layout_constraintBottom_toBottomOf="@id/v1Icon"/>
+                                        <TextView android:id="@+id/v1Name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Harish Naik (Adult)" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="14sp" android:layout_marginStart="12dp" app:layout_constraintStart_toEndOf="@id/v1Icon" app:layout_constraintTop_toTopOf="parent"/>
+                                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Male, 28 Years" android:textColor="@color/foreground_secondary" android:textSize="12sp" app:layout_constraintTop_toBottomOf="@id/v1Name" app:layout_constraintStart_toStartOf="@id/v1Name"/>
+                                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aadhaar Card" android:textColor="@color/foreground_secondary" android:textSize="11sp" android:gravity="end" app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
+                                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1234 5678 9012" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="12sp" app:layout_constraintTop_toBottomOf="@id/v1Name" app:layout_constraintEnd_toEndOf="parent"/>
+                                    </androidx.constraintlayout.widget.ConstraintLayout>
+                                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_light" android:layout_marginVertical="4dp"/>
+                                    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8dp">
+                                        <ImageView android:id="@+id/v2Icon" android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/bg_circle_primary_light" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+                                        <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_profile" app:tint="@color/primary" app:layout_constraintStart_toStartOf="@id/v2Icon" app:layout_constraintEnd_toEndOf="@id/v2Icon" app:layout_constraintTop_toTopOf="@id/v2Icon" app:layout_constraintBottom_toBottomOf="@id/v2Icon"/>
+                                        <TextView android:id="@+id/v2Name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sneha Naik (Adult)" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="14sp" android:layout_marginStart="12dp" app:layout_constraintStart_toEndOf="@id/v2Icon" app:layout_constraintTop_toTopOf="parent"/>
+                                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Female, 25 Years" android:textColor="@color/foreground_secondary" android:textSize="12sp" app:layout_constraintTop_toBottomOf="@id/v2Name" app:layout_constraintStart_toStartOf="@id/v2Name"/>
+                                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aadhaar Card" android:textColor="@color/foreground_secondary" android:textSize="11sp" android:gravity="end" app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
+                                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="9876 5432 1098" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="12sp" app:layout_constraintTop_toBottomOf="@id/v2Name" app:layout_constraintEnd_toEndOf="parent"/>
+                                    </androidx.constraintlayout.widget.ConstraintLayout>
+                                </LinearLayout>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Payment Summary Section -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:layout_marginTop="16dp"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/border_light">
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Payment Summary" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="15sp"/>
+
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="16dp">
+                                    <TextView android:id="@+id/successPaidLabel" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Darshan Amount (2 × ₹300)" android:textColor="@color/foreground_secondary" android:textSize="14sp"/>
+                                    <TextView android:id="@+id/successPaidAmount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹600" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="14sp"/>
+                                </LinearLayout>
+
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="10dp" android:gravity="center_vertical">
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Platform Fee" android:textColor="@color/foreground_secondary" android:textSize="14sp"/>
+                                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="4dp" android:src="@drawable/ic_info_outline" app:tint="@color/foreground_muted"/>
+                                    <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+                                    <TextView android:id="@+id/successPlatformFee" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹10" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="14sp"/>
+                                </LinearLayout>
+
+                                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_light" android:layout_marginVertical="16dp"/>
+
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Total Amount Paid" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="16sp"/>
+                                    <TextView android:id="@+id/successTotalPaid" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹610" android:textColor="@color/primary" android:textStyle="bold" android:textSize="20sp"/>
+                                </LinearLayout>
+
+                                <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:paddingTop="12dp">
+                                    <ImageView android:id="@+id/upiIcon" android:layout_width="32dp" android:layout_height="16dp" android:src="@drawable/ic_shield" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="UPI / Net Banking" android:textColor="@color/foreground" android:textStyle="bold" android:textSize="12sp" android:layout_marginStart="12dp" app:layout_constraintStart_toEndOf="@id/upiIcon" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_status_pill" android:backgroundTint="@color/success_light" android:paddingHorizontal="10dp" android:paddingVertical="4dp" android:text="✓ Payment Successfull" android:textColor="@color/success" android:textSize="10sp" android:textStyle="bold" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
+                                </androidx.constraintlayout.widget.ConstraintLayout>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Important Info Card -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:layout_marginTop="16dp"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="0dp"
+                            app:cardBackgroundColor="#F5F8FF"
+                            app:strokeWidth="0dp">
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                                    <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_info_outline" app:tint="@color/primary"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Important Information" android:textColor="@color/primary" android:textStyle="bold" android:textSize="13sp" android:layout_marginStart="8dp"/>
+                                </LinearLayout>
+                                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="• Please reach the temple at least 30 minutes before your slot time.\n• Carry a valid photo ID proof for all visitors.\n• This booking is non-refundable and non-transferable." android:textColor="@color/foreground" android:textSize="11sp" android:lineSpacingExtra="4dp"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Action Buttons Section -->
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnViewPass"
+                                style="@style/Widget.EasyDarshan.Button.Primary"
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:text="View Booking / QR Pass"
+                                app:icon="@drawable/ic_menu"
+                                app:iconGravity="textStart"
+                                app:iconPadding="12dp"
+                                app:cornerRadius="16dp"/>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="12dp" android:weightSum="2">
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btnDownloadReceipt"
+                                    style="@style/Widget.Material3.Button.OutlinedButton"
+                                    android:layout_width="0dp"
+                                    android:layout_height="50dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginEnd="6dp"
+                                    android:text="Download Receipt"
+                                    android:textSize="12sp"
+                                    app:icon="@drawable/ic_arrow_forward"
+                                    app:iconGravity="textStart"
+                                    app:cornerRadius="14dp"
+                                    app:strokeColor="@color/primary"/>
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btnShareBooking"
+                                    style="@style/Widget.Material3.Button.OutlinedButton"
+                                    android:layout_width="0dp"
+                                    android:layout_height="50dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="6dp"
+                                    android:text="Share Booking"
+                                    android:textSize="12sp"
+                                    app:icon="@drawable/ic_share"
+                                    app:iconGravity="textStart"
+                                    app:cornerRadius="14dp"
+                                    app:strokeColor="@color/primary"/>
+                            </LinearLayout>
+                        </LinearLayout>
+
                     </LinearLayout>
 
                     <!-- Failed Content -->
@@ -347,7 +624,7 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
-        <!-- Fixed Bottom Button -->
+        <!-- Fixed Bottom Button (Visible only during steps) -->
         <LinearLayout
             android:id="@+id/bottomActionArea"
             android:layout_width="match_parent"

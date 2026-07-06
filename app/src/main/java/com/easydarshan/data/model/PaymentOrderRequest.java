@@ -15,9 +15,6 @@ public class PaymentOrderRequest {
     @SerializedName("platformFee")
     private BigDecimal platformFee;
 
-    @SerializedName("userId")
-    private Long userId;
-
     @SerializedName("templeId")
     private Long templeId;
 
@@ -27,12 +24,10 @@ public class PaymentOrderRequest {
     @SerializedName("gatewayProvider")
     private String gatewayProvider = "RAZORPAY";
 
-    public PaymentOrderRequest(String bookingId, BigDecimal amount, BigDecimal platformFee,
-                               Long userId, Long templeId) {
+    public PaymentOrderRequest(String bookingId, BigDecimal amount, BigDecimal platformFee, Long templeId) {
         this.bookingId = bookingId;
         this.amount = amount;
         this.platformFee = platformFee;
-        this.userId = userId;
         this.templeId = templeId;
     }
 
@@ -44,9 +39,6 @@ public class PaymentOrderRequest {
 
     public BigDecimal getPlatformFee() { return platformFee; }
     public void setPlatformFee(BigDecimal platformFee) { this.platformFee = platformFee; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
 
     public Long getTempleId() { return templeId; }
     public void setTempleId(Long templeId) { this.templeId = templeId; }

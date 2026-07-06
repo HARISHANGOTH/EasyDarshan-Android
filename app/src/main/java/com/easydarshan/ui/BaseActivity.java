@@ -1,13 +1,18 @@
 package com.easydarshan.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.easydarshan.R;
+import com.easydarshan.data.api.AuthInterceptor;
 import com.easydarshan.data.session.SessionManager;
 import com.easydarshan.ui.bookings.MyBookingsActivity;
 import com.easydarshan.ui.home.HomeActivity;
@@ -18,10 +23,33 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
+    private final BroadcastReceiver unauthorizedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleUnauthorized();
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SessionManager.getInstance(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(unauthorizedReceiver, new IntentFilter(AuthInterceptor.ACTION_UNAUTHORIZED), Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(unauthorizedReceiver, new IntentFilter(AuthInterceptor.ACTION_UNAUTHORIZED));
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(unauthorizedReceiver);
     }
 
     /**
